@@ -1,0 +1,311 @@
+#!/usr/bin/env python3
+"""data/ingredients.json 생성기.
+
+각 성분의 synonyms 는 (1) 논문 DB 질의어이자 (2) 수집된 논문이 실제로 그 성분을
+다루는지 판정하는 client-side 매칭어로 함께 쓰입니다. 그래서 'copper', 'iron' 같은
+단일 일반명사는 그대로 쓰지 않고 'copper supplementation' 처럼 보충제 맥락으로
+한정합니다. 한글명은 편집 큐레이션이며, 실제 문헌 검색은 영문 synonyms 로만 이뤄집니다.
+"""
+import json, pathlib, sys
+
+CATEGORIES = {
+    "vitamin": "비타민", "mineral": "미네랄", "fatty_acid": "지방산·지질",
+    "amino": "아미노산·단백질", "carotenoid": "카로티노이드",
+    "polyphenol": "폴리페놀·플라보노이드", "fiber": "식이섬유·유산균",
+    "herb": "약용식물·허브", "mushroom": "버섯", "algae": "해조류·미세조류",
+    "animal": "동물성 원료", "other": "기타 기능성 원료",
+}
+
+# (id, 한글명, 영문명, 분류, [문헌 검색·매칭어])
+ROWS = [
+ # ── 비타민 ────────────────────────────────────────────────────────────────
+ ("vitamin_a","비타민A","Vitamin A","vitamin",["vitamin a","retinol","retinyl palmitate"]),
+ ("vitamin_b1","비타민B1(티아민)","Thiamine","vitamin",["thiamine","thiamin","vitamin b1","benfotiamine"]),
+ ("vitamin_b2","비타민B2(리보플라빈)","Riboflavin","vitamin",["riboflavin","vitamin b2"]),
+ ("vitamin_b3","비타민B3(나이아신)","Niacin","vitamin",["niacin","nicotinic acid","nicotinamide","vitamin b3"]),
+ ("vitamin_b5","판토텐산","Pantothenic acid","vitamin",["pantothenic acid","pantothenate","panthenol"]),
+ ("vitamin_b6","비타민B6","Vitamin B6","vitamin",["pyridoxine","vitamin b6","pyridoxal phosphate"]),
+ ("biotin","비오틴","Biotin","vitamin",["biotin"]),
+ ("folate","엽산","Folate","vitamin",["folic acid","folate supplementation","methylfolate"]),
+ ("vitamin_b12","비타민B12","Vitamin B12","vitamin",["vitamin b12","cobalamin","methylcobalamin","cyanocobalamin"]),
+ ("vitamin_c","비타민C","Vitamin C","vitamin",["vitamin c","ascorbic acid","ascorbate supplementation"]),
+ ("vitamin_d","비타민D","Vitamin D","vitamin",["vitamin d","cholecalciferol","vitamin d3","25-hydroxyvitamin d"]),
+ ("vitamin_e","비타민E","Vitamin E","vitamin",["vitamin e","alpha-tocopherol","tocopherol","tocotrienol"]),
+ ("vitamin_k","비타민K1","Vitamin K1","vitamin",["vitamin k1","phylloquinone"]),
+ ("vitamin_k2","비타민K2","Vitamin K2","vitamin",["vitamin k2","menaquinone","mk-7","menaquinone-7"]),
+ ("choline","콜린","Choline","vitamin",["choline supplementation","citicoline","alpha-gpc","cdp-choline"]),
+ ("inositol","이노시톨","Inositol","vitamin",["myo-inositol","d-chiro-inositol","inositol supplementation"]),
+ # ── 미네랄 ────────────────────────────────────────────────────────────────
+ ("calcium","칼슘","Calcium","mineral",["calcium supplementation","calcium carbonate","calcium citrate","dietary calcium"]),
+ ("magnesium","마그네슘","Magnesium","mineral",["magnesium supplementation","magnesium oxide","magnesium citrate","dietary magnesium"]),
+ ("zinc","아연","Zinc","mineral",["zinc supplementation","zinc gluconate","zinc sulfate","zinc supplement"]),
+ ("iron","철분","Iron","mineral",["iron supplementation","ferrous sulfate","ferrous fumarate","iron supplement"]),
+ ("selenium","셀레늄","Selenium","mineral",["selenium supplementation","selenomethionine","sodium selenite"]),
+ ("copper","구리","Copper","mineral",["copper supplementation","dietary copper"]),
+ ("manganese","망간","Manganese","mineral",["manganese supplementation","dietary manganese"]),
+ ("chromium","크롬","Chromium","mineral",["chromium picolinate","chromium supplementation"]),
+ ("iodine","요오드","Iodine","mineral",["iodine supplementation","dietary iodine","potassium iodide supplementation"]),
+ ("molybdenum","몰리브덴","Molybdenum","mineral",["molybdenum supplementation","dietary molybdenum"]),
+ ("potassium","칼륨","Potassium","mineral",["potassium supplementation","dietary potassium"]),
+ ("phosphorus","인(포스포러스)","Phosphorus","mineral",["phosphorus supplementation","dietary phosphorus"]),
+ ("boron","붕소","Boron","mineral",["boron supplementation","dietary boron"]),
+ ("silicon","규소","Silicon","mineral",["orthosilicic acid","silicon supplementation"]),
+ # ── 지방산·지질 ───────────────────────────────────────────────────────────
+ ("omega3","오메가3","Omega-3","fatty_acid",["omega-3 fatty acid","fish oil","n-3 pufa","omega 3 supplementation"]),
+ ("epa","EPA","Eicosapentaenoic acid","fatty_acid",["eicosapentaenoic acid","epa supplementation"]),
+ ("dha","DHA","Docosahexaenoic acid","fatty_acid",["docosahexaenoic acid","dha supplementation"]),
+ ("krill_oil","크릴오일","Krill oil","fatty_acid",["krill oil"]),
+ ("algal_oil","조류유(알제오일)","Algal oil","fatty_acid",["algal oil","schizochytrium"]),
+ ("flaxseed","아마씨유","Flaxseed oil","fatty_acid",["flaxseed oil","linseed oil","alpha-linolenic acid","flaxseed supplementation"]),
+ ("evening_primrose","달맞이꽃종자유(GLA)","Evening primrose oil","fatty_acid",["evening primrose oil","gamma-linolenic acid"]),
+ ("cla","공액리놀레산(CLA)","Conjugated linoleic acid","fatty_acid",["conjugated linoleic acid"]),
+ ("mct","MCT오일","Medium-chain triglyceride","fatty_acid",["medium-chain triglyceride","mct oil"]),
+ ("perilla","들기름","Perilla oil","fatty_acid",["perilla oil","perilla frutescens"]),
+ ("lecithin","레시틴","Lecithin","fatty_acid",["lecithin supplementation","soy lecithin"]),
+ ("phosphatidylserine","포스파티딜세린","Phosphatidylserine","fatty_acid",["phosphatidylserine"]),
+ ("phytosterol","식물스테롤","Phytosterol","fatty_acid",["phytosterol","plant sterol","plant stanol","beta-sitosterol"]),
+ ("squalene","스쿠알렌","Squalene","fatty_acid",["squalene supplementation","dietary squalene"]),
+ # ── 아미노산·단백질 ───────────────────────────────────────────────────────
+ ("whey","유청단백","Whey protein","amino",["whey protein"]),
+ ("casein","카제인","Casein protein","amino",["casein protein","micellar casein"]),
+ ("soy_protein","대두단백","Soy protein","amino",["soy protein"]),
+ ("pea_protein","완두단백","Pea protein","amino",["pea protein"]),
+ ("bcaa","BCAA(분지사슬아미노산)","Branched-chain amino acids","amino",["branched-chain amino acid","bcaa supplementation"]),
+ ("leucine","류신","Leucine","amino",["leucine supplementation","l-leucine"]),
+ ("glutamine","글루타민","Glutamine","amino",["glutamine supplementation","l-glutamine"]),
+ ("arginine","아르기닌","Arginine","amino",["l-arginine","arginine supplementation"]),
+ ("citrulline","시트룰린","Citrulline","amino",["l-citrulline","citrulline malate"]),
+ ("creatine","크레아틴","Creatine","amino",["creatine monohydrate","creatine supplementation"]),
+ ("carnitine","카르니틴","Carnitine","amino",["l-carnitine","acetyl-l-carnitine","carnitine supplementation"]),
+ ("taurine","타우린","Taurine","amino",["taurine supplementation","taurine ingestion"]),
+ ("beta_alanine","베타알라닌","Beta-alanine","amino",["beta-alanine"]),
+ ("theanine","테아닌","L-Theanine","amino",["l-theanine","theanine"]),
+ ("tryptophan","트립토판","Tryptophan","amino",["l-tryptophan","tryptophan supplementation"]),
+ ("tyrosine","티로신","Tyrosine","amino",["l-tyrosine","tyrosine supplementation"]),
+ ("glycine","글리신","Glycine","amino",["glycine supplementation","oral glycine"]),
+ ("gaba","가바(GABA)","GABA","amino",["gamma-aminobutyric acid supplementation","gaba supplementation","oral gaba"]),
+ ("collagen","콜라겐","Collagen peptide","amino",["collagen peptide","hydrolyzed collagen","collagen supplementation","collagen hydrolysate"]),
+ ("hmb","HMB","Beta-hydroxy-beta-methylbutyrate","amino",["beta-hydroxy-beta-methylbutyrate","hmb supplementation"]),
+ ("nac","N-아세틸시스테인(NAC)","N-acetylcysteine","amino",["n-acetylcysteine","n-acetyl cysteine"]),
+ ("betaine","베타인","Betaine","amino",["betaine supplementation","trimethylglycine","betaine anhydrous"]),
+ # ── 카로티노이드 ──────────────────────────────────────────────────────────
+ ("beta_carotene","베타카로틴","Beta-carotene","carotenoid",["beta-carotene","betacarotene"]),
+ ("lutein","루테인","Lutein","carotenoid",["lutein","meso-zeaxanthin"]),
+ ("zeaxanthin","지아잔틴","Zeaxanthin","carotenoid",["zeaxanthin"]),
+ ("astaxanthin","아스타잔틴","Astaxanthin","carotenoid",["astaxanthin","haematococcus pluvialis"]),
+ ("lycopene","라이코펜","Lycopene","carotenoid",["lycopene"]),
+ ("fucoxanthin","푸코잔틴","Fucoxanthin","carotenoid",["fucoxanthin"]),
+ # ── 폴리페놀·플라보노이드 ─────────────────────────────────────────────────
+ ("curcumin","커큐민(강황)","Curcumin","polyphenol",["curcumin","turmeric","curcuma longa","curcuminoid"]),
+ ("resveratrol","레스베라트롤","Resveratrol","polyphenol",["resveratrol"]),
+ ("quercetin","케르세틴","Quercetin","polyphenol",["quercetin"]),
+ ("green_tea","녹차추출물(EGCG)","Green tea extract","polyphenol",["green tea extract","epigallocatechin gallate","egcg","green tea catechin"]),
+ ("anthocyanin","안토시아닌","Anthocyanin","polyphenol",["anthocyanin","anthocyanidin"]),
+ ("bilberry","빌베리","Bilberry","polyphenol",["bilberry","vaccinium myrtillus"]),
+ ("aronia","아로니아","Aronia","polyphenol",["aronia","chokeberry","aronia melanocarpa"]),
+ ("blueberry","블루베리","Blueberry","polyphenol",["blueberry","vaccinium corymbosum"]),
+ ("grape_seed","포도씨추출물","Grape seed extract","polyphenol",["grape seed extract","proanthocyanidin"]),
+ ("pine_bark","소나무껍질추출물","Pine bark extract","polyphenol",["pycnogenol","pine bark extract"]),
+ ("pomegranate","석류","Pomegranate","polyphenol",["pomegranate","punica granatum","ellagic acid","urolithin"]),
+ ("cranberry","크랜베리","Cranberry","polyphenol",["cranberry","vaccinium macrocarpon"]),
+ ("elderberry","엘더베리","Elderberry","polyphenol",["elderberry","sambucus nigra"]),
+ ("olive_leaf","올리브잎추출물","Olive leaf extract","polyphenol",["olive leaf extract","oleuropein","hydroxytyrosol"]),
+ ("silymarin","밀크씨슬(실리마린)","Milk thistle / Silymarin","polyphenol",["silymarin","milk thistle","silybum marianum","silybin"]),
+ ("hesperidin","감귤 바이오플라보노이드","Citrus bioflavonoids","polyphenol",["hesperidin","citrus bioflavonoid","naringin","citrus flavonoid"]),
+ ("rutin","루틴","Rutin","polyphenol",["rutin supplementation","troxerutin"]),
+ ("soy_isoflavone","대두이소플라본","Soy isoflavone","polyphenol",["soy isoflavone","genistein","daidzein","equol supplementation"]),
+ ("red_clover","레드클로버","Red clover","polyphenol",["red clover","trifolium pratense"]),
+ ("pueraria","칡(갈근)","Pueraria","polyphenol",["pueraria","puerarin","kudzu"]),
+ ("sulforaphane","설포라판","Sulforaphane","polyphenol",["sulforaphane","broccoli sprout extract","glucoraphanin"]),
+ ("apigenin","아피게닌","Apigenin","polyphenol",["apigenin"]),
+ ("luteolin","루테올린","Luteolin","polyphenol",["luteolin"]),
+ ("berberine","베르베린","Berberine","polyphenol",["berberine"]),
+ ("chlorogenic","클로로겐산(그린커피)","Chlorogenic acid","polyphenol",["chlorogenic acid","green coffee bean extract"]),
+ ("cocoa","코코아 플라바놀","Cocoa flavanol","polyphenol",["cocoa flavanol","cocoa extract","dark chocolate","cocoa polyphenol"]),
+ ("ferulic","페룰산","Ferulic acid","polyphenol",["ferulic acid"]),
+ # ── 식이섬유·유산균 ───────────────────────────────────────────────────────
+ ("probiotics","프로바이오틱스","Probiotics","fiber",["probiotic","lactobacillus","bifidobacterium","synbiotic"]),
+ ("prebiotics","프리바이오틱스","Prebiotics","fiber",["prebiotic","fructooligosaccharide","galactooligosaccharide"]),
+ ("postbiotics","포스트바이오틱스","Postbiotics","fiber",["postbiotic","heat-killed lactobacillus","paraprobiotic"]),
+ ("inulin","이눌린","Inulin","fiber",["inulin","chicory root fiber"]),
+ ("psyllium","차전자피","Psyllium","fiber",["psyllium","plantago ovata","ispaghula"]),
+ ("beta_glucan","베타글루칸","Beta-glucan","fiber",["beta-glucan","beta glucan"]),
+ ("glucomannan","글루코만난","Glucomannan","fiber",["glucomannan","konjac"]),
+ ("resistant_starch","저항전분","Resistant starch","fiber",["resistant starch"]),
+ ("guar_gum","구아검","Guar gum","fiber",["partially hydrolyzed guar gum","guar gum"]),
+ ("chitosan","키토산","Chitosan","fiber",["chitosan"]),
+ ("pectin","펙틴","Pectin","fiber",["pectin supplementation","apple pectin","citrus pectin"]),
+ ("polydextrose","폴리덱스트로스","Polydextrose","fiber",["polydextrose"]),
+ ("xos","자일로올리고당","Xylooligosaccharide","fiber",["xylooligosaccharide"]),
+ # ── 약용식물·허브 ─────────────────────────────────────────────────────────
+ ("red_ginseng","홍삼","Korean red ginseng","herb",["red ginseng","korean red ginseng","ginsenoside"]),
+ ("ginseng","인삼","Panax ginseng","herb",["panax ginseng","ginseng extract"]),
+ ("american_ginseng","화기삼","American ginseng","herb",["american ginseng","panax quinquefolius"]),
+ ("ashwagandha","아슈와간다","Ashwagandha","herb",["ashwagandha","withania somnifera"]),
+ ("rhodiola","홍경천","Rhodiola rosea","herb",["rhodiola rosea","rhodiola extract"]),
+ ("maca","마카","Maca","herb",["maca","lepidium meyenii"]),
+ ("ginkgo","은행잎추출물","Ginkgo biloba","herb",["ginkgo biloba","ginkgo extract","egb 761"]),
+ ("saw_palmetto","쏘팔메토","Saw palmetto","herb",["saw palmetto","serenoa repens"]),
+ ("echinacea","에키네시아","Echinacea","herb",["echinacea","echinacea purpurea"]),
+ ("valerian","발레리안(쥐오줌풀)","Valerian","herb",["valerian","valeriana officinalis"]),
+ ("st_johns_wort","세인트존스워트","St. John's wort","herb",["st john's wort","hypericum perforatum"]),
+ ("lavender","라벤더","Lavender","herb",["lavender oil","lavandula angustifolia","silexan"]),
+ ("chamomile","캐모마일","Chamomile","herb",["chamomile","matricaria recutita","matricaria chamomilla"]),
+ ("peppermint","페퍼민트","Peppermint","herb",["peppermint oil","mentha piperita"]),
+ ("ginger","생강","Ginger","herb",["ginger","zingiber officinale"]),
+ ("garlic","마늘","Garlic","herb",["garlic supplementation","allium sativum","aged garlic extract","garlic extract"]),
+ ("cinnamon","계피","Cinnamon","herb",["cinnamon","cinnamomum"]),
+ ("fenugreek","호로파","Fenugreek","herb",["fenugreek","trigonella foenum-graecum"]),
+ ("boswellia","보스웰리아","Boswellia","herb",["boswellia serrata","boswellic acid"]),
+ ("devils_claw","데빌스클로","Devil's claw","herb",["devil's claw","harpagophytum"]),
+ ("bacopa","바코파","Bacopa monnieri","herb",["bacopa monnieri","brahmi"]),
+ ("centella","병풀(센텔라)","Centella asiatica","herb",["centella asiatica","gotu kola","madecassoside","asiaticoside"]),
+ ("artichoke","아티초크","Artichoke","herb",["artichoke extract","cynara scolymus"]),
+ ("dandelion","민들레","Dandelion","herb",["taraxacum officinale","dandelion extract"]),
+ ("hovenia","헛개나무","Hovenia dulcis","herb",["hovenia dulcis","oriental raisin tree"]),
+ ("schisandra","오미자","Schisandra chinensis","herb",["schisandra chinensis","schizandra","gomisin"]),
+ ("cynanchum","백수오","Cynanchum wilfordii","herb",["cynanchum wilfordii"]),
+ ("angelica","당귀","Angelica","herb",["angelica gigas","angelica sinensis","dong quai"]),
+ ("astragalus","황기","Astragalus","herb",["astragalus membranaceus","astragalus polysaccharide"]),
+ ("licorice","감초","Licorice","herb",["glycyrrhiza glabra","licorice extract","glycyrrhizin"]),
+ ("gastrodia","천마","Gastrodia elata","herb",["gastrodia elata","gastrodin"]),
+ ("eleuthero","가시오가피","Eleuthero","herb",["eleutherococcus senticosus","siberian ginseng"]),
+ ("mulberry","뽕잎","Mulberry leaf","herb",["mulberry leaf","morus alba"]),
+ ("garcinia","가르시니아","Garcinia cambogia","herb",["garcinia cambogia","hydroxycitric acid"]),
+ ("guarana","과라나","Guarana","herb",["guarana","paullinia cupana"]),
+ ("yerba_mate","마테","Yerba mate","herb",["yerba mate","ilex paraguariensis"]),
+ ("tribulus","트리불루스","Tribulus terrestris","herb",["tribulus terrestris"]),
+ ("epimedium","음양곽","Epimedium","herb",["epimedium","icariin","horny goat weed"]),
+ ("tongkat_ali","통캇알리","Tongkat ali","herb",["eurycoma longifolia","tongkat ali"]),
+ ("saffron","사프란","Saffron","herb",["saffron","crocus sativus","crocin supplementation"]),
+ ("nigella","블랙커민(니겔라)","Nigella sativa","herb",["nigella sativa","black seed oil","thymoquinone"]),
+ ("moringa","모링가","Moringa","herb",["moringa oleifera"]),
+ ("sea_buckthorn","산자나무(비타민나무)","Sea buckthorn","herb",["sea buckthorn","hippophae rhamnoides"]),
+ ("noni","노니","Noni","herb",["noni juice","morinda citrifolia"]),
+ ("acai","아사이베리","Acai","herb",["acai","euterpe oleracea"]),
+ ("holy_basil","홀리바질(툴시)","Holy basil","herb",["holy basil","ocimum sanctum","tulsi"]),
+ ("black_cohosh","승마(블랙코호시)","Black cohosh","herb",["black cohosh","cimicifuga racemosa","actaea racemosa"]),
+ ("chasteberry","체이스트베리","Chasteberry","herb",["vitex agnus-castus","chasteberry","chaste tree"]),
+ ("horse_chestnut","마로니에(말밤)","Horse chestnut","herb",["horse chestnut","aesculus hippocastanum","aescin"]),
+ ("nettle","쐐기풀","Stinging nettle","herb",["urtica dioica","stinging nettle"]),
+ ("pumpkin_seed","호박씨유","Pumpkin seed oil","herb",["pumpkin seed oil","cucurbita pepo"]),
+ ("aloe","알로에","Aloe vera","herb",["aloe vera","aloe barbadensis"]),
+ ("lemon_balm","레몬밤","Lemon balm","herb",["melissa officinalis","lemon balm"]),
+ ("passionflower","패션플라워","Passionflower","herb",["passiflora incarnata","passionflower"]),
+ ("kava","카바","Kava","herb",["kava","piper methysticum"]),
+ ("capsaicin","캡사이신","Capsaicin","herb",["capsaicin","capsicum extract","capsinoid"]),
+ ("piperine","피페린(후추추출물)","Piperine","herb",["piperine","bioperine","black pepper extract"]),
+ ("mastic","매스틱검","Mastic gum","herb",["mastic gum","pistacia lentiscus"]),
+ ("sage","세이지","Sage","herb",["salvia officinalis","sage extract"]),
+ ("rosemary","로즈마리","Rosemary","herb",["rosemary extract","rosmarinus officinalis","carnosic acid"]),
+ ("oregano","오레가노","Oregano","herb",["oregano oil","origanum vulgare"]),
+ ("hibiscus","히비스커스","Hibiscus","herb",["hibiscus sabdariffa"]),
+ ("beetroot","비트루트","Beetroot","herb",["beetroot juice","beetroot supplementation","dietary nitrate"]),
+ ("tart_cherry","타트체리","Tart cherry","herb",["tart cherry","montmorency cherry","prunus cerasus"]),
+ ("citrus_aurantium","비터오렌지(시네프린)","Bitter orange","herb",["citrus aurantium","synephrine","bitter orange"]),
+ ("banaba","바나바잎","Banaba leaf","herb",["banaba leaf","lagerstroemia speciosa","corosolic acid"]),
+ ("gymnema","짐네마","Gymnema sylvestre","herb",["gymnema sylvestre"]),
+ ("bitter_melon","여주","Bitter melon","herb",["bitter melon","momordica charantia"]),
+ ("white_kidney_bean","백강낭콩","White kidney bean","herb",["white kidney bean extract","phaseolus vulgaris extract"]),
+ ("jujube","대추","Jujube","herb",["ziziphus jujuba","jujube"]),
+ ("goji","구기자","Goji berry","herb",["lycium barbarum","goji berry","wolfberry"]),
+ ("danshen","단삼","Salvia miltiorrhiza","herb",["salvia miltiorrhiza","danshen"]),
+ ("scutellaria","황금(속썩은풀)","Scutellaria baicalensis","herb",["scutellaria baicalensis","baicalin","baicalein"]),
+ # ── 버섯 ──────────────────────────────────────────────────────────────────
+ ("reishi","영지버섯","Reishi","mushroom",["ganoderma lucidum","reishi"]),
+ ("cordyceps","동충하초","Cordyceps","mushroom",["cordyceps militaris","cordyceps sinensis","cordycepin"]),
+ ("lions_mane","노루궁뎅이버섯","Lion's mane","mushroom",["hericium erinaceus","lion's mane"]),
+ ("chaga","차가버섯","Chaga","mushroom",["inonotus obliquus","chaga mushroom"]),
+ ("maitake","잎새버섯","Maitake","mushroom",["grifola frondosa","maitake"]),
+ ("shiitake","표고버섯","Shiitake","mushroom",["lentinula edodes","shiitake","lentinan"]),
+ ("agaricus","아가리쿠스","Agaricus blazei","mushroom",["agaricus blazei","agaricus subrufescens"]),
+ ("turkey_tail","운지버섯","Turkey tail","mushroom",["trametes versicolor","coriolus versicolor","polysaccharide-k"]),
+ ("poria","복령","Poria cocos","mushroom",["poria cocos","wolfiporia extensa"]),
+ # ── 해조류·미세조류 ───────────────────────────────────────────────────────
+ ("spirulina","스피루리나","Spirulina","algae",["spirulina","arthrospira platensis"]),
+ ("chlorella","클로렐라","Chlorella","algae",["chlorella","chlorella vulgaris"]),
+ ("fucoidan","후코이단","Fucoidan","algae",["fucoidan"]),
+ ("ecklonia","감태(에클로니아)","Ecklonia cava","algae",["ecklonia cava","dieckol","phlorotannin"]),
+ ("kelp","다시마","Kelp","algae",["laminaria japonica","saccharina japonica","kelp supplementation"]),
+ ("undaria","미역","Undaria","algae",["undaria pinnatifida","wakame"]),
+ ("marine_calcium","해조칼슘","Marine algal calcium","algae",["seaweed calcium","lithothamnion","aquamin"]),
+ # ── 동물성 원료 ───────────────────────────────────────────────────────────
+ ("lactoferrin","락토페린","Lactoferrin","animal",["lactoferrin"]),
+ ("colostrum","초유","Bovine colostrum","animal",["bovine colostrum","colostrum supplementation"]),
+ ("propolis","프로폴리스","Propolis","animal",["propolis"]),
+ ("royal_jelly","로열젤리","Royal jelly","animal",["royal jelly"]),
+ ("chondroitin","콘드로이틴","Chondroitin","animal",["chondroitin sulfate"]),
+ ("glucosamine","글루코사민","Glucosamine","animal",["glucosamine sulfate","glucosamine hydrochloride","glucosamine supplementation"]),
+ ("msm","MSM(식이유황)","MSM","animal",["methylsulfonylmethane","msm supplementation"]),
+ ("hyaluronic_acid","히알루론산","Hyaluronic acid","animal",["oral hyaluronic acid","hyaluronan supplementation","ingested hyaluronic acid"]),
+ ("deer_antler","녹용","Deer antler","animal",["deer antler","velvet antler","cervus elaphus antler"]),
+ ("oyster","굴추출물","Oyster extract","animal",["oyster extract","crassostrea gigas extract"]),
+ ("placenta","태반추출물","Placenta extract","animal",["placental extract","placenta extract"]),
+ # ── 기타 기능성 원료 ──────────────────────────────────────────────────────
+ ("coq10","코엔자임Q10","Coenzyme Q10","other",["coenzyme q10","ubiquinol","ubiquinone supplementation"]),
+ ("alpha_lipoic","알파리포산","Alpha-lipoic acid","other",["alpha-lipoic acid","thioctic acid"]),
+ ("nmn","NMN","Nicotinamide mononucleotide","other",["nicotinamide mononucleotide"]),
+ ("nr","니코틴아미드 리보사이드(NR)","Nicotinamide riboside","other",["nicotinamide riboside"]),
+ ("melatonin","멜라토닌","Melatonin","other",["melatonin supplementation","exogenous melatonin","oral melatonin"]),
+ ("caffeine","카페인","Caffeine","other",["caffeine supplementation","caffeine ingestion","caffeine intake"]),
+ ("nattokinase","나토키나제","Nattokinase","other",["nattokinase"]),
+ ("serrapeptase","세라펩타제","Serrapeptase","other",["serrapeptase","serratiopeptidase"]),
+ ("policosanol","폴리코사놀","Policosanol","other",["policosanol","octacosanol"]),
+ ("red_yeast_rice","홍국(모나콜린K)","Red yeast rice","other",["red yeast rice","monascus purpureus","monacolin k"]),
+ ("spermidine","스퍼미딘","Spermidine","other",["spermidine supplementation","dietary spermidine"]),
+ ("urolithin_a","유로리틴A","Urolithin A","other",["urolithin a"]),
+ ("pqq","PQQ","Pyrroloquinoline quinone","other",["pyrroloquinoline quinone"]),
+ ("same","SAM-e","S-adenosylmethionine","other",["s-adenosylmethionine","s-adenosyl methionine"]),
+ ("five_htp","5-HTP","5-HTP","other",["5-hydroxytryptophan","5-htp"]),
+ ("dhea","DHEA","DHEA","other",["dehydroepiandrosterone"]),
+ ("bromelain","브로멜라인","Bromelain","other",["bromelain"]),
+ ("digestive_enzyme","소화효소","Digestive enzyme","other",["digestive enzyme supplementation","pancreatic enzyme supplementation"]),
+ ("xylitol","자일리톨","Xylitol","other",["xylitol"]),
+ ("d_mannose","디만노스","D-mannose","other",["d-mannose"]),
+ ("apple_cider_vinegar","애플사이다비니거","Apple cider vinegar","other",["apple cider vinegar","vinegar supplementation"]),
+ ("sodium_bicarbonate","중탄산나트륨","Sodium bicarbonate","other",["sodium bicarbonate supplementation","sodium bicarbonate ingestion"]),
+]
+
+
+def build():
+    out, seen_id, seen_term = [], set(), {}
+    for iid, ko, en, cat, syns in ROWS:
+        assert iid not in seen_id, f"중복 ingredient id: {iid}"
+        assert cat in CATEGORIES, f"알 수 없는 분류: {cat}"
+        seen_id.add(iid)
+        terms = []
+        for t in syns:
+            t = t.strip().lower()
+            if t and t not in terms:
+                terms.append(t)
+        assert terms, iid
+        for t in terms:
+            seen_term.setdefault(t, []).append(iid)
+        out.append({
+            "id": iid, "name_ko": ko, "name_en": en,
+            "category": cat, "category_ko": CATEGORIES[cat],
+            "synonyms": terms,
+            "source": "curated",
+        })
+    dupes = {t: ids for t, ids in seen_term.items() if len(ids) > 1}
+    if dupes:
+        print(f"[warn] 여러 성분이 공유하는 검색어 {len(dupes)}건: {dupes}", file=sys.stderr)
+    return {
+        "_meta": {
+            "description": "광고·제품 라벨에서 흔히 보이는 건강기능식품 원료 사전.",
+            "provenance": "한글명·분류는 편집 큐레이션(국내 건강기능식품 원료 통용명 기준). "
+                          "문헌 검색과 논문-성분 연결은 영문 synonyms 로만 수행하므로, "
+                          "화면에 표시되는 논문 수치는 전적으로 문헌 DB 응답에서 나옵니다.",
+            "categories": CATEGORIES,
+            "count": len(out),
+            "version": 1,
+        },
+        "ingredients": out,
+    }
+
+
+if __name__ == "__main__":
+    path = pathlib.Path(__file__).resolve().parent.parent / "data" / "ingredients.json"
+    data = build()
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"{path}: {data['_meta']['count']} ingredients")

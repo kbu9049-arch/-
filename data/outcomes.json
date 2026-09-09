@@ -1,0 +1,280 @@
+{
+  "_meta": {
+    "description": "연구 결과지표(outcome) 분류 체계. terms/measures/mesh 는 논문 제목·초록·MeSH 에서 해당 항목을 측정했는지 판정하는 데 쓰입니다.",
+    "matching": "measures(측정도구) 는 가중치 3, mesh 는 2, terms 는 1 로 점수화하며 임계값 이상일 때만 해당 항목으로 분류합니다.",
+    "source": "지표 구분은 MeSH 표준 용어와 각 분야 표준 측정도구(PSQI, WOMAC, IPSS, HOMA-IR 등) 를 기준으로 구성했습니다.",
+    "version": 1
+  },
+  "outcomes": [
+    {
+      "id": "lipid",
+      "label_ko": "혈중 지질(콜레스테롤·중성지방)",
+      "label_en": "Blood lipids",
+      "ko_aliases": ["콜레스테롤", "중성지방", "고지혈증", "이상지질혈증", "혈중지질", "LDL", "HDL", "트리글리세라이드"],
+      "measures": ["ldl cholesterol", "hdl cholesterol", "ldl-c", "hdl-c", "total cholesterol", "serum triglyceride", "triglyceride level", "apolipoprotein b", "lipid profile", "non-hdl"],
+      "mesh": ["Cholesterol", "Cholesterol, LDL", "Cholesterol, HDL", "Triglycerides", "Hyperlipidemias", "Dyslipidemias", "Lipids"],
+      "terms": ["cholesterol", "triglyceride", "triacylglycerol", "hyperlipidemia", "dyslipidemia", "lipid profile", "hypercholesterolemia"]
+    },
+    {
+      "id": "glucose",
+      "label_ko": "혈당·인슐린",
+      "label_en": "Glucose and insulin",
+      "ko_aliases": ["혈당", "당뇨", "인슐린", "인슐린저항성", "당화혈색소", "식후혈당"],
+      "measures": ["fasting blood glucose", "fasting plasma glucose", "hba1c", "glycated hemoglobin", "homa-ir", "oral glucose tolerance test", "postprandial glucose", "fasting insulin"],
+      "mesh": ["Blood Glucose", "Insulin Resistance", "Diabetes Mellitus, Type 2", "Glycated Hemoglobin", "Insulin", "Hyperglycemia", "Prediabetic State"],
+      "terms": ["blood glucose", "glycemic control", "glycaemic control", "insulin sensitivity", "insulin resistance", "type 2 diabetes", "glucose tolerance", "hyperglycemia"]
+    },
+    {
+      "id": "blood_pressure",
+      "label_ko": "혈압",
+      "label_en": "Blood pressure",
+      "ko_aliases": ["혈압", "고혈압", "수축기혈압", "이완기혈압"],
+      "measures": ["systolic blood pressure", "diastolic blood pressure", "ambulatory blood pressure", "mean arterial pressure", "sbp", "dbp"],
+      "mesh": ["Blood Pressure", "Hypertension", "Antihypertensive Agents", "Blood Pressure Monitoring, Ambulatory"],
+      "terms": ["blood pressure", "hypertension", "hypertensive", "antihypertensive"]
+    },
+    {
+      "id": "weight",
+      "label_ko": "체중·체지방",
+      "label_en": "Body weight and fat",
+      "ko_aliases": ["체중", "다이어트", "비만", "체지방", "뱃살", "내장지방", "체중감량", "허리둘레"],
+      "measures": ["body mass index", "body fat percentage", "waist circumference", "fat mass", "visceral fat area", "body weight change", "waist-to-hip ratio"],
+      "mesh": ["Obesity", "Body Weight", "Body Mass Index", "Weight Loss", "Adipose Tissue", "Overweight", "Waist Circumference"],
+      "terms": ["body weight", "body fat", "obesity", "overweight", "weight loss", "weight reduction", "adiposity", "anti-obesity"]
+    },
+    {
+      "id": "liver",
+      "label_ko": "간 기능",
+      "label_en": "Liver function",
+      "ko_aliases": ["간", "간기능", "간수치", "지방간", "숙취", "간건강"],
+      "measures": ["alanine aminotransferase", "aspartate aminotransferase", "gamma-glutamyl transferase", "liver enzyme", "alt level", "ast level", "hepatic steatosis", "liver stiffness", "fib-4"],
+      "mesh": ["Liver", "Liver Diseases", "Non-alcoholic Fatty Liver Disease", "Fatty Liver", "Alanine Transaminase", "Aspartate Aminotransferases", "Liver Function Tests", "Hepatitis"],
+      "terms": ["liver function", "hepatic", "hepatoprotective", "nafld", "fatty liver", "transaminase", "liver injury"]
+    },
+    {
+      "id": "inflammation",
+      "label_ko": "염증 지표",
+      "label_en": "Inflammatory markers",
+      "ko_aliases": ["염증", "항염", "염증수치", "CRP", "만성염증"],
+      "measures": ["c-reactive protein", "hs-crp", "interleukin-6", "tumor necrosis factor", "tnf-alpha", "il-1beta", "erythrocyte sedimentation rate", "nf-kb"],
+      "mesh": ["Inflammation", "C-Reactive Protein", "Interleukin-6", "Tumor Necrosis Factor-alpha", "Cytokines", "Anti-Inflammatory Agents"],
+      "terms": ["inflammatory marker", "inflammation", "anti-inflammatory", "proinflammatory", "pro-inflammatory", "cytokine"]
+    },
+    {
+      "id": "oxidative",
+      "label_ko": "산화 스트레스·항산화",
+      "label_en": "Oxidative stress and antioxidant status",
+      "ko_aliases": ["항산화", "산화스트레스", "활성산소", "노화"],
+      "measures": ["malondialdehyde", "total antioxidant capacity", "superoxide dismutase", "glutathione peroxidase", "8-ohdg", "orac", "reactive oxygen species", "f2-isoprostane"],
+      "mesh": ["Oxidative Stress", "Antioxidants", "Reactive Oxygen Species", "Superoxide Dismutase", "Glutathione", "Lipid Peroxidation", "Free Radicals"],
+      "terms": ["oxidative stress", "antioxidant", "anti-oxidant", "free radical", "lipid peroxidation", "radical scavenging"]
+    },
+    {
+      "id": "immune",
+      "label_ko": "면역·감염",
+      "label_en": "Immune function and infection",
+      "ko_aliases": ["면역", "면역력", "감기", "감염", "저항력", "NK세포"],
+      "measures": ["natural killer cell activity", "nk cell activity", "immunoglobulin a", "secretory iga", "upper respiratory tract infection", "lymphocyte proliferation", "vaccine response", "cd4 count"],
+      "mesh": ["Immunity", "Immune System", "Killer Cells, Natural", "Respiratory Tract Infections", "Immunomodulation", "Common Cold", "Immunoglobulins", "T-Lymphocytes"],
+      "terms": ["immune function", "immunomodulat", "immune response", "immunity", "common cold", "respiratory infection", "immunostimulat"]
+    },
+    {
+      "id": "cognition",
+      "label_ko": "인지·기억",
+      "label_en": "Cognition and memory",
+      "ko_aliases": ["기억력", "인지", "집중력", "뇌건강", "치매", "총명", "학습능력"],
+      "measures": ["mini-mental state examination", "mmse", "montreal cognitive assessment", "moca", "working memory", "adas-cog", "trail making test", "digit span", "reaction time task"],
+      "mesh": ["Cognition", "Memory", "Alzheimer Disease", "Cognitive Dysfunction", "Neuroprotective Agents", "Attention", "Executive Function", "Dementia"],
+      "terms": ["cognitive function", "cognition", "memory", "neuroprotect", "attention", "mild cognitive impairment", "learning and memory"]
+    },
+    {
+      "id": "mood",
+      "label_ko": "기분·스트레스·불안",
+      "label_en": "Mood, stress and anxiety",
+      "ko_aliases": ["스트레스", "우울", "불안", "기분", "심리", "코르티솔"],
+      "measures": ["beck depression inventory", "hamilton depression rating", "state-trait anxiety inventory", "perceived stress scale", "salivary cortisol", "profile of mood states", "hads", "phq-9"],
+      "mesh": ["Depression", "Anxiety", "Stress, Psychological", "Affect", "Hydrocortisone", "Depressive Disorder", "Mental Health"],
+      "terms": ["depressive symptom", "depression", "anxiety", "psychological stress", "perceived stress", "mood state", "anxiolytic", "antidepressant"]
+    },
+    {
+      "id": "sleep",
+      "label_ko": "수면",
+      "label_en": "Sleep",
+      "ko_aliases": ["수면", "불면", "잠", "숙면", "수면질", "잠자리"],
+      "measures": ["pittsburgh sleep quality index", "psqi", "sleep efficiency", "sleep onset latency", "insomnia severity index", "actigraphy", "polysomnography", "epworth sleepiness"],
+      "mesh": ["Sleep", "Sleep Initiation and Maintenance Disorders", "Sleep Quality", "Melatonin", "Sleep Wake Disorders", "Polysomnography"],
+      "terms": ["sleep quality", "insomnia", "sleep latency", "sleep duration", "sleep disturbance", "hypnotic effect"]
+    },
+    {
+      "id": "fatigue",
+      "label_ko": "피로",
+      "label_en": "Fatigue and vitality",
+      "ko_aliases": ["피로", "피로회복", "활력", "기력", "만성피로", "에너지"],
+      "measures": ["fatigue severity scale", "multidimensional fatigue inventory", "chalder fatigue scale", "vitality score", "facit-f", "visual analogue scale for fatigue"],
+      "mesh": ["Fatigue", "Fatigue Syndrome, Chronic", "Asthenia", "Physical Endurance"],
+      "terms": ["fatigue", "anti-fatigue", "vitality", "tiredness", "energy level", "chronic fatigue"]
+    },
+    {
+      "id": "muscle",
+      "label_ko": "근력·운동수행",
+      "label_en": "Muscle strength and exercise performance",
+      "ko_aliases": ["근력", "근육", "운동능력", "지구력", "근감소증", "체력", "운동수행"],
+      "measures": ["handgrip strength", "one-repetition maximum", "1rm", "vo2max", "vo2 max", "time to exhaustion", "lean body mass", "muscle cross-sectional area", "creatine kinase", "short physical performance battery"],
+      "mesh": ["Muscle Strength", "Muscle, Skeletal", "Sarcopenia", "Exercise", "Physical Endurance", "Athletic Performance", "Resistance Training"],
+      "terms": ["muscle strength", "muscle mass", "exercise performance", "sarcopenia", "endurance performance", "muscle protein synthesis", "physical performance"]
+    },
+    {
+      "id": "joint",
+      "label_ko": "관절·통증",
+      "label_en": "Joint health and pain",
+      "ko_aliases": ["관절", "무릎", "통증", "관절염", "연골", "허리통증"],
+      "measures": ["womac", "visual analogue scale for pain", "knee injury and osteoarthritis outcome score", "koos", "lequesne index", "joint space width", "pain vas"],
+      "mesh": ["Osteoarthritis", "Arthralgia", "Arthritis, Rheumatoid", "Cartilage, Articular", "Pain", "Joint Diseases", "Low Back Pain"],
+      "terms": ["joint pain", "osteoarthritis", "knee pain", "arthritis", "cartilage", "pain intensity", "joint stiffness"]
+    },
+    {
+      "id": "bone",
+      "label_ko": "뼈 건강",
+      "label_en": "Bone health",
+      "ko_aliases": ["뼈", "골다공증", "골밀도", "골절", "칼슘흡수"],
+      "measures": ["bone mineral density", "bmd", "t-score", "dual-energy x-ray absorptiometry", "bone turnover marker", "osteocalcin", "ctx", "p1np"],
+      "mesh": ["Bone Density", "Osteoporosis", "Bone and Bones", "Fractures, Bone", "Bone Remodeling", "Osteoporosis, Postmenopausal"],
+      "terms": ["bone mineral density", "bone loss", "osteoporosis", "bone turnover", "bone health", "fracture risk", "osteoblast"]
+    },
+    {
+      "id": "skin",
+      "label_ko": "피부",
+      "label_en": "Skin",
+      "ko_aliases": ["피부", "주름", "미백", "보습", "탄력", "기미", "아토피", "여드름"],
+      "measures": ["skin hydration", "transepidermal water loss", "tewl", "skin elasticity", "wrinkle depth", "melanin index", "corneometer", "cutometer", "scorad", "erythema index"],
+      "mesh": ["Skin", "Skin Aging", "Dermatitis, Atopic", "Skin Pigmentation", "Wrinkle", "Acne Vulgaris", "Water Loss, Insensible"],
+      "terms": ["skin hydration", "skin elasticity", "wrinkle", "skin barrier", "photoaging", "atopic dermatitis", "skin moisturiz", "skin moisturis", "melanogenesis", "skin whitening"]
+    },
+    {
+      "id": "hair",
+      "label_ko": "모발·탈모",
+      "label_en": "Hair",
+      "ko_aliases": ["탈모", "머리카락", "모발", "발모", "머리숱"],
+      "measures": ["hair density", "hair count", "phototrichogram", "hair shaft diameter", "anagen ratio", "hair pull test"],
+      "mesh": ["Hair", "Alopecia", "Alopecia Areata", "Hair Follicle"],
+      "terms": ["hair growth", "hair loss", "alopecia", "hair density", "androgenetic alopecia", "hair follicle"]
+    },
+    {
+      "id": "eye",
+      "label_ko": "눈 건강",
+      "label_en": "Eye health",
+      "ko_aliases": ["눈", "시력", "안구건조", "황반변성", "눈피로", "백내장"],
+      "measures": ["macular pigment optical density", "mpod", "visual acuity", "contrast sensitivity", "tear break-up time", "schirmer test", "ocular surface disease index"],
+      "mesh": ["Macular Degeneration", "Visual Acuity", "Dry Eye Syndromes", "Retina", "Cataract", "Eye", "Macular Pigment"],
+      "terms": ["visual acuity", "macular", "dry eye", "eye fatigue", "retinal", "ocular", "contrast sensitivity", "asthenopia"]
+    },
+    {
+      "id": "gut",
+      "label_ko": "장 건강·배변",
+      "label_en": "Gut health and bowel function",
+      "ko_aliases": ["장", "변비", "설사", "장건강", "배변", "과민성대장", "소화", "위"],
+      "measures": ["stool frequency", "bristol stool scale", "gastrointestinal symptom rating scale", "gsrs", "colonic transit time", "ibs symptom severity score", "gut microbiota composition"],
+      "mesh": ["Gastrointestinal Microbiome", "Constipation", "Irritable Bowel Syndrome", "Diarrhea", "Intestines", "Defecation", "Gastrointestinal Tract", "Inflammatory Bowel Diseases"],
+      "terms": ["gut microbiota", "gut microbiome", "constipation", "bowel movement", "irritable bowel", "intestinal barrier", "gastrointestinal symptom", "stool consistency", "digestion"]
+    },
+    {
+      "id": "menopause",
+      "label_ko": "갱년기·호르몬",
+      "label_en": "Menopause and hormones",
+      "ko_aliases": ["갱년기", "폐경", "안면홍조", "여성호르몬", "월경", "생리통", "호르몬"],
+      "measures": ["kupperman index", "menopause rating scale", "hot flash frequency", "greene climacteric scale", "estradiol level", "follicle stimulating hormone", "menopause-specific quality of life"],
+      "mesh": ["Menopause", "Hot Flashes", "Postmenopause", "Estrogens", "Premenstrual Syndrome", "Dysmenorrhea", "Climacteric"],
+      "terms": ["menopausal symptom", "hot flash", "hot flush", "postmenopausal", "climacteric", "premenstrual", "dysmenorrhea", "estrogenic"]
+    },
+    {
+      "id": "prostate",
+      "label_ko": "전립선·배뇨",
+      "label_en": "Prostate and urinary function",
+      "ko_aliases": ["전립선", "배뇨", "소변", "빈뇨", "야간뇨"],
+      "measures": ["international prostate symptom score", "ipss", "maximum urinary flow rate", "qmax", "post-void residual", "prostate volume", "prostate-specific antigen"],
+      "mesh": ["Prostatic Hyperplasia", "Lower Urinary Tract Symptoms", "Prostate", "Urination Disorders", "Prostate-Specific Antigen", "Nocturia"],
+      "terms": ["benign prostatic hyperplasia", "lower urinary tract symptom", "prostate", "urinary flow", "nocturia", "urinary symptom"]
+    },
+    {
+      "id": "blood_flow",
+      "label_ko": "혈행·혈관",
+      "label_en": "Blood flow and vascular function",
+      "ko_aliases": ["혈액순환", "혈행", "혈관", "동맥경화", "혈전", "손발저림"],
+      "measures": ["flow-mediated dilation", "fmd", "pulse wave velocity", "carotid intima-media thickness", "augmentation index", "platelet aggregation", "reactive hyperemia index"],
+      "mesh": ["Endothelium, Vascular", "Vascular Stiffness", "Atherosclerosis", "Platelet Aggregation", "Blood Circulation", "Carotid Intima-Media Thickness", "Regional Blood Flow"],
+      "terms": ["endothelial function", "arterial stiffness", "blood flow", "atherosclerosis", "platelet aggregation", "vasodilation", "microcirculation", "vascular function"]
+    },
+    {
+      "id": "allergy",
+      "label_ko": "알레르기",
+      "label_en": "Allergy",
+      "ko_aliases": ["알레르기", "비염", "천식", "알러지", "두드러기"],
+      "measures": ["total nasal symptom score", "tnss", "rhinoconjunctivitis quality of life questionnaire", "rqlq", "serum ige", "skin prick test", "nasal symptom score"],
+      "mesh": ["Rhinitis, Allergic", "Hypersensitivity", "Asthma", "Immunoglobulin E", "Rhinitis, Allergic, Seasonal", "Urticaria"],
+      "terms": ["allergic rhinitis", "allergy", "allergic symptom", "antiallergic", "anti-allergic", "hypersensitivity", "nasal symptom", "asthma"]
+    },
+    {
+      "id": "cardio_event",
+      "label_ko": "심혈관 질환·사건",
+      "label_en": "Cardiovascular events",
+      "ko_aliases": ["심장", "심혈관", "심근경색", "뇌졸중", "심부전", "부정맥"],
+      "measures": ["major adverse cardiovascular events", "mace", "cardiovascular mortality", "myocardial infarction incidence", "left ventricular ejection fraction", "stroke incidence"],
+      "mesh": ["Cardiovascular Diseases", "Myocardial Infarction", "Stroke", "Heart Failure", "Coronary Artery Disease", "Atrial Fibrillation", "Death, Sudden, Cardiac"],
+      "terms": ["cardiovascular event", "cardiovascular disease", "myocardial infarction", "heart failure", "stroke", "coronary", "cardioprotective", "arrhythmia"]
+    },
+    {
+      "id": "kidney",
+      "label_ko": "신장 기능",
+      "label_en": "Kidney function",
+      "ko_aliases": ["신장", "콩팥", "신기능", "요산", "통풍"],
+      "measures": ["estimated glomerular filtration rate", "egfr", "serum creatinine", "albuminuria", "urinary albumin-to-creatinine ratio", "serum uric acid", "blood urea nitrogen"],
+      "mesh": ["Kidney", "Renal Insufficiency, Chronic", "Glomerular Filtration Rate", "Kidney Diseases", "Uric Acid", "Gout", "Creatinine"],
+      "terms": ["kidney function", "renal function", "chronic kidney disease", "nephroprotective", "uric acid", "gout", "proteinuria", "renoprotective"]
+    },
+    {
+      "id": "thyroid",
+      "label_ko": "갑상선",
+      "label_en": "Thyroid function",
+      "ko_aliases": ["갑상선", "갑상샘", "TSH"],
+      "measures": ["thyroid stimulating hormone", "free t4", "free t3", "thyroid peroxidase antibody", "tpoab"],
+      "mesh": ["Thyroid Gland", "Hypothyroidism", "Thyroiditis, Autoimmune", "Thyrotropin", "Hyperthyroidism", "Thyroid Hormones"],
+      "terms": ["thyroid function", "hypothyroid", "hyperthyroid", "thyroid hormone", "thyroiditis"]
+    },
+    {
+      "id": "anemia",
+      "label_ko": "빈혈·철 영양",
+      "label_en": "Anemia and iron status",
+      "ko_aliases": ["빈혈", "철분", "헤모글로빈", "페리틴"],
+      "measures": ["hemoglobin concentration", "serum ferritin", "transferrin saturation", "hematocrit", "serum iron", "soluble transferrin receptor"],
+      "mesh": ["Anemia", "Anemia, Iron-Deficiency", "Hemoglobins", "Ferritins", "Iron", "Iron Deficiencies"],
+      "terms": ["iron deficiency", "anemia", "anaemia", "hemoglobin level", "haemoglobin", "ferritin", "iron status"]
+    },
+    {
+      "id": "oral",
+      "label_ko": "구강 건강",
+      "label_en": "Oral health",
+      "ko_aliases": ["구강", "치아", "잇몸", "충치", "입냄새", "치주"],
+      "measures": ["plaque index", "gingival index", "probing depth", "dmft index", "halitosis score", "bleeding on probing"],
+      "mesh": ["Periodontal Diseases", "Dental Caries", "Gingivitis", "Halitosis", "Mouth", "Dental Plaque", "Oral Health"],
+      "terms": ["periodontal", "dental caries", "gingivitis", "oral health", "dental plaque", "halitosis", "oral microbiome"]
+    },
+    {
+      "id": "respiratory",
+      "label_ko": "호흡기·폐 기능",
+      "label_en": "Respiratory and lung function",
+      "ko_aliases": ["호흡기", "폐", "기침", "가래", "미세먼지", "폐기능", "기관지"],
+      "measures": ["forced expiratory volume", "fev1", "forced vital capacity", "peak expiratory flow", "st george respiratory questionnaire", "cough severity score"],
+      "mesh": ["Lung", "Pulmonary Disease, Chronic Obstructive", "Respiratory Function Tests", "Cough", "Bronchitis", "Respiratory Tract Diseases"],
+      "terms": ["lung function", "pulmonary function", "copd", "bronchial", "cough", "respiratory symptom", "airway inflammation"]
+    },
+    {
+      "id": "sexual",
+      "label_ko": "성기능·생식",
+      "label_en": "Sexual and reproductive function",
+      "ko_aliases": ["정력", "성기능", "발기", "불임", "정자", "테스토스테론", "난임"],
+      "measures": ["international index of erectile function", "iief", "sperm concentration", "sperm motility", "total testosterone", "female sexual function index", "fsfi"],
+      "mesh": ["Erectile Dysfunction", "Testosterone", "Infertility, Male", "Spermatozoa", "Semen Analysis", "Sexual Dysfunction, Physiological", "Infertility, Female"],
+      "terms": ["erectile function", "erectile dysfunction", "sperm quality", "semen quality", "testosterone level", "sexual function", "male infertility", "libido"]
+    }
+  ]
+}

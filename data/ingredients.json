@@ -1,0 +1,2897 @@
+{
+ "_meta": {
+  "description": "광고·제품 라벨에서 흔히 보이는 건강기능식품 원료 사전.",
+  "provenance": "한글명·분류는 편집 큐레이션(국내 건강기능식품 원료 통용명 기준). 문헌 검색과 논문-성분 연결은 영문 synonyms 로만 수행하므로, 화면에 표시되는 논문 수치는 전적으로 문헌 DB 응답에서 나옵니다.",
+  "categories": {
+   "vitamin": "비타민",
+   "mineral": "미네랄",
+   "fatty_acid": "지방산·지질",
+   "amino": "아미노산·단백질",
+   "carotenoid": "카로티노이드",
+   "polyphenol": "폴리페놀·플라보노이드",
+   "fiber": "식이섬유·유산균",
+   "herb": "약용식물·허브",
+   "mushroom": "버섯",
+   "algae": "해조류·미세조류",
+   "animal": "동물성 원료",
+   "other": "기타 기능성 원료"
+  },
+  "count": 234,
+  "version": 1
+ },
+ "ingredients": [
+  {
+   "id": "vitamin_a",
+   "name_ko": "비타민A",
+   "name_en": "Vitamin A",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin a",
+    "retinol",
+    "retinyl palmitate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b1",
+   "name_ko": "비타민B1(티아민)",
+   "name_en": "Thiamine",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "thiamine",
+    "thiamin",
+    "vitamin b1",
+    "benfotiamine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b2",
+   "name_ko": "비타민B2(리보플라빈)",
+   "name_en": "Riboflavin",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "riboflavin",
+    "vitamin b2"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b3",
+   "name_ko": "비타민B3(나이아신)",
+   "name_en": "Niacin",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "niacin",
+    "nicotinic acid",
+    "nicotinamide",
+    "vitamin b3"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b5",
+   "name_ko": "판토텐산",
+   "name_en": "Pantothenic acid",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "pantothenic acid",
+    "pantothenate",
+    "panthenol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b6",
+   "name_ko": "비타민B6",
+   "name_en": "Vitamin B6",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "pyridoxine",
+    "vitamin b6",
+    "pyridoxal phosphate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "biotin",
+   "name_ko": "비오틴",
+   "name_en": "Biotin",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "biotin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "folate",
+   "name_ko": "엽산",
+   "name_en": "Folate",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "folic acid",
+    "folate supplementation",
+    "methylfolate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_b12",
+   "name_ko": "비타민B12",
+   "name_en": "Vitamin B12",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin b12",
+    "cobalamin",
+    "methylcobalamin",
+    "cyanocobalamin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_c",
+   "name_ko": "비타민C",
+   "name_en": "Vitamin C",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin c",
+    "ascorbic acid",
+    "ascorbate supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_d",
+   "name_ko": "비타민D",
+   "name_en": "Vitamin D",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin d",
+    "cholecalciferol",
+    "vitamin d3",
+    "25-hydroxyvitamin d"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_e",
+   "name_ko": "비타민E",
+   "name_en": "Vitamin E",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin e",
+    "alpha-tocopherol",
+    "tocopherol",
+    "tocotrienol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_k",
+   "name_ko": "비타민K1",
+   "name_en": "Vitamin K1",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin k1",
+    "phylloquinone"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "vitamin_k2",
+   "name_ko": "비타민K2",
+   "name_en": "Vitamin K2",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "vitamin k2",
+    "menaquinone",
+    "mk-7",
+    "menaquinone-7"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "choline",
+   "name_ko": "콜린",
+   "name_en": "Choline",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "choline supplementation",
+    "citicoline",
+    "alpha-gpc",
+    "cdp-choline"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "inositol",
+   "name_ko": "이노시톨",
+   "name_en": "Inositol",
+   "category": "vitamin",
+   "category_ko": "비타민",
+   "synonyms": [
+    "myo-inositol",
+    "d-chiro-inositol",
+    "inositol supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "calcium",
+   "name_ko": "칼슘",
+   "name_en": "Calcium",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "calcium supplementation",
+    "calcium carbonate",
+    "calcium citrate",
+    "dietary calcium"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "magnesium",
+   "name_ko": "마그네슘",
+   "name_en": "Magnesium",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "magnesium supplementation",
+    "magnesium oxide",
+    "magnesium citrate",
+    "dietary magnesium"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "zinc",
+   "name_ko": "아연",
+   "name_en": "Zinc",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "zinc supplementation",
+    "zinc gluconate",
+    "zinc sulfate",
+    "zinc supplement"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "iron",
+   "name_ko": "철분",
+   "name_en": "Iron",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "iron supplementation",
+    "ferrous sulfate",
+    "ferrous fumarate",
+    "iron supplement"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "selenium",
+   "name_ko": "셀레늄",
+   "name_en": "Selenium",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "selenium supplementation",
+    "selenomethionine",
+    "sodium selenite"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "copper",
+   "name_ko": "구리",
+   "name_en": "Copper",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "copper supplementation",
+    "dietary copper"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "manganese",
+   "name_ko": "망간",
+   "name_en": "Manganese",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "manganese supplementation",
+    "dietary manganese"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chromium",
+   "name_ko": "크롬",
+   "name_en": "Chromium",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "chromium picolinate",
+    "chromium supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "iodine",
+   "name_ko": "요오드",
+   "name_en": "Iodine",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "iodine supplementation",
+    "dietary iodine",
+    "potassium iodide supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "molybdenum",
+   "name_ko": "몰리브덴",
+   "name_en": "Molybdenum",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "molybdenum supplementation",
+    "dietary molybdenum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "potassium",
+   "name_ko": "칼륨",
+   "name_en": "Potassium",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "potassium supplementation",
+    "dietary potassium"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "phosphorus",
+   "name_ko": "인(포스포러스)",
+   "name_en": "Phosphorus",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "phosphorus supplementation",
+    "dietary phosphorus"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "boron",
+   "name_ko": "붕소",
+   "name_en": "Boron",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "boron supplementation",
+    "dietary boron"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "silicon",
+   "name_ko": "규소",
+   "name_en": "Silicon",
+   "category": "mineral",
+   "category_ko": "미네랄",
+   "synonyms": [
+    "orthosilicic acid",
+    "silicon supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "omega3",
+   "name_ko": "오메가3",
+   "name_en": "Omega-3",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "omega-3 fatty acid",
+    "fish oil",
+    "n-3 pufa",
+    "omega 3 supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "epa",
+   "name_ko": "EPA",
+   "name_en": "Eicosapentaenoic acid",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "eicosapentaenoic acid",
+    "epa supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "dha",
+   "name_ko": "DHA",
+   "name_en": "Docosahexaenoic acid",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "docosahexaenoic acid",
+    "dha supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "krill_oil",
+   "name_ko": "크릴오일",
+   "name_en": "Krill oil",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "krill oil"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "algal_oil",
+   "name_ko": "조류유(알제오일)",
+   "name_en": "Algal oil",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "algal oil",
+    "schizochytrium"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "flaxseed",
+   "name_ko": "아마씨유",
+   "name_en": "Flaxseed oil",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "flaxseed oil",
+    "linseed oil",
+    "alpha-linolenic acid",
+    "flaxseed supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "evening_primrose",
+   "name_ko": "달맞이꽃종자유(GLA)",
+   "name_en": "Evening primrose oil",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "evening primrose oil",
+    "gamma-linolenic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cla",
+   "name_ko": "공액리놀레산(CLA)",
+   "name_en": "Conjugated linoleic acid",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "conjugated linoleic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "mct",
+   "name_ko": "MCT오일",
+   "name_en": "Medium-chain triglyceride",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "medium-chain triglyceride",
+    "mct oil"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "perilla",
+   "name_ko": "들기름",
+   "name_en": "Perilla oil",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "perilla oil",
+    "perilla frutescens"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lecithin",
+   "name_ko": "레시틴",
+   "name_en": "Lecithin",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "lecithin supplementation",
+    "soy lecithin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "phosphatidylserine",
+   "name_ko": "포스파티딜세린",
+   "name_en": "Phosphatidylserine",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "phosphatidylserine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "phytosterol",
+   "name_ko": "식물스테롤",
+   "name_en": "Phytosterol",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "phytosterol",
+    "plant sterol",
+    "plant stanol",
+    "beta-sitosterol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "squalene",
+   "name_ko": "스쿠알렌",
+   "name_en": "Squalene",
+   "category": "fatty_acid",
+   "category_ko": "지방산·지질",
+   "synonyms": [
+    "squalene supplementation",
+    "dietary squalene"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "whey",
+   "name_ko": "유청단백",
+   "name_en": "Whey protein",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "whey protein"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "casein",
+   "name_ko": "카제인",
+   "name_en": "Casein protein",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "casein protein",
+    "micellar casein"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "soy_protein",
+   "name_ko": "대두단백",
+   "name_en": "Soy protein",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "soy protein"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pea_protein",
+   "name_ko": "완두단백",
+   "name_en": "Pea protein",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "pea protein"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "bcaa",
+   "name_ko": "BCAA(분지사슬아미노산)",
+   "name_en": "Branched-chain amino acids",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "branched-chain amino acid",
+    "bcaa supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "leucine",
+   "name_ko": "류신",
+   "name_en": "Leucine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "leucine supplementation",
+    "l-leucine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "glutamine",
+   "name_ko": "글루타민",
+   "name_en": "Glutamine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "glutamine supplementation",
+    "l-glutamine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "arginine",
+   "name_ko": "아르기닌",
+   "name_en": "Arginine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-arginine",
+    "arginine supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "citrulline",
+   "name_ko": "시트룰린",
+   "name_en": "Citrulline",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-citrulline",
+    "citrulline malate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "creatine",
+   "name_ko": "크레아틴",
+   "name_en": "Creatine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "creatine monohydrate",
+    "creatine supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "carnitine",
+   "name_ko": "카르니틴",
+   "name_en": "Carnitine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-carnitine",
+    "acetyl-l-carnitine",
+    "carnitine supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "taurine",
+   "name_ko": "타우린",
+   "name_en": "Taurine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "taurine supplementation",
+    "taurine ingestion"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "beta_alanine",
+   "name_ko": "베타알라닌",
+   "name_en": "Beta-alanine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "beta-alanine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "theanine",
+   "name_ko": "테아닌",
+   "name_en": "L-Theanine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-theanine",
+    "theanine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "tryptophan",
+   "name_ko": "트립토판",
+   "name_en": "Tryptophan",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-tryptophan",
+    "tryptophan supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "tyrosine",
+   "name_ko": "티로신",
+   "name_en": "Tyrosine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "l-tyrosine",
+    "tyrosine supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "glycine",
+   "name_ko": "글리신",
+   "name_en": "Glycine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "glycine supplementation",
+    "oral glycine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "gaba",
+   "name_ko": "가바(GABA)",
+   "name_en": "GABA",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "gamma-aminobutyric acid supplementation",
+    "gaba supplementation",
+    "oral gaba"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "collagen",
+   "name_ko": "콜라겐",
+   "name_en": "Collagen peptide",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "collagen peptide",
+    "hydrolyzed collagen",
+    "collagen supplementation",
+    "collagen hydrolysate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "hmb",
+   "name_ko": "HMB",
+   "name_en": "Beta-hydroxy-beta-methylbutyrate",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "beta-hydroxy-beta-methylbutyrate",
+    "hmb supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nac",
+   "name_ko": "N-아세틸시스테인(NAC)",
+   "name_en": "N-acetylcysteine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "n-acetylcysteine",
+    "n-acetyl cysteine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "betaine",
+   "name_ko": "베타인",
+   "name_en": "Betaine",
+   "category": "amino",
+   "category_ko": "아미노산·단백질",
+   "synonyms": [
+    "betaine supplementation",
+    "trimethylglycine",
+    "betaine anhydrous"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "beta_carotene",
+   "name_ko": "베타카로틴",
+   "name_en": "Beta-carotene",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "beta-carotene",
+    "betacarotene"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lutein",
+   "name_ko": "루테인",
+   "name_en": "Lutein",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "lutein",
+    "meso-zeaxanthin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "zeaxanthin",
+   "name_ko": "지아잔틴",
+   "name_en": "Zeaxanthin",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "zeaxanthin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "astaxanthin",
+   "name_ko": "아스타잔틴",
+   "name_en": "Astaxanthin",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "astaxanthin",
+    "haematococcus pluvialis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lycopene",
+   "name_ko": "라이코펜",
+   "name_en": "Lycopene",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "lycopene"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "fucoxanthin",
+   "name_ko": "푸코잔틴",
+   "name_en": "Fucoxanthin",
+   "category": "carotenoid",
+   "category_ko": "카로티노이드",
+   "synonyms": [
+    "fucoxanthin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "curcumin",
+   "name_ko": "커큐민(강황)",
+   "name_en": "Curcumin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "curcumin",
+    "turmeric",
+    "curcuma longa",
+    "curcuminoid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "resveratrol",
+   "name_ko": "레스베라트롤",
+   "name_en": "Resveratrol",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "resveratrol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "quercetin",
+   "name_ko": "케르세틴",
+   "name_en": "Quercetin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "quercetin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "green_tea",
+   "name_ko": "녹차추출물(EGCG)",
+   "name_en": "Green tea extract",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "green tea extract",
+    "epigallocatechin gallate",
+    "egcg",
+    "green tea catechin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "anthocyanin",
+   "name_ko": "안토시아닌",
+   "name_en": "Anthocyanin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "anthocyanin",
+    "anthocyanidin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "bilberry",
+   "name_ko": "빌베리",
+   "name_en": "Bilberry",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "bilberry",
+    "vaccinium myrtillus"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "aronia",
+   "name_ko": "아로니아",
+   "name_en": "Aronia",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "aronia",
+    "chokeberry",
+    "aronia melanocarpa"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "blueberry",
+   "name_ko": "블루베리",
+   "name_en": "Blueberry",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "blueberry",
+    "vaccinium corymbosum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "grape_seed",
+   "name_ko": "포도씨추출물",
+   "name_en": "Grape seed extract",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "grape seed extract",
+    "proanthocyanidin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pine_bark",
+   "name_ko": "소나무껍질추출물",
+   "name_en": "Pine bark extract",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "pycnogenol",
+    "pine bark extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pomegranate",
+   "name_ko": "석류",
+   "name_en": "Pomegranate",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "pomegranate",
+    "punica granatum",
+    "ellagic acid",
+    "urolithin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cranberry",
+   "name_ko": "크랜베리",
+   "name_en": "Cranberry",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "cranberry",
+    "vaccinium macrocarpon"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "elderberry",
+   "name_ko": "엘더베리",
+   "name_en": "Elderberry",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "elderberry",
+    "sambucus nigra"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "olive_leaf",
+   "name_ko": "올리브잎추출물",
+   "name_en": "Olive leaf extract",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "olive leaf extract",
+    "oleuropein",
+    "hydroxytyrosol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "silymarin",
+   "name_ko": "밀크씨슬(실리마린)",
+   "name_en": "Milk thistle / Silymarin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "silymarin",
+    "milk thistle",
+    "silybum marianum",
+    "silybin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "hesperidin",
+   "name_ko": "감귤 바이오플라보노이드",
+   "name_en": "Citrus bioflavonoids",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "hesperidin",
+    "citrus bioflavonoid",
+    "naringin",
+    "citrus flavonoid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "rutin",
+   "name_ko": "루틴",
+   "name_en": "Rutin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "rutin supplementation",
+    "troxerutin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "soy_isoflavone",
+   "name_ko": "대두이소플라본",
+   "name_en": "Soy isoflavone",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "soy isoflavone",
+    "genistein",
+    "daidzein",
+    "equol supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "red_clover",
+   "name_ko": "레드클로버",
+   "name_en": "Red clover",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "red clover",
+    "trifolium pratense"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pueraria",
+   "name_ko": "칡(갈근)",
+   "name_en": "Pueraria",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "pueraria",
+    "puerarin",
+    "kudzu"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "sulforaphane",
+   "name_ko": "설포라판",
+   "name_en": "Sulforaphane",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "sulforaphane",
+    "broccoli sprout extract",
+    "glucoraphanin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "apigenin",
+   "name_ko": "아피게닌",
+   "name_en": "Apigenin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "apigenin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "luteolin",
+   "name_ko": "루테올린",
+   "name_en": "Luteolin",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "luteolin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "berberine",
+   "name_ko": "베르베린",
+   "name_en": "Berberine",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "berberine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chlorogenic",
+   "name_ko": "클로로겐산(그린커피)",
+   "name_en": "Chlorogenic acid",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "chlorogenic acid",
+    "green coffee bean extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cocoa",
+   "name_ko": "코코아 플라바놀",
+   "name_en": "Cocoa flavanol",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "cocoa flavanol",
+    "cocoa extract",
+    "dark chocolate",
+    "cocoa polyphenol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ferulic",
+   "name_ko": "페룰산",
+   "name_en": "Ferulic acid",
+   "category": "polyphenol",
+   "category_ko": "폴리페놀·플라보노이드",
+   "synonyms": [
+    "ferulic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "probiotics",
+   "name_ko": "프로바이오틱스",
+   "name_en": "Probiotics",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "probiotic",
+    "lactobacillus",
+    "bifidobacterium",
+    "synbiotic"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "prebiotics",
+   "name_ko": "프리바이오틱스",
+   "name_en": "Prebiotics",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "prebiotic",
+    "fructooligosaccharide",
+    "galactooligosaccharide"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "postbiotics",
+   "name_ko": "포스트바이오틱스",
+   "name_en": "Postbiotics",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "postbiotic",
+    "heat-killed lactobacillus",
+    "paraprobiotic"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "inulin",
+   "name_ko": "이눌린",
+   "name_en": "Inulin",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "inulin",
+    "chicory root fiber"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "psyllium",
+   "name_ko": "차전자피",
+   "name_en": "Psyllium",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "psyllium",
+    "plantago ovata",
+    "ispaghula"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "beta_glucan",
+   "name_ko": "베타글루칸",
+   "name_en": "Beta-glucan",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "beta-glucan",
+    "beta glucan"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "glucomannan",
+   "name_ko": "글루코만난",
+   "name_en": "Glucomannan",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "glucomannan",
+    "konjac"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "resistant_starch",
+   "name_ko": "저항전분",
+   "name_en": "Resistant starch",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "resistant starch"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "guar_gum",
+   "name_ko": "구아검",
+   "name_en": "Guar gum",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "partially hydrolyzed guar gum",
+    "guar gum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chitosan",
+   "name_ko": "키토산",
+   "name_en": "Chitosan",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "chitosan"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pectin",
+   "name_ko": "펙틴",
+   "name_en": "Pectin",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "pectin supplementation",
+    "apple pectin",
+    "citrus pectin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "polydextrose",
+   "name_ko": "폴리덱스트로스",
+   "name_en": "Polydextrose",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "polydextrose"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "xos",
+   "name_ko": "자일로올리고당",
+   "name_en": "Xylooligosaccharide",
+   "category": "fiber",
+   "category_ko": "식이섬유·유산균",
+   "synonyms": [
+    "xylooligosaccharide"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "red_ginseng",
+   "name_ko": "홍삼",
+   "name_en": "Korean red ginseng",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "red ginseng",
+    "korean red ginseng",
+    "ginsenoside"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ginseng",
+   "name_ko": "인삼",
+   "name_en": "Panax ginseng",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "panax ginseng",
+    "ginseng extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "american_ginseng",
+   "name_ko": "화기삼",
+   "name_en": "American ginseng",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "american ginseng",
+    "panax quinquefolius"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ashwagandha",
+   "name_ko": "아슈와간다",
+   "name_en": "Ashwagandha",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "ashwagandha",
+    "withania somnifera"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "rhodiola",
+   "name_ko": "홍경천",
+   "name_en": "Rhodiola rosea",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "rhodiola rosea",
+    "rhodiola extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "maca",
+   "name_ko": "마카",
+   "name_en": "Maca",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "maca",
+    "lepidium meyenii"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ginkgo",
+   "name_ko": "은행잎추출물",
+   "name_en": "Ginkgo biloba",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "ginkgo biloba",
+    "ginkgo extract",
+    "egb 761"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "saw_palmetto",
+   "name_ko": "쏘팔메토",
+   "name_en": "Saw palmetto",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "saw palmetto",
+    "serenoa repens"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "echinacea",
+   "name_ko": "에키네시아",
+   "name_en": "Echinacea",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "echinacea",
+    "echinacea purpurea"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "valerian",
+   "name_ko": "발레리안(쥐오줌풀)",
+   "name_en": "Valerian",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "valerian",
+    "valeriana officinalis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "st_johns_wort",
+   "name_ko": "세인트존스워트",
+   "name_en": "St. John's wort",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "st john's wort",
+    "hypericum perforatum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lavender",
+   "name_ko": "라벤더",
+   "name_en": "Lavender",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "lavender oil",
+    "lavandula angustifolia",
+    "silexan"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chamomile",
+   "name_ko": "캐모마일",
+   "name_en": "Chamomile",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "chamomile",
+    "matricaria recutita",
+    "matricaria chamomilla"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "peppermint",
+   "name_ko": "페퍼민트",
+   "name_en": "Peppermint",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "peppermint oil",
+    "mentha piperita"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ginger",
+   "name_ko": "생강",
+   "name_en": "Ginger",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "ginger",
+    "zingiber officinale"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "garlic",
+   "name_ko": "마늘",
+   "name_en": "Garlic",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "garlic supplementation",
+    "allium sativum",
+    "aged garlic extract",
+    "garlic extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cinnamon",
+   "name_ko": "계피",
+   "name_en": "Cinnamon",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "cinnamon",
+    "cinnamomum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "fenugreek",
+   "name_ko": "호로파",
+   "name_en": "Fenugreek",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "fenugreek",
+    "trigonella foenum-graecum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "boswellia",
+   "name_ko": "보스웰리아",
+   "name_en": "Boswellia",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "boswellia serrata",
+    "boswellic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "devils_claw",
+   "name_ko": "데빌스클로",
+   "name_en": "Devil's claw",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "devil's claw",
+    "harpagophytum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "bacopa",
+   "name_ko": "바코파",
+   "name_en": "Bacopa monnieri",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "bacopa monnieri",
+    "brahmi"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "centella",
+   "name_ko": "병풀(센텔라)",
+   "name_en": "Centella asiatica",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "centella asiatica",
+    "gotu kola",
+    "madecassoside",
+    "asiaticoside"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "artichoke",
+   "name_ko": "아티초크",
+   "name_en": "Artichoke",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "artichoke extract",
+    "cynara scolymus"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "dandelion",
+   "name_ko": "민들레",
+   "name_en": "Dandelion",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "taraxacum officinale",
+    "dandelion extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "hovenia",
+   "name_ko": "헛개나무",
+   "name_en": "Hovenia dulcis",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "hovenia dulcis",
+    "oriental raisin tree"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "schisandra",
+   "name_ko": "오미자",
+   "name_en": "Schisandra chinensis",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "schisandra chinensis",
+    "schizandra",
+    "gomisin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cynanchum",
+   "name_ko": "백수오",
+   "name_en": "Cynanchum wilfordii",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "cynanchum wilfordii"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "angelica",
+   "name_ko": "당귀",
+   "name_en": "Angelica",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "angelica gigas",
+    "angelica sinensis",
+    "dong quai"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "astragalus",
+   "name_ko": "황기",
+   "name_en": "Astragalus",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "astragalus membranaceus",
+    "astragalus polysaccharide"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "licorice",
+   "name_ko": "감초",
+   "name_en": "Licorice",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "glycyrrhiza glabra",
+    "licorice extract",
+    "glycyrrhizin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "gastrodia",
+   "name_ko": "천마",
+   "name_en": "Gastrodia elata",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "gastrodia elata",
+    "gastrodin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "eleuthero",
+   "name_ko": "가시오가피",
+   "name_en": "Eleuthero",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "eleutherococcus senticosus",
+    "siberian ginseng"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "mulberry",
+   "name_ko": "뽕잎",
+   "name_en": "Mulberry leaf",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "mulberry leaf",
+    "morus alba"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "garcinia",
+   "name_ko": "가르시니아",
+   "name_en": "Garcinia cambogia",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "garcinia cambogia",
+    "hydroxycitric acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "guarana",
+   "name_ko": "과라나",
+   "name_en": "Guarana",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "guarana",
+    "paullinia cupana"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "yerba_mate",
+   "name_ko": "마테",
+   "name_en": "Yerba mate",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "yerba mate",
+    "ilex paraguariensis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "tribulus",
+   "name_ko": "트리불루스",
+   "name_en": "Tribulus terrestris",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "tribulus terrestris"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "epimedium",
+   "name_ko": "음양곽",
+   "name_en": "Epimedium",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "epimedium",
+    "icariin",
+    "horny goat weed"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "tongkat_ali",
+   "name_ko": "통캇알리",
+   "name_en": "Tongkat ali",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "eurycoma longifolia",
+    "tongkat ali"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "saffron",
+   "name_ko": "사프란",
+   "name_en": "Saffron",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "saffron",
+    "crocus sativus",
+    "crocin supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nigella",
+   "name_ko": "블랙커민(니겔라)",
+   "name_en": "Nigella sativa",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "nigella sativa",
+    "black seed oil",
+    "thymoquinone"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "moringa",
+   "name_ko": "모링가",
+   "name_en": "Moringa",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "moringa oleifera"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "sea_buckthorn",
+   "name_ko": "산자나무(비타민나무)",
+   "name_en": "Sea buckthorn",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "sea buckthorn",
+    "hippophae rhamnoides"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "noni",
+   "name_ko": "노니",
+   "name_en": "Noni",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "noni juice",
+    "morinda citrifolia"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "acai",
+   "name_ko": "아사이베리",
+   "name_en": "Acai",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "acai",
+    "euterpe oleracea"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "holy_basil",
+   "name_ko": "홀리바질(툴시)",
+   "name_en": "Holy basil",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "holy basil",
+    "ocimum sanctum",
+    "tulsi"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "black_cohosh",
+   "name_ko": "승마(블랙코호시)",
+   "name_en": "Black cohosh",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "black cohosh",
+    "cimicifuga racemosa",
+    "actaea racemosa"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chasteberry",
+   "name_ko": "체이스트베리",
+   "name_en": "Chasteberry",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "vitex agnus-castus",
+    "chasteberry",
+    "chaste tree"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "horse_chestnut",
+   "name_ko": "마로니에(말밤)",
+   "name_en": "Horse chestnut",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "horse chestnut",
+    "aesculus hippocastanum",
+    "aescin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nettle",
+   "name_ko": "쐐기풀",
+   "name_en": "Stinging nettle",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "urtica dioica",
+    "stinging nettle"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pumpkin_seed",
+   "name_ko": "호박씨유",
+   "name_en": "Pumpkin seed oil",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "pumpkin seed oil",
+    "cucurbita pepo"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "aloe",
+   "name_ko": "알로에",
+   "name_en": "Aloe vera",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "aloe vera",
+    "aloe barbadensis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lemon_balm",
+   "name_ko": "레몬밤",
+   "name_en": "Lemon balm",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "melissa officinalis",
+    "lemon balm"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "passionflower",
+   "name_ko": "패션플라워",
+   "name_en": "Passionflower",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "passiflora incarnata",
+    "passionflower"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "kava",
+   "name_ko": "카바",
+   "name_en": "Kava",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "kava",
+    "piper methysticum"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "capsaicin",
+   "name_ko": "캡사이신",
+   "name_en": "Capsaicin",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "capsaicin",
+    "capsicum extract",
+    "capsinoid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "piperine",
+   "name_ko": "피페린(후추추출물)",
+   "name_en": "Piperine",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "piperine",
+    "bioperine",
+    "black pepper extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "mastic",
+   "name_ko": "매스틱검",
+   "name_en": "Mastic gum",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "mastic gum",
+    "pistacia lentiscus"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "sage",
+   "name_ko": "세이지",
+   "name_en": "Sage",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "salvia officinalis",
+    "sage extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "rosemary",
+   "name_ko": "로즈마리",
+   "name_en": "Rosemary",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "rosemary extract",
+    "rosmarinus officinalis",
+    "carnosic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "oregano",
+   "name_ko": "오레가노",
+   "name_en": "Oregano",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "oregano oil",
+    "origanum vulgare"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "hibiscus",
+   "name_ko": "히비스커스",
+   "name_en": "Hibiscus",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "hibiscus sabdariffa"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "beetroot",
+   "name_ko": "비트루트",
+   "name_en": "Beetroot",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "beetroot juice",
+    "beetroot supplementation",
+    "dietary nitrate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "tart_cherry",
+   "name_ko": "타트체리",
+   "name_en": "Tart cherry",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "tart cherry",
+    "montmorency cherry",
+    "prunus cerasus"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "citrus_aurantium",
+   "name_ko": "비터오렌지(시네프린)",
+   "name_en": "Bitter orange",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "citrus aurantium",
+    "synephrine",
+    "bitter orange"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "banaba",
+   "name_ko": "바나바잎",
+   "name_en": "Banaba leaf",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "banaba leaf",
+    "lagerstroemia speciosa",
+    "corosolic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "gymnema",
+   "name_ko": "짐네마",
+   "name_en": "Gymnema sylvestre",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "gymnema sylvestre"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "bitter_melon",
+   "name_ko": "여주",
+   "name_en": "Bitter melon",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "bitter melon",
+    "momordica charantia"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "white_kidney_bean",
+   "name_ko": "백강낭콩",
+   "name_en": "White kidney bean",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "white kidney bean extract",
+    "phaseolus vulgaris extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "jujube",
+   "name_ko": "대추",
+   "name_en": "Jujube",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "ziziphus jujuba",
+    "jujube"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "goji",
+   "name_ko": "구기자",
+   "name_en": "Goji berry",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "lycium barbarum",
+    "goji berry",
+    "wolfberry"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "danshen",
+   "name_ko": "단삼",
+   "name_en": "Salvia miltiorrhiza",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "salvia miltiorrhiza",
+    "danshen"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "scutellaria",
+   "name_ko": "황금(속썩은풀)",
+   "name_en": "Scutellaria baicalensis",
+   "category": "herb",
+   "category_ko": "약용식물·허브",
+   "synonyms": [
+    "scutellaria baicalensis",
+    "baicalin",
+    "baicalein"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "reishi",
+   "name_ko": "영지버섯",
+   "name_en": "Reishi",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "ganoderma lucidum",
+    "reishi"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "cordyceps",
+   "name_ko": "동충하초",
+   "name_en": "Cordyceps",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "cordyceps militaris",
+    "cordyceps sinensis",
+    "cordycepin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lions_mane",
+   "name_ko": "노루궁뎅이버섯",
+   "name_en": "Lion's mane",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "hericium erinaceus",
+    "lion's mane"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chaga",
+   "name_ko": "차가버섯",
+   "name_en": "Chaga",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "inonotus obliquus",
+    "chaga mushroom"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "maitake",
+   "name_ko": "잎새버섯",
+   "name_en": "Maitake",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "grifola frondosa",
+    "maitake"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "shiitake",
+   "name_ko": "표고버섯",
+   "name_en": "Shiitake",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "lentinula edodes",
+    "shiitake",
+    "lentinan"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "agaricus",
+   "name_ko": "아가리쿠스",
+   "name_en": "Agaricus blazei",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "agaricus blazei",
+    "agaricus subrufescens"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "turkey_tail",
+   "name_ko": "운지버섯",
+   "name_en": "Turkey tail",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "trametes versicolor",
+    "coriolus versicolor",
+    "polysaccharide-k"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "poria",
+   "name_ko": "복령",
+   "name_en": "Poria cocos",
+   "category": "mushroom",
+   "category_ko": "버섯",
+   "synonyms": [
+    "poria cocos",
+    "wolfiporia extensa"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "spirulina",
+   "name_ko": "스피루리나",
+   "name_en": "Spirulina",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "spirulina",
+    "arthrospira platensis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chlorella",
+   "name_ko": "클로렐라",
+   "name_en": "Chlorella",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "chlorella",
+    "chlorella vulgaris"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "fucoidan",
+   "name_ko": "후코이단",
+   "name_en": "Fucoidan",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "fucoidan"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "ecklonia",
+   "name_ko": "감태(에클로니아)",
+   "name_en": "Ecklonia cava",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "ecklonia cava",
+    "dieckol",
+    "phlorotannin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "kelp",
+   "name_ko": "다시마",
+   "name_en": "Kelp",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "laminaria japonica",
+    "saccharina japonica",
+    "kelp supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "undaria",
+   "name_ko": "미역",
+   "name_en": "Undaria",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "undaria pinnatifida",
+    "wakame"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "marine_calcium",
+   "name_ko": "해조칼슘",
+   "name_en": "Marine algal calcium",
+   "category": "algae",
+   "category_ko": "해조류·미세조류",
+   "synonyms": [
+    "seaweed calcium",
+    "lithothamnion",
+    "aquamin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "lactoferrin",
+   "name_ko": "락토페린",
+   "name_en": "Lactoferrin",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "lactoferrin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "colostrum",
+   "name_ko": "초유",
+   "name_en": "Bovine colostrum",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "bovine colostrum",
+    "colostrum supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "propolis",
+   "name_ko": "프로폴리스",
+   "name_en": "Propolis",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "propolis"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "royal_jelly",
+   "name_ko": "로열젤리",
+   "name_en": "Royal jelly",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "royal jelly"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "chondroitin",
+   "name_ko": "콘드로이틴",
+   "name_en": "Chondroitin",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "chondroitin sulfate"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "glucosamine",
+   "name_ko": "글루코사민",
+   "name_en": "Glucosamine",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "glucosamine sulfate",
+    "glucosamine hydrochloride",
+    "glucosamine supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "msm",
+   "name_ko": "MSM(식이유황)",
+   "name_en": "MSM",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "methylsulfonylmethane",
+    "msm supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "hyaluronic_acid",
+   "name_ko": "히알루론산",
+   "name_en": "Hyaluronic acid",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "oral hyaluronic acid",
+    "hyaluronan supplementation",
+    "ingested hyaluronic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "deer_antler",
+   "name_ko": "녹용",
+   "name_en": "Deer antler",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "deer antler",
+    "velvet antler",
+    "cervus elaphus antler"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "oyster",
+   "name_ko": "굴추출물",
+   "name_en": "Oyster extract",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "oyster extract",
+    "crassostrea gigas extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "placenta",
+   "name_ko": "태반추출물",
+   "name_en": "Placenta extract",
+   "category": "animal",
+   "category_ko": "동물성 원료",
+   "synonyms": [
+    "placental extract",
+    "placenta extract"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "coq10",
+   "name_ko": "코엔자임Q10",
+   "name_en": "Coenzyme Q10",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "coenzyme q10",
+    "ubiquinol",
+    "ubiquinone supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "alpha_lipoic",
+   "name_ko": "알파리포산",
+   "name_en": "Alpha-lipoic acid",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "alpha-lipoic acid",
+    "thioctic acid"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nmn",
+   "name_ko": "NMN",
+   "name_en": "Nicotinamide mononucleotide",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "nicotinamide mononucleotide"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nr",
+   "name_ko": "니코틴아미드 리보사이드(NR)",
+   "name_en": "Nicotinamide riboside",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "nicotinamide riboside"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "melatonin",
+   "name_ko": "멜라토닌",
+   "name_en": "Melatonin",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "melatonin supplementation",
+    "exogenous melatonin",
+    "oral melatonin"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "caffeine",
+   "name_ko": "카페인",
+   "name_en": "Caffeine",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "caffeine supplementation",
+    "caffeine ingestion",
+    "caffeine intake"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "nattokinase",
+   "name_ko": "나토키나제",
+   "name_en": "Nattokinase",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "nattokinase"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "serrapeptase",
+   "name_ko": "세라펩타제",
+   "name_en": "Serrapeptase",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "serrapeptase",
+    "serratiopeptidase"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "policosanol",
+   "name_ko": "폴리코사놀",
+   "name_en": "Policosanol",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "policosanol",
+    "octacosanol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "red_yeast_rice",
+   "name_ko": "홍국(모나콜린K)",
+   "name_en": "Red yeast rice",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "red yeast rice",
+    "monascus purpureus",
+    "monacolin k"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "spermidine",
+   "name_ko": "스퍼미딘",
+   "name_en": "Spermidine",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "spermidine supplementation",
+    "dietary spermidine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "urolithin_a",
+   "name_ko": "유로리틴A",
+   "name_en": "Urolithin A",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "urolithin a"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "pqq",
+   "name_ko": "PQQ",
+   "name_en": "Pyrroloquinoline quinone",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "pyrroloquinoline quinone"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "same",
+   "name_ko": "SAM-e",
+   "name_en": "S-adenosylmethionine",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "s-adenosylmethionine",
+    "s-adenosyl methionine"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "five_htp",
+   "name_ko": "5-HTP",
+   "name_en": "5-HTP",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "5-hydroxytryptophan",
+    "5-htp"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "dhea",
+   "name_ko": "DHEA",
+   "name_en": "DHEA",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "dehydroepiandrosterone"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "bromelain",
+   "name_ko": "브로멜라인",
+   "name_en": "Bromelain",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "bromelain"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "digestive_enzyme",
+   "name_ko": "소화효소",
+   "name_en": "Digestive enzyme",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "digestive enzyme supplementation",
+    "pancreatic enzyme supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "xylitol",
+   "name_ko": "자일리톨",
+   "name_en": "Xylitol",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "xylitol"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "d_mannose",
+   "name_ko": "디만노스",
+   "name_en": "D-mannose",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "d-mannose"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "apple_cider_vinegar",
+   "name_ko": "애플사이다비니거",
+   "name_en": "Apple cider vinegar",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "apple cider vinegar",
+    "vinegar supplementation"
+   ],
+   "source": "curated"
+  },
+  {
+   "id": "sodium_bicarbonate",
+   "name_ko": "중탄산나트륨",
+   "name_en": "Sodium bicarbonate",
+   "category": "other",
+   "category_ko": "기타 기능성 원료",
+   "synonyms": [
+    "sodium bicarbonate supplementation",
+    "sodium bicarbonate ingestion"
+   ],
+   "source": "curated"
+  }
+ ]
+}
