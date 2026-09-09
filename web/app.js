@@ -9,8 +9,19 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const n = (v) => Number(v || 0).toLocaleString('ko-KR');
 
+/* 이 앱은 두 가지 방식으로 배포된다.
+     server   — FastAPI 가 /api/* 를 서빙 (실시간 조회·전체 논문 페이지네이션 가능)
+     snapshot — 정적 호스팅. snapshot.json 하나만 두고 브라우저가 API 를 흉내 낸다.
+   화면 코드는 둘 다 완전히 동일하다. api() 아래에서만 갈린다. */
+let SNAPSHOT = null;
+
+// GitHub Pages 처럼 하위 경로(/저장소명/)에 올려도 동작하도록 현재 디렉터리 기준.
+const BASE = location.pathname.replace(/[^/]*$/, '');
+const resolve = (p) => BASE + String(p).replace(/^\//, '');
+
 async function api(path) {
-  const res = await fetch(path, { headers: { Accept: 'application/json' } });
+  if (SNAPSHOT) return snapshotRoute(path);
+  const res = await fetch(resolve(path), { headers: { Accept: 'application/json' } });
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const detail = body && body.detail;
@@ -21,6 +32,148 @@ async function api(path) {
     throw err;
   }
   return body;
+}
+
+/* ── 정적 스냅샷 모드 ────────────────────────────────────────────────────── */
+const snorm = (v) => String(v ?? '').normalize('NFKC').trim().toLowerCase();
+
+/** server/queries.py 의 Reference._find 와 같은 점수 규칙. */
+function findIn(index, q, limit) {
+  q = snorm(q);
+  if (!q) return [];
+  const qc = q.replace(/ /g, '');
+  const scores = new Map();
+  for (const [label, key, weight] of index) {
+    let score;
+    if (label === q) score = 100 * weight;
+    else if (label.startsWith(q)) score = 60 * weight;
+    else if (label.includes(q)) score = 30 * weight;
+    else if (q.length >= 3 && label.replace(/ /g, '').includes(qc)) score = 20 * weight;
+    else continue;
+    if (!scores.has(key) || scores.get(key) < score) scores.set(key, score);
+  }
+  return [...scores.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+}
+
+function snapshotRoute(path) {
+  const [rawPath, rawQuery] = path.split('?');
+  const p = new URLSearchParams(rawQuery || '');
+  const S = SNAPSHOT;
+  const seg = rawPath.replace(/^\/api\//, '').split('/').map(decodeURIComponent);
+
+  if (seg[0] === 'meta') {
+    return {
+      corpus_ready: (S.corpus.papers || 0) > 0,
+      corpus: S.corpus,
+      ...S.meta,
+      live_lookup: false,
+      snapshot: true,
+      generated_at: S.generated_at,
+    };
+  }
+
+  if (seg[0] === 'outcomes') {
+    if (seg.length === 1) return { items: S.outcomes };
+    const d = S.outcome_details[seg[1]];
+    if (!d) throw new Error(`알 수 없는 지표 id: ${seg[1]}`);
+    return d;
+  }
+
+  if (seg[0] === 'ingredients') {
+    if (seg.length === 1) return snapshotIngredientList(p);
+    const d = S.ingredient_details[seg[1]];
+    if (!d) throw new Error(`알 수 없는 성분 id: ${seg[1]}`);
+    if (seg[2] === 'papers') return snapshotPapers(d, p);
+    return d;
+  }
+
+  if (seg[0] === 'search') return snapshotSearch(p.get('q') || '');
+
+  if (seg[0] === 'live') {
+    return {
+      available: false,
+      term: p.get('term') || '',
+      reason: '정적 배포에서는 문헌 DB 실시간 조회를 쓸 수 없습니다. '
+            + '서버 배포(FastAPI)로 실행하면 이 기능이 켜집니다.',
+    };
+  }
+  throw new Error(`정적 배포에서 지원하지 않는 경로: ${rawPath}`);
+}
+
+function snapshotIngredientList(p) {
+  const q = p.get('q') || '';
+  const cat = p.get('category') || '';
+  const limit = Number(p.get('limit') || 60);
+  const offset = Number(p.get('offset') || 0);
+
+  let items = SNAPSHOT.ingredients;
+  let order = null;
+  if (q) {
+    const ranked = findIn(SNAPSHOT.search_index.ingredients, q, 400);
+    order = new Map(ranked.map(([id], i) => [id, i]));
+    items = ranked.map(([id]) => items.find((it) => it.id === id)).filter(Boolean);
+  }
+  if (cat) items = items.filter((it) => it.category === cat);
+
+  items = items.slice();
+  if (order) {
+    items.sort((a, b) => (order.get(a.id) - order.get(b.id)) || (b.stats.total - a.stats.total));
+  } else {
+    // 동점은 id(ASCII)로. 서버(queries.ingredient_list)와 같은 순서를 내야 한다.
+    items.sort((a, b) => (b.stats.human - a.stats.human)
+      || (b.stats.total - a.stats.total) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+  return { total: items.length, items: items.slice(offset, offset + limit) };
+}
+
+function snapshotPapers(detail, p) {
+  const outcome = p.get('outcome') || '';
+  const subject = p.get('subject') || '';
+  const study = p.get('study_type') || '';
+  const direction = p.get('direction') || '';
+  const page = Number(p.get('page') || 1);
+  const pageSize = Number(p.get('page_size') || 20);
+
+  let items = (detail.papers || []).filter((x) => {
+    if (outcome && !(x.outcome_ids || []).includes(outcome)) return false;
+    if (subject && x.subject !== subject) return false;
+    if (study && x.study_type !== study) return false;
+    // 지표를 지정하면 그 지표의 방향으로 걸러야 하지만, 스냅샷에는 대표 지표의
+    // 방향만 담겨 있다. 그래서 대표 지표와 일치할 때만 방향 필터를 적용한다.
+    if (direction && x.direction !== direction) return false;
+    return true;
+  });
+  const total = items.length;
+  const start = Math.max(0, (page - 1) * pageSize);
+  return {
+    total, page, page_size: pageSize,
+    items: items.slice(start, start + pageSize),
+    truncated: !!detail.papers_truncated,
+  };
+}
+
+function snapshotSearch(q) {
+  const S = SNAPSHOT;
+  const res = { query: q, ingredients: [], outcomes: [], fulltext: [], mode: 'empty' };
+  if (!q.trim()) return res;
+
+  for (const [id, score] of findIn(S.search_index.ingredients, q, 10)) {
+    const it = S.ingredients.find((x) => x.id === id);
+    if (it) res.ingredients.push({ ...it, score });
+  }
+  for (const [id, score] of findIn(S.search_index.outcomes, q, 5)) {
+    const o = S.outcomes.find((x) => x.id === id);
+    if (o) res.outcomes.push({ ...o, score });
+  }
+  if (res.ingredients.length
+      && (!res.outcomes.length || res.ingredients[0].score >= res.outcomes[0].score)) {
+    res.mode = 'ingredient';
+  } else if (res.outcomes.length) {
+    res.mode = 'outcome';
+  } else {
+    res.mode = 'fulltext';
+  }
+  return res;
 }
 
 const state = {
@@ -112,7 +265,18 @@ function renderAlerts() {
     out.push(`<div class="banner warn"><span class="bt">⚠ 아직 논문을 수집하지 않았습니다</span>
       화면에 표시할 데이터가 없습니다. 저장소에서
       <code>python -m ingest.build all --target 100000</code> 을 실행해 문헌 DB 에서 논문을
-      수집한 뒤 서버를 다시 시작하세요. <b>수집 전에는 어떤 수치도 지어내지 않습니다.</b></div>`);
+      수집하면 이 화면이 실제 데이터로 채워집니다.
+      <b>수집 전에는 어떤 수치도 지어내지 않습니다.</b></div>`);
+  }
+  if (state.meta.snapshot && c.papers > 0) {
+    const built = state.meta.generated_at
+      ? new Date(state.meta.generated_at).toLocaleString('ko-KR') : '';
+    const top = state.meta.snapshot_top_papers;
+    out.push(`<div class="banner warn"><span class="bt">정적 스냅샷으로 보고 있습니다</span>
+      서버 없이 미리 만들어 둔 데이터를 읽는 중입니다${built ? ` (생성 ${esc(built)})` : ''}.
+      성분별 논문은 <b>상위 ${n(top)}건</b>까지만 담겨 있고, 색인에 없는 검색어를 문헌 DB 에
+      실시간 조회하는 기능은 꺼져 있습니다. 전체 논문과 실시간 조회가 필요하면
+      서버 배포로 실행하세요.</div>`);
   }
   if (c.fixture_papers > 0) {
     out.push(`<div class="banner alert"><span class="bt">⚠ 테스트 픽스처가 섞여 있습니다 —
@@ -390,8 +554,11 @@ async function loadPapers(id) {
   });
   try {
     const d = await api(`/api/ingredients/${encodeURIComponent(id)}/papers?` + params);
+    const trunc = d.truncated
+      ? ' <span class="dim">— 정적 스냅샷이라 근거 위계가 높은 상위 일부만 담겨 있습니다.</span>'
+      : '';
     mount.innerHTML = d.items.length
-      ? `<p class="count">조건에 맞는 논문 <b>${n(d.total)}</b>건</p>`
+      ? `<p class="count">조건에 맞는 논문 <b>${n(d.total)}</b>건${trunc}</p>`
         + d.items.map((x) => paperItem(x)).join('')
       : '<div class="empty">이 조건에 맞는 논문이 없습니다.</div>';
     const pages = Math.max(1, Math.ceil(d.total / d.page_size));
@@ -537,11 +704,29 @@ $('#oq-clear').addEventListener('click', () => {
 });
 
 /* ── 시작 ────────────────────────────────────────────────────────────────── */
+/** 서버 API 를 먼저 찾고, 없으면 정적 스냅샷으로 떨어진다. 설정할 것이 없다. */
+async function bootstrap() {
+  try {
+    const res = await fetch(resolve('/api/meta'), { headers: { Accept: 'application/json' } });
+    if (res.ok && (res.headers.get('content-type') || '').includes('json')) {
+      return await res.json();          // 서버 배포
+    }
+  } catch { /* 정적 호스팅에서는 /api/meta 가 없다. 아래로 넘어간다. */ }
+
+  const res = await fetch(resolve('snapshot.json'));
+  if (!res.ok) {
+    throw new Error('서버 API 도 snapshot.json 도 찾지 못했습니다. '
+                  + '`make serve` 로 서버를 띄우거나 `make snapshot` 으로 스냅샷을 만드세요.');
+  }
+  SNAPSHOT = await res.json();          // 정적 배포
+  return snapshotRoute('/api/meta');
+}
+
 (async function init() {
   try {
-    state.meta = await api('/api/meta');
+    state.meta = await bootstrap();
   } catch (e) {
-    $('#alerts').innerHTML = `<div class="banner alert"><span class="bt">서버에 연결하지 못했습니다</span>
+    $('#alerts').innerHTML = `<div class="banner alert"><span class="bt">데이터를 불러오지 못했습니다</span>
       ${esc(e.message)}</div>`;
     return;
   }

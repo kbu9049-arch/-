@@ -46,6 +46,15 @@ def open_db(path=None) -> sqlite3.Connection:
     return conn
 
 
+def require_db() -> sqlite3.Connection:
+    """이미 있는 색인 DB 만 연다. 읽기 전용 명령이 빈 DB 를 새로 만들지 않게 한다."""
+    if not config.DB_PATH.exists():
+        raise SystemExit(
+            f"색인 DB가 없습니다: {config.DB_PATH}\n"
+            "  먼저 논문을 수집하세요:  python -m ingest.build all --target 100000")
+    return open_db()
+
+
 def load_reference() -> tuple[list[dict], list[dict]]:
     ing = json.loads(config.INGREDIENTS_JSON.read_text(encoding="utf-8"))["ingredients"]
     out = json.loads(config.OUTCOMES_JSON.read_text(encoding="utf-8"))["outcomes"]
@@ -404,7 +413,7 @@ def cmd_aggregate(args) -> int:
 
 # ── stats ────────────────────────────────────────────────────────────────────
 def cmd_stats(args) -> int:
-    conn = open_db()
+    conn = require_db()
 
     def q(sql):
         return conn.execute(sql).fetchone()[0]
@@ -461,11 +470,27 @@ def cmd_stats(args) -> int:
 def cmd_export(args) -> int:
     """정적 배포용 JSON 스냅샷. 서버 없이도 프런트를 띄울 수 있다."""
     from server import queries          # 서버와 같은 조회 로직을 쓴다
-    conn = open_db()
+    conn = require_db()
     payload = queries.export_snapshot(conn, top_papers=args.top_papers)
+    corpus = payload["corpus"]
+
+    if not corpus["papers"] and not args.allow_empty:
+        raise SystemExit(
+            "코퍼스가 비어 있어 스냅샷을 만들지 않았습니다.\n"
+            "  그대로 내보내면 백지 사이트가 배포됩니다.\n"
+            "  먼저 수집하세요:  python -m ingest.build all --target 100000\n"
+            "  (의도한 것이라면 --allow-empty)")
+    if corpus.get("fixture_papers") and not args.allow_empty:
+        raise SystemExit(
+            f"합성 테스트 레코드 {corpus['fixture_papers']:,}건이 섞여 있어 스냅샷을 "
+            "만들지 않았습니다.\n  실제 논문이 아니므로 공개 배포하면 안 됩니다.\n"
+            "  (화면 확인 목적이라면 --allow-empty)")
+
     out = config.ROOT / args.path
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"{out} ({out.stat().st_size / 1e6:.1f} MB) — 성분 {len(payload['ingredients'])}종")
+    print(f"{out} ({out.stat().st_size / 1e6:.1f} MB) — "
+          f"성분 {len(payload['ingredients'])}종 · 논문 {corpus['papers']:,}건")
     return 0
 
 
@@ -525,7 +550,10 @@ def main(argv=None) -> int:
 
     sp = sub.add_parser("export", help="정적 배포용 JSON 스냅샷")
     sp.add_argument("path", nargs="?", default="web/snapshot.json")
-    sp.add_argument("--top-papers", type=int, default=8)
+    sp.add_argument("--top-papers", type=int, default=40,
+                    help="성분당 스냅샷에 담을 논문 수 (기본 %(default)s)")
+    sp.add_argument("--allow-empty", action="store_true",
+                    help="빈 코퍼스나 테스트 픽스처도 내보낸다 (공개 배포 금지)")
     sp.set_defaults(func=cmd_export)
 
     args = p.parse_args(argv)

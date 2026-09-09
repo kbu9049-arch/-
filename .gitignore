@@ -13,3 +13,4 @@ web/snapshot.json
 tests/fixtures/sample_papers.jsonl
 *.log
 .DS_Store
+_site/

@@ -1,0 +1,33 @@
+name: 테스트
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt playwright
+      - run: playwright install --with-deps chromium
+
+      - name: 성분 사전이 생성기와 일치하는지
+        run: |
+          python scripts/gen_ingredients.py
+          git diff --exit-code data/ingredients.json
+
+      - name: 분류기 단위 테스트
+        run: python tests/test_classify.py
+
+      - name: 파이프라인 통합 테스트
+        run: python tests/test_pipeline.py
+
+      - name: 정적/서버 동등성 테스트
+        run: python tests/test_parity.py

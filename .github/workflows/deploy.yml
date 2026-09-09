@@ -1,0 +1,127 @@
+# 논문을 수집해 정적 사이트로 GitHub Pages 에 배포한다.
+#
+# GitHub 러너는 Europe PMC / PubMed 에 접속할 수 있으므로, 이 워크플로만 돌리면
+# 로컬에서 아무것도 실행하지 않아도 공개 주소가 있는 사이트가 만들어진다.
+#
+# 처음 쓰기 전에 한 번:
+#   저장소 Settings → Pages → Build and deployment → Source 를 "GitHub Actions" 로.
+# 그다음 Actions 탭에서 "Run workflow" 를 누르면 된다.
+
+name: 논문 수집 후 사이트 배포
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "수집할 고유 논문 수 상한"
+        type: string
+        default: "100000"
+      limit_per_ingredient:
+        description: "성분 하나당 최대 수집 건수"
+        type: string
+        default: "500"
+      filter_profile:
+        description: "질의 필터 (tiered = 근거 수준 높은 논문부터, basic = 필터 없음)"
+        type: choice
+        options: [tiered, basic]
+        default: tiered
+      refresh:
+        description: "저장된 진행 상태를 무시하고 처음부터 다시 수집"
+        type: boolean
+        default: false
+  schedule:
+    # 매월 1일 03:00 UTC — 새 논문을 이어받아 갱신한다 (캐시가 있어 증분).
+    - cron: "0 3 1 * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  harvest-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 이전 실행의 코퍼스를 재사용해 증분 수집한다. 캐시가 없으면 처음부터 받는다.
+      - name: 이전 코퍼스 복원
+        uses: actions/cache@v4
+        with:
+          path: data/evidence.db
+          key: corpus-${{ github.run_id }}
+          restore-keys: corpus-
+
+      - name: API 연결·질의 문법 점검
+        continue-on-error: true
+        run: python -m ingest.build probe
+        env:
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+
+      - name: 논문 수집
+        run: |
+          python -m ingest.build harvest \
+            --target "${{ inputs.target || 100000 }}" \
+            --limit-per-ingredient "${{ inputs.limit_per_ingredient || 500 }}" \
+            --filter-profile "${{ inputs.filter_profile || 'tiered' }}" \
+            ${{ inputs.refresh == true && '--refresh' || '' }}
+        env:
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          RATE_LIMIT_PER_SEC: "3"
+
+      - name: 색인 생성
+        run: python -m ingest.build aggregate
+
+      # 수집이 실패해 빈 DB 로 배포되는 일을 막는다.
+      - name: 코퍼스 검증
+        run: |
+          python - <<'PY'
+          import sqlite3, sys
+          c = sqlite3.connect("data/evidence.db")
+          papers = c.execute("SELECT COUNT(*) FROM papers").fetchone()[0]
+          human  = c.execute("SELECT COUNT(*) FROM papers WHERE subject='human'").fetchone()[0]
+          ings   = c.execute("SELECT COUNT(DISTINCT ingredient_id) FROM paper_ingredient").fetchone()[0]
+          fake   = c.execute("SELECT COUNT(*) FROM papers WHERE source='FIXTURE'").fetchone()[0]
+          print(f"논문 {papers:,} · 사람 대상 {human:,} · 성분 {ings}")
+          if papers < 1000:
+              sys.exit(f"논문이 {papers}건뿐입니다. 수집이 제대로 되지 않았습니다.")
+          if fake:
+              sys.exit(f"합성 테스트 레코드 {fake}건이 섞여 있어 배포를 중단합니다.")
+          if ings < 50:
+              sys.exit(f"논문이 연결된 성분이 {ings}종뿐입니다.")
+          PY
+
+      - name: 정적 스냅샷 생성
+        run: python -m ingest.build export web/snapshot.json --top-papers 40
+
+      - name: 사이트 구성
+        run: |
+          mkdir -p _site
+          cp web/index.html web/style.css web/app.js web/snapshot.json _site/
+          touch _site/.nojekyll
+          ls -la _site
+          echo "스냅샷 크기: $(du -h _site/snapshot.json | cut -f1)"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: 배포 결과
+        run: |
+          echo "### 배포 완료" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "사이트 주소: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          python -m ingest.build stats >> $GITHUB_STEP_SUMMARY

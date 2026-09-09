@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import datetime
 import json
 import re
 import sqlite3
@@ -59,6 +60,13 @@ class Reference:
                 self._out_index.append((norm(a), o["id"], 3))
             for t in o["measures"] + o["terms"]:
                 self._out_index.append((norm(t), o["id"], 1))
+
+    def search_index(self) -> dict[str, list[list]]:
+        """정적 배포용 표기 색인. 브라우저가 서버와 똑같은 검색 규칙을 쓰게 한다."""
+        return {
+            "ingredients": [[lbl, key, w] for lbl, key, w in self._ing_index if lbl],
+            "outcomes": [[lbl, key, w] for lbl, key, w in self._out_index if lbl],
+        }
 
     def find_ingredients(self, q: str, limit: int = 12) -> list[tuple[str, int]]:
         return self._find(self._ing_index, q, limit)
@@ -216,7 +224,9 @@ def ingredient_list(conn, ref: Reference, *, category: str = "", q: str = "",
     elif sort == "name":
         items.sort(key=lambda it: it["name_ko"])
     else:
-        items.sort(key=lambda it: (-it["stats"]["human"], -it["stats"]["total"], it["name_ko"]))
+        # 동점 처리는 id(ASCII)로 한다. 한글 이름으로 정렬하면 파이썬과 브라우저의
+        # 로케일 규칙이 달라 서버 배포와 정적 배포의 목록 순서가 어긋난다.
+        items.sort(key=lambda it: (-it["stats"]["human"], -it["stats"]["total"], it["id"]))
 
     return {"total": len(items), "items": items[offset:offset + limit]}
 
@@ -340,6 +350,13 @@ def ingredient_papers(conn, iid: str, *, outcome: str = "", subject: str = "",
         if direction:
             where.append("po.direction = ?")
             params.append(direction)
+    elif direction:
+        # 지표를 고르지 않았다면 그 논문의 대표 지표(점수 최상위, 동점이면 id 순)
+        # 방향으로 거른다. attach_top_outcome 이 화면에 보여주는 그 방향이다.
+        where.append("""(SELECT po2.direction FROM paper_outcome po2
+                         WHERE po2.paper_id = p.id
+                         ORDER BY po2.score DESC, po2.outcome_id LIMIT 1) = ?""")
+        params.append(direction)
     if subject:
         where.append("p.subject = ?")
         params.append(subject)
@@ -551,14 +568,79 @@ def paper_detail(conn, ref: Reference, pid: int) -> dict | None:
 
 
 # ── 정적 스냅샷 ──────────────────────────────────────────────────────────────
-def export_snapshot(conn, *, top_papers: int = 8) -> dict:
+def _snapshot_papers(conn, iid: str, limit: int) -> list[dict]:
+    """정적 배포용 논문 목록.
+
+    서버가 없으면 페이지네이션 질의를 할 수 없으므로, 성분당 상위 N건을 미리 담고
+    필터링은 브라우저에서 한다. 그래서 각 논문에 그 논문이 분류된 지표 목록을
+    함께 넣는다(지표 필터가 동작해야 하므로).
+    """
+    rows = conn.execute(
+        """SELECT p.* FROM papers p JOIN paper_ingredient pi ON pi.paper_id = p.id
+           WHERE pi.ingredient_id = ?
+           ORDER BY p.retracted ASC, p.evidence_rank DESC, p.cited_by DESC, p.year DESC
+           LIMIT ?""", (iid, limit)).fetchall()
+    items = attach_top_outcome(conn, [paper_row(r, with_evidence=True) for r in rows])
+    if not items:
+        return items
+    ids = [it["id"] for it in items]
+    placeholders = ",".join("?" * len(ids))
+    per: dict[int, list[str]] = {}
+    for r in conn.execute(
+            f"SELECT paper_id, outcome_id FROM paper_outcome WHERE paper_id IN ({placeholders})",
+            ids):
+        per.setdefault(r["paper_id"], []).append(r["outcome_id"])
+    for it in items:
+        it["outcome_ids"] = per.get(it["id"], [])
+    return items
+
+
+def export_snapshot(conn, *, top_papers: int = 40, outcome_limit: int = 100) -> dict:
+    """서버 없이 브라우저만으로 돌아가는 정적 스냅샷.
+
+    web/app.js 가 이 구조를 읽어 /api/* 응답을 그대로 흉내 낸다. 따라서 화면 코드는
+    서버 배포와 정적 배포에서 완전히 동일하다.
+    """
     import ingest.config as cfg
+    from ingest.classify import DIRECTIONS, STUDY_TYPES, SUBJECTS
+
     ingredients = json.loads(cfg.INGREDIENTS_JSON.read_text(encoding="utf-8"))["ingredients"]
     outcomes = json.loads(cfg.OUTCOMES_JSON.read_text(encoding="utf-8"))["outcomes"]
     ref = Reference(ingredients, outcomes)
+
+    ing_details, ing_list = {}, []
+    for iid in ref.ingredients:
+        d = ingredient_detail(conn, ref, iid, top_papers=8)
+        d["papers"] = _snapshot_papers(conn, iid, top_papers)
+        d["papers_truncated"] = d["stats"]["total"] > len(d["papers"])
+        ing_details[iid] = d
+        ing_list.append({
+            "id": iid, "name_ko": d["name_ko"], "name_en": d["name_en"],
+            "category": d["category"], "category_ko": d["category_ko"],
+            "synonyms": d["synonyms"], "stats": d["stats"],
+            "indexed": d["stats"]["total"] > 0,
+        })
+
+    out_details = {oid: outcome_detail(conn, ref, oid, min_human=1, limit=outcome_limit)
+                   for oid in ref.outcomes}
+
     return {
+        "generated_at": datetime.datetime.now(
+            datetime.timezone.utc).isoformat(timespec="seconds"),
         "corpus": corpus_summary(conn),
+        "meta": {
+            "categories": ref.categories,
+            "study_types": {k: v[0] for k, v in STUDY_TYPES.items()},
+            "subjects": SUBJECTS,
+            "directions": DIRECTIONS,
+            "ingredient_count": len(ref.ingredients),
+            "outcome_count": len(ref.outcomes),
+            "snapshot_top_papers": top_papers,
+        },
         "outcomes": outcome_list(conn, ref),
-        "ingredients": [ingredient_detail(conn, ref, iid, top_papers=top_papers)
-                        for iid in ref.ingredients],
+        "outcome_details": out_details,
+        "ingredients": ing_list,
+        "ingredient_details": ing_details,
+        # 검색은 브라우저에서 한다. 서버와 같은 표기 색인을 그대로 넘겨준다.
+        "search_index": ref.search_index(),
     }

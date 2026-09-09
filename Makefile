@@ -2,7 +2,7 @@ PY ?= python3
 PORT ?= 8000
 TARGET ?= 100000
 
-.PHONY: help install probe harvest ingest serve dev stats test clean reset fixture snapshot
+.PHONY: help install probe harvest ingest serve dev stats test clean reset fixture snapshot site
 
 help:
 	@echo "make install    의존성 설치 (웹서버용, 수집은 표준 라이브러리만 사용)"
@@ -13,6 +13,7 @@ help:
 	@echo "make stats      현재 색인 상태 출력"
 	@echo "make test       테스트 실행"
 	@echo "make fixture    테스트용 합성 코퍼스로 화면 확인 (실제 데이터 아님)"
+	@echo "make site       정적 사이트 빌드 → _site/ (그대로 올리면 됨)"
 	@echo "make reset      색인 DB 삭제"
 
 install:
@@ -39,9 +40,19 @@ stats:
 test:
 	$(PY) tests/test_classify.py
 	$(PY) tests/test_pipeline.py
+	$(PY) tests/test_parity.py
 
 snapshot:
-	$(PY) -m ingest.build export web/snapshot.json
+	$(PY) -m ingest.build export web/snapshot.json --top-papers 40
+
+# 서버 없이 어디든 올릴 수 있는 정적 사이트. GitHub Pages, Netlify, Vercel,
+# S3, 심지어 USB 에 넣어도 열린다.
+site: snapshot
+	rm -rf _site && mkdir -p _site
+	cp web/index.html web/style.css web/app.js web/snapshot.json _site/
+	touch _site/.nojekyll
+	@echo "\n_site/ 준비 완료 ($$(du -sh _site | cut -f1))"
+	@echo "확인:  python3 -m http.server -d _site 8080"
 
 # 실제 논문 없이 화면만 확인할 때. 만들어지는 레코드는 전부 합성이며
 # 화면 상단에 빨간 경고가 뜬다.

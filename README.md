@@ -20,8 +20,14 @@
 2. 그렇다고 **가짜 논문 데이터를 채워 넣지는 않았습니다.** 수집 전에는 화면이
    "아직 수집 전"이라고 정직하게 표시합니다.
 
-대신 **한 명령으로 실제 10만 건을 수집하는 파이프라인이 완성되어 있습니다.**
-네트워크가 열린 곳에서 아래를 실행하면 이 사이트가 실데이터로 채워집니다.
+대신 **수집 파이프라인이 완성되어 있습니다.** 두 가지 방법 중 하나를 쓰면 됩니다.
+
+**가장 쉬운 방법 — 아무것도 설치하지 않아도 됩니다.** 저장소 Settings → Pages → Source 를
+`GitHub Actions` 로 바꾼 뒤, Actions 탭에서 **"논문 수집 후 사이트 배포"** 를 실행하세요.
+GitHub 러너가 논문을 수집해 공개 주소가 있는 사이트까지 만들어 줍니다
+(→ [온라인 웹사이트로 올리기](#온라인-웹사이트로-올리기)).
+
+**직접 실행하려면**, 네트워크가 열린 곳에서 아래를 실행하면 이 사이트가 실데이터로 채워집니다.
 
 ```bash
 make install
@@ -208,18 +214,73 @@ python -m ingest.build load-jsonl dump.jsonl          # 내려받아 둔 덤프 
 
 ---
 
-## 배포
+## 온라인 웹사이트로 올리기
+
+두 가지 방법이 있습니다. **A안이 훨씬 쉽고, 논문 수집까지 GitHub이 대신 해 줍니다.**
+
+### A안 — GitHub Pages (무료 · 서버 불필요 · 수집도 자동)
+
+GitHub Actions 러너는 Europe PMC 와 PubMed 에 접속할 수 있습니다. 그래서 **여러분 컴퓨터에서는
+아무것도 실행하지 않아도** 됩니다.
+
+1. 저장소 **Settings → Pages → Source** 를 `GitHub Actions` 로 바꿉니다.
+2. **Actions 탭 → "논문 수집 후 사이트 배포" → Run workflow** 를 누릅니다.
+3. 30~60분 뒤 `https://<사용자명>.github.io/<저장소명>/` 에 사이트가 뜹니다.
+
+워크플로가 하는 일: 논문 수집 → 분류 → 색인 → 정적 스냅샷 생성 → Pages 배포.
+매월 1일에 자동으로 다시 돌아 새 논문을 이어받습니다(캐시가 있어 증분입니다).
+
+빈 사이트가 배포되는 사고를 막기 위해 **검증 단계**를 둡니다 — 논문이 1,000건 미만이거나,
+연결된 성분이 50종 미만이거나, 합성 테스트 레코드가 섞여 있으면 배포를 중단합니다.
+
+로컬에서 정적 사이트를 직접 만들려면:
 
 ```bash
+make site                              # → _site/
+python3 -m http.server -d _site 8080   # 확인
+```
+
+`_site/` 폴더를 Netlify·Vercel·S3 등 아무 정적 호스팅에나 올려도 그대로 동작합니다.
+
+**정적 배포의 제약** — 화면 상단에 자동으로 안내가 뜹니다.
+
+- 성분별 논문은 근거 위계가 높은 **상위 40건**까지만 담깁니다(전체 목록은 서버 배포에서).
+- 색인에 없는 검색어를 문헌 DB 에 **실시간 조회하는 기능은 꺼집니다.**
+- 그 외 성분 검색, 효능 역방향 검색, 지표·연구유형·결과 필터는 **전부 동일하게 동작합니다.**
+  `tests/test_parity.py` 가 정적 모드와 서버 모드가 같은 수치를 내는지 매번 검사합니다.
+
+### B안 — 서버 배포 (실시간 조회 + 전체 논문)
+
+`render.yaml`, `fly.toml`, `Procfile`, `Dockerfile` 이 들어 있습니다.
+
+```bash
+# Fly.io
+fly launch --no-deploy --copy-config
+fly volumes create corpus --size 2
+fly deploy
+fly ssh console -C "python -m ingest.build all --target 100000"
+
+# Render — 대시보드에서 Blueprint 로 render.yaml 을 가리킨 뒤, Shell 에서
+python -m ingest.build all --target 100000
+
+# Docker
 docker build -t ingredient-evidence .
 docker run -v $(pwd)/data:/app/data ingredient-evidence python -m ingest.build all
 docker run -p 8000:8000 -v $(pwd)/data:/app/data ingredient-evidence
 ```
 
-색인 DB 는 이미지에 넣지 않고 볼륨으로 붙입니다. `make snapshot` 으로 JSON 스냅샷을
-뽑으면 서버 없이 정적 호스팅도 가능합니다.
+코퍼스 DB 는 이미지에 넣지 않고 디스크 볼륨에 둡니다. 재배포해도 수집한 논문이 유지됩니다.
 
----
+### 어느 쪽을 고를까
+
+| | GitHub Pages (A) | 서버 배포 (B) |
+|---|---|---|
+| 비용 | 무료 | 유료 (디스크 필요) |
+| 수집 실행 | GitHub 가 대신 | 직접 한 번 실행 |
+| 성분·효능 검색 | ✅ | ✅ |
+| 성분별 논문 | 상위 40건 | 전체 |
+| 실시간 문헌 조회 | ❌ | ✅ |
+| 초록 전문검색 | ❌ | ✅ |
 
 ## 한계
 

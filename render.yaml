@@ -1,0 +1,28 @@
+# Render (https://render.com) 서버 배포 설정.
+#
+# 대시보드에서 Blueprint 로 이 파일을 가리키면 서비스가 만들어진다.
+# 배포 후 논문 수집을 한 번 돌려야 한다 (Shell 탭에서):
+#   python -m ingest.build all --target 100000
+# 디스크가 붙어 있으므로 재배포해도 코퍼스는 유지된다.
+
+services:
+  - type: web
+    name: ingredient-evidence
+    runtime: python
+    plan: starter          # free 플랜에는 디스크를 붙일 수 없다
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    disk:
+      name: corpus
+      mountPath: /var/data
+      sizeGB: 2
+    envVars:
+      - key: EVIDENCE_DB
+        value: /var/data/evidence.db
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: CONTACT_EMAIL
+        sync: false        # 대시보드에서 직접 입력
+      - key: NCBI_API_KEY
+        sync: false
