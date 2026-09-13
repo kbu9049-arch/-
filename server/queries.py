@@ -297,10 +297,11 @@ def ingredient_detail(conn, ref: Reference, iid: str, *, top_papers: int = 8) ->
 def build_summary(ing: dict, st: dict, outcomes: list[dict], papers: list[dict]) -> dict:
     """집계된 숫자만으로 한국어 요약을 만든다. 새로운 주장은 넣지 않는다."""
     if not st["total"]:
+        note = ("색인에 없다는 것은 '효과가 없다'는 뜻이 아니라 "
+                "'이 코퍼스에 수집되지 않았다'는 뜻입니다.")
         return {
             "headline": f"{ing['name_ko']}에 대해 색인된 논문이 아직 없습니다.",
-            "lines": ["색인에 없다는 것은 '효과가 없다'는 뜻이 아니라 "
-                      "'이 코퍼스에 수집되지 않았다'는 뜻입니다."],
+            "lines": [note], "lede": note, "small": [],
         }
     lines = [
         f"색인된 논문 {st['total']:,}건 중 사람 대상 연구는 {st['human']:,}건입니다."
@@ -328,9 +329,32 @@ def build_summary(ing: dict, st: dict, outcomes: list[dict], papers: list[dict])
     if st["retracted"]:
         lines.append(f"철회된 논문 {st['retracted']:,}건은 집계에서 제외했습니다.")
 
+    # 화면 상단에 크게 놓을 한 문단(lede)과, 그 아래 작게 붙일 부속 정보(small).
+    # 논문 총계·사람 대상 수는 표제 숫자와 표에서 이미 보이므로 lede 에서 뺀다.
+    if top:
+        o = top[0]
+        lede = (f"가장 많이 측정된 항목은 {o['label_ko']}입니다. "
+                f"사람 대상 연구 {o['human']:,}건 가운데 "
+                f"유의한 결과를 보고한 논문이 {o['human_significant']:,}건, "
+                f"유의차가 없었던 논문이 {o['human_null']:,}건입니다.")
+    else:
+        lede = "사람 대상 연구에서 분류된 결과지표가 아직 없습니다."
+
+    small = []
+    if st["year_min"] and st["year_max"]:
+        small.append(f"{st['year_min']}–{st['year_max']}")
+    if st["systematic"]:
+        small.append(f"메타분석·체계적 고찰 {st['systematic']:,}")
+    if st["rct"]:
+        small.append(f"무작위대조시험 {st['rct']:,}")
+    if st["preclinical"]:
+        small.append(f"동물·시험관 {st['preclinical']:,}")
+    if st["retracted"]:
+        small.append(f"철회 {st['retracted']:,} (집계 제외)")
+
     headline = (f"{ing['name_ko']}({ing['name_en']}) — 논문 {st['total']:,}건, "
                 f"사람 대상 {st['human']:,}건")
-    return {"headline": headline, "lines": lines,
+    return {"headline": headline, "lines": lines, "lede": lede, "small": small,
             "representative_titles": [p["title"] for p in papers[:3]]}
 
 
