@@ -230,7 +230,6 @@ const LEGEND = `
     <span><i class="sw" style="background:var(--sig)"></i>유의한 결과 보고</span>
     <span><i class="sw" style="background:var(--null)"></i>유의차 없음</span>
     <span><i class="sw" style="background:var(--unclear)"></i>판정 불가</span>
-    <span class="dim">막대 길이 = 사람 대상 연구 건수 (효과 크기가 아님)</span>
   </div>`;
 
 function paperItem(p, { showEvidence = true } = {}) {
@@ -267,16 +266,6 @@ function renderAlerts() {
       <code>python -m ingest.build all --target 100000</code> 을 실행해 문헌 DB 에서 논문을
       수집하면 이 화면이 실제 데이터로 채워집니다.
       <b>수집 전에는 어떤 수치도 지어내지 않습니다.</b></div>`);
-  }
-  if (state.meta.snapshot && c.papers > 0) {
-    const built = state.meta.generated_at
-      ? new Date(state.meta.generated_at).toLocaleString('ko-KR') : '';
-    const top = state.meta.snapshot_top_papers;
-    out.push(`<div class="banner warn"><span class="bt">정적 스냅샷으로 보고 있습니다</span>
-      서버 없이 미리 만들어 둔 데이터를 읽는 중입니다${built ? ` (생성 ${esc(built)})` : ''}.
-      성분별 논문은 <b>상위 ${n(top)}건</b>까지만 담겨 있고, 색인에 없는 검색어를 문헌 DB 에
-      실시간 조회하는 기능은 꺼져 있습니다. 전체 논문과 실시간 조회가 필요하면
-      서버 배포로 실행하세요.</div>`);
   }
   if (c.fixture_papers > 0) {
     out.push(`<div class="banner alert"><span class="bt">⚠ 테스트 픽스처가 섞여 있습니다 —
@@ -385,7 +374,7 @@ async function loadIngredients({ append = false } = {}) {
       </div>`;
     $('#ing-count').innerHTML = state.query
       ? `“<b>${esc(state.query)}</b>” 검색 결과 <b>${n(state.total)}</b>종`
-      : `<b>${n(state.total)}</b>종의 성분 — 사람 대상 연구가 많은 순`;
+      : `<b>${n(state.total)}</b>종의 성분`;
     $('#ing-more').hidden = state.items.length >= state.total;
   } catch (e) {
     $('#ing-list').innerHTML = `<div class="empty"><b>${esc(e.message)}</b></div>`;
@@ -603,8 +592,7 @@ async function renderOutcome(id) {
   box.innerHTML = `
     <button class="back" data-back>← 항목 목록으로</button>
     <h2 style="margin-top:0">${esc(d.label_ko)} <span class="en">${esc(d.label_en)}</span></h2>
-    <div class="note"><b>${esc(d.note)}</b><br>
-      이 항목으로 분류하는 데 쓰는 대표 측정지표: ${d.measures.map(esc).join(', ')}</div>
+    <div class="note"><b>${esc(d.note)}</b></div>
     ${LEGEND}
     ${d.ingredients.length ? d.ingredients.map((i) => `
       <div class="orow">
