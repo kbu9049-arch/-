@@ -2,126 +2,147 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>성분 근거 찾기</title>
 <meta name="description" content="광고에서 본 성분에 어떤 연구가 얼마나 있는지, 반대로 원하는 효능을 측정한 성분은 무엇인지 논문 원문 링크와 함께 찾아봅니다.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;500;700&family=Gothic+A1:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
 </head>
 <body>
-<div class="wrap">
 
-  <header class="top">
-    <div class="brand">
-      <h1 class="wordmark">성분 근거 찾기</h1>
-      <span class="tagline">광고에서 본 성분, 논문은 뭐라고 하나</span>
-    </div>
-    <button id="theme-toggle" type="button" aria-label="화면 밝기 전환">밝기</button>
-  </header>
+<!-- 상단 고정 바 -->
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <button class="brand" type="button" data-home>성분 근거 찾기</button>
+    <nav class="tabs" role="tablist" aria-label="주요 화면">
+      <span class="tab-underline" aria-hidden="true"></span>
+      <button class="tab" id="tab-ingredient" role="tab" aria-selected="true"
+              aria-controls="panel-ingredient">성분</button>
+      <button class="tab" id="tab-outcome" role="tab" aria-selected="false"
+              aria-controls="panel-outcome">효능</button>
+      <button class="tab" id="tab-about" role="tab" aria-selected="false"
+              aria-controls="panel-about">데이터</button>
+    </nav>
+    <button id="theme-toggle" type="button" aria-label="화면 밝기 전환">
+      <svg viewBox="0 0 24 24" aria-hidden="true" width="17" height="17">
+        <path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M18.4 5.6l-1.1 1.1M6.7 17.3l-1.1 1.1"/>
+        <circle cx="12" cy="12" r="4"/>
+      </svg>
+    </button>
+  </div>
+</header>
 
+<main class="wrap">
   <div id="alerts"></div>
 
-  <div class="stats" id="corpus-stats"></div>
-
-  <div class="tabs" role="tablist">
-    <span class="tab-underline" aria-hidden="true"></span>
-    <button class="tab" id="tab-ingredient" role="tab" aria-selected="true"
-            aria-controls="panel-ingredient">성분으로 찾기</button>
-    <button class="tab" id="tab-outcome" role="tab" aria-selected="false"
-            aria-controls="panel-outcome">효능으로 찾기</button>
-    <button class="tab" id="tab-about" role="tab" aria-selected="false"
-            aria-controls="panel-about">데이터 출처</button>
-  </div>
-
-  <!-- 성분으로 찾기 ------------------------------------------------------- -->
+  <!-- 성분 -->
   <section id="panel-ingredient" role="tabpanel" aria-labelledby="tab-ingredient">
     <div id="ingredient-search">
-      <div class="sbox">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-        <input id="q" type="search" autocomplete="off" spellcheck="false"
-               placeholder="홍삼, 루테인, 밀크씨슬, omega-3 …"
-               aria-label="성분 검색" aria-describedby="ing-count">
-        <button class="clear" id="q-clear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+      <div class="hero">
+        <h1 class="hero-title">광고에서 본 그 성분,<br>논문은 뭐라고 하나.</h1>
+        <p class="hero-sub">어떤 항목을 측정한 연구가 몇 건이고 결과가 어떻게 갈렸는지,
+          논문 원문 링크와 함께 보여드립니다.</p>
+        <div class="sbox">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input id="q" type="search" autocomplete="off" spellcheck="false"
+                 placeholder="홍삼, 루테인, 밀크씨슬, omega-3" aria-label="성분 검색"
+                 aria-describedby="ing-count">
+          <button class="clear" id="q-clear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+        </div>
       </div>
+
+      <div class="stats" id="corpus-stats"></div>
+
       <div class="chips" id="cat-chips"></div>
       <p class="count" id="ing-count" role="status" aria-live="polite"></p>
       <div id="ing-list"></div>
-      <div class="btnrow"><button class="btn" id="ing-more" hidden>더 보기</button></div>
+      <div class="btnrow center"><button class="btn" id="ing-more" hidden>더 보기</button></div>
     </div>
     <div id="ingredient-detail" hidden></div>
   </section>
 
-  <!-- 효능으로 찾기 ------------------------------------------------------- -->
+  <!-- 효능 -->
   <section id="panel-outcome" role="tabpanel" aria-labelledby="tab-outcome" hidden>
     <div id="outcome-browse">
-      <div class="sbox">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-        <input id="oq" type="search" autocomplete="off" spellcheck="false"
-               placeholder="혈당, 수면, 탈모, 관절, 피로 …" aria-label="효능 검색">
-        <button class="clear" id="oq-clear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+      <div class="hero">
+        <h1 class="hero-title">찾는 효능이<br>먼저라면.</h1>
+        <p class="hero-sub">측정 항목을 고르면 그 항목을 실제로 측정한
+          사람 대상 연구가 있는 성분이 나옵니다.</p>
+        <div class="sbox">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input id="oq" type="search" autocomplete="off" spellcheck="false"
+                 placeholder="혈당, 수면, 탈모, 관절, 피로" aria-label="효능 검색">
+          <button class="clear" id="oq-clear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+        </div>
       </div>
-      <p class="count">측정 항목을 고르면, 그 항목을 실제로 측정한 사람 대상 연구가 있는 성분이 나옵니다.</p>
-      <div class="kicker" style="margin:22px 0 12px">측정 항목</div>
       <div class="ogrid" id="o-grid"></div>
     </div>
     <div id="outcome-detail" hidden></div>
   </section>
 
-  <!-- 데이터 출처 --------------------------------------------------------- -->
+  <!-- 데이터 -->
   <section id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
-    <h2>이 화면의 숫자는 어디서 왔나</h2>
-    <p>모든 논문 메타데이터는 아래 공개 문헌 데이터베이스의 API 응답을 그대로 저장한 것입니다.
-       화면의 모든 건수는 저장된 논문 레코드를 실제로 센 값이며, 추정하거나 보정한 값은 없습니다.</p>
-    <ul>
-      <li><a href="https://europepmc.org/RestfulWebService" target="_blank" rel="noopener">Europe PMC Articles RESTful API</a>
-          — 기본 수집 경로. 제목·초록·MeSH·publication type·피인용 수를 받습니다.</li>
-      <li><a href="https://www.ncbi.nlm.nih.gov/books/NBK25501/" target="_blank" rel="noopener">NCBI E-utilities (PubMed)</a>
-          — 대체 수집 경로.</li>
-      <li>논문 링크는 PMID 가 있으면 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a> 원문으로 연결됩니다.</li>
-    </ul>
+    <div class="hero left">
+      <h1 class="hero-title">숫자는<br>어디서 왔나.</h1>
+      <p class="hero-sub">모든 논문 메타데이터는 공개 문헌 데이터베이스의 API 응답을 그대로 저장한 것입니다.
+        화면의 모든 건수는 저장된 논문 레코드를 실제로 센 값이며, 추정하거나 보정한 값은 없습니다.</p>
+    </div>
 
-    <h3>성분 목록과 결과지표는 어떻게 정했나</h3>
-    <p>성분 한글명·분류는 국내에서 통용되는 건강기능식품 원료명을 기준으로 <b>직접 정리한 편집 자료</b>입니다.
-       다만 문헌 검색과 논문–성분 연결은 <b>영문 검색어로만</b> 이루어지므로, 화면에 표시되는 논문 수치 자체는
-       한글명 선택과 무관하게 문헌 DB 응답에서만 나옵니다.
-       결과지표(30종)는 MeSH 표준 용어와 각 분야의 표준 측정도구(PSQI, WOMAC, IPSS, HOMA-IR 등)를 기준으로 구성했습니다.</p>
+    <div class="prose">
+      <h2>문헌 출처</h2>
+      <ul>
+        <li><a href="https://europepmc.org/RestfulWebService" target="_blank" rel="noopener">Europe PMC Articles RESTful API</a>
+            — 기본 수집 경로. 제목·초록·MeSH·publication type·피인용 수를 받습니다.</li>
+        <li><a href="https://www.ncbi.nlm.nih.gov/books/NBK25501/" target="_blank" rel="noopener">NCBI E-utilities (PubMed)</a>
+            — 대체 수집 경로.</li>
+        <li>논문 링크는 PMID 가 있으면 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a> 원문으로 연결됩니다.</li>
+      </ul>
 
-    <h3>연구유형·결과방향은 어떻게 판정하나</h3>
-    <p>초록 문구에 대한 <b>규칙 기반 자동 분류</b>입니다. 학습된 모델이 판단을 내리는 것이 아니라,
-       공개된 규칙이 초록의 특정 표현을 찾아 분류합니다. 그래서 모든 판정에는
-       <b>근거가 된 초록 문장</b>이 함께 붙습니다 — 화면에서 직접 확인하고 원문과 대조할 수 있습니다.</p>
-    <p>결과 방향은 “효과 있음/없음”이 아니라 다음 세 가지로만 구분합니다.</p>
-    <ul>
-      <li><b>유의한 결과 보고</b> — 그 논문이 통계적으로 유의한 결과를 보고했습니다.
-          개선인지 악화인지, 임상적으로 의미 있는 크기인지는 판정하지 않습니다.</li>
-      <li><b>유의차 없음</b> — 위약·대조군 대비 유의한 차이가 관찰되지 않았습니다.</li>
-      <li><b>판정 불가</b> — 초록 문구만으로는 어느 쪽인지 판단할 수 없습니다.</li>
-    </ul>
+      <h2>성분 목록과 결과지표</h2>
+      <p>성분 한글명·분류는 국내에서 통용되는 건강기능식품 원료명을 기준으로 <b>직접 정리한 편집 자료</b>입니다.
+        다만 문헌 검색과 논문–성분 연결은 <b>영문 검색어로만</b> 이루어지므로, 화면에 표시되는 논문 수치 자체는
+        한글명 선택과 무관하게 문헌 DB 응답에서만 나옵니다.
+        결과지표 30종은 MeSH 표준 용어와 각 분야의 표준 측정도구(PSQI, WOMAC, IPSS, HOMA-IR 등)를 기준으로 구성했습니다.</p>
 
-    <h3>읽을 때 주의할 점</h3>
-    <ul>
-      <li><b>연구가 없다 ≠ 효과가 없다.</b> 색인에 논문이 없다는 것은 아직 연구되지 않았거나
-          수집되지 않았다는 뜻입니다.</li>
-      <li><b>출판 편향.</b> 효과가 없다는 결과는 상대적으로 덜 출판되는 경향이 있어,
-          유의한 결과의 비율이 실제보다 높게 보일 수 있습니다.</li>
-      <li><b>건수는 근거의 질이 아닙니다.</b> 논문 100건보다 잘 설계된 대규모 RCT 1건이
-          더 강한 근거일 수 있습니다. 연구 유형을 함께 보세요.</li>
-      <li><b>철회된 논문</b>은 별도로 표시하고 집계에서 제외합니다.</li>
-    </ul>
-    <div id="about-corpus"></div>
+      <h2>어떻게 판정하나</h2>
+      <p>초록 문구에 대한 <b>규칙 기반 자동 분류</b>입니다. 학습된 모델이 판단을 내리는 것이 아니라,
+        공개된 규칙이 초록의 특정 표현을 찾아 분류합니다. 그래서 모든 판정에는
+        <b>근거가 된 초록 문장</b>이 함께 붙습니다.</p>
+      <p>결과 방향은 “효과 있음/없음”이 아니라 다음 세 가지로만 구분합니다.</p>
+      <ul>
+        <li><b>유의한 결과 보고</b> — 그 논문이 통계적으로 유의한 결과를 보고했습니다.
+            개선인지 악화인지, 임상적으로 의미 있는 크기인지는 판정하지 않습니다.</li>
+        <li><b>유의차 없음</b> — 위약·대조군 대비 유의한 차이가 관찰되지 않았습니다.</li>
+        <li><b>판정 불가</b> — 초록 문구만으로는 어느 쪽인지 판단할 수 없습니다.</li>
+      </ul>
+
+      <h2>읽을 때 주의할 점</h2>
+      <ul>
+        <li><b>연구가 없다 ≠ 효과가 없다.</b> 색인에 논문이 없다는 것은 아직 연구되지 않았거나
+            수집되지 않았다는 뜻입니다.</li>
+        <li><b>출판 편향.</b> 효과가 없다는 결과는 상대적으로 덜 출판되는 경향이 있어,
+            유의한 결과의 비율이 실제보다 높게 보일 수 있습니다.</li>
+        <li><b>건수는 근거의 질이 아닙니다.</b> 논문 100건보다 잘 설계된 대규모 RCT 1건이
+            더 강한 근거일 수 있습니다.</li>
+        <li><b>철회된 논문</b>은 별도로 표시하고 집계에서 제외합니다.</li>
+      </ul>
+
+      <div id="about-corpus"></div>
+    </div>
   </section>
 
   <footer>
     <span id="footer-build"></span>
-    문헌 메타데이터:
+    문헌 메타데이터
     <a href="https://europepmc.org/RestfulWebService" target="_blank" rel="noopener">Europe PMC</a> ·
     <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed·NLM</a><br>
     이 화면은 의학적 조언이 아닙니다. 질병의 진단·치료·예방을 목적으로 사용할 수 없습니다.
   </footer>
-</div>
+</main>
+
 <script src="app.js"></script>
 </body>
 </html>
