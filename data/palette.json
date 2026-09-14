@@ -1,0 +1,164 @@
+{
+  "categories": {
+    "amino": {
+      "ko": "아미노산·단백질",
+      "hue": 15
+    },
+    "carotenoid": {
+      "ko": "카로티노이드",
+      "hue": 48
+    },
+    "vitamin": {
+      "ko": "비타민",
+      "hue": 80
+    },
+    "fiber": {
+      "ko": "식이섬유·유산균",
+      "hue": 113
+    },
+    "herb": {
+      "ko": "약용식물·허브",
+      "hue": 146
+    },
+    "algae": {
+      "ko": "해조류·미세조류",
+      "hue": 179
+    },
+    "mineral": {
+      "ko": "미네랄",
+      "hue": 211
+    },
+    "fatty_acid": {
+      "ko": "지방산·지질",
+      "hue": 244
+    },
+    "polyphenol": {
+      "ko": "폴리페놀·플라보노이드",
+      "hue": 277
+    },
+    "mushroom": {
+      "ko": "버섯",
+      "hue": 310
+    },
+    "animal": {
+      "ko": "동물성 원료",
+      "hue": 342
+    },
+    "other": {
+      "ko": "기타 기능성 원료",
+      "hue": 250
+    }
+  },
+  "outcome_families": {
+    "metabolic": {
+      "ko": "혈액·대사",
+      "hue": 22,
+      "outcomes": [
+        "lipid",
+        "glucose",
+        "blood_pressure",
+        "weight",
+        "blood_flow",
+        "cardio_event",
+        "anemia"
+      ]
+    },
+    "organ": {
+      "ko": "소화·간·콩팥",
+      "hue": 68,
+      "outcomes": [
+        "liver",
+        "gut",
+        "kidney"
+      ]
+    },
+    "defense": {
+      "ko": "면역·염증",
+      "hue": 112,
+      "outcomes": [
+        "inflammation",
+        "oxidative",
+        "immune",
+        "allergy"
+      ]
+    },
+    "breath": {
+      "ko": "호흡기",
+      "hue": 158,
+      "outcomes": [
+        "respiratory"
+      ]
+    },
+    "mind": {
+      "ko": "뇌·마음",
+      "hue": 205,
+      "outcomes": [
+        "cognition",
+        "mood",
+        "sleep",
+        "fatigue"
+      ]
+    },
+    "movement": {
+      "ko": "근육·뼈·관절",
+      "hue": 250,
+      "outcomes": [
+        "muscle",
+        "joint",
+        "bone"
+      ]
+    },
+    "surface": {
+      "ko": "피부·머리·눈·입",
+      "hue": 295,
+      "outcomes": [
+        "skin",
+        "hair",
+        "eye",
+        "oral"
+      ]
+    },
+    "hormone": {
+      "ko": "호르몬·비뇨생식",
+      "hue": 338,
+      "outcomes": [
+        "menopause",
+        "prostate",
+        "sexual",
+        "thyroid"
+      ]
+    }
+  },
+  "outcome_family_of": {
+    "lipid": "metabolic",
+    "glucose": "metabolic",
+    "blood_pressure": "metabolic",
+    "weight": "metabolic",
+    "blood_flow": "metabolic",
+    "cardio_event": "metabolic",
+    "anemia": "metabolic",
+    "liver": "organ",
+    "gut": "organ",
+    "kidney": "organ",
+    "inflammation": "defense",
+    "oxidative": "defense",
+    "immune": "defense",
+    "allergy": "defense",
+    "respiratory": "breath",
+    "cognition": "mind",
+    "mood": "mind",
+    "sleep": "mind",
+    "fatigue": "mind",
+    "muscle": "movement",
+    "joint": "movement",
+    "bone": "movement",
+    "skin": "surface",
+    "hair": "surface",
+    "eye": "surface",
+    "oral": "surface",
+    "menopause": "hormone",
+    "prostate": "hormone",
+    "sexual": "hormone",
+    "thyroid": "hormone"
+  }
+}

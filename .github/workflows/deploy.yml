@@ -111,7 +111,8 @@ jobs:
       - name: 사이트 구성
         run: |
           mkdir -p _site
-          cp web/index.html web/style.css web/app.js _site/
+          python scripts/gen_colors.py
+          cp web/index.html web/colors.css web/style.css web/app.js _site/
           python -m ingest.build export _site/data
           touch _site/.nojekyll
           echo "전체 $(du -sh _site | cut -f1) · 첫 화면에서 받는 색인 $(du -h _site/data/index.json | cut -f1)"

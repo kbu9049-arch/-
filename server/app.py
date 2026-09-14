@@ -62,6 +62,7 @@ def api_meta():
     payload = {
         "corpus_ready": corpus_ready(),
         "categories": REF.categories,
+        "outcome_families": REF.families,
         "study_types": {k: v[0] for k, v in STUDY_TYPES.items()},
         "subjects": SUBJECTS,
         "directions": DIRECTIONS,

@@ -1,9 +1,14 @@
 /* 성분 근거 찾기
-   큰 타이포와 넓은 여백, 서체 하나로 위계를 만드는 방식.
-   색은 거의 쓰지 않고, 데이터를 구분해야 하는 곳에만 쓴다.
+   큰 타이포와 넓은 여백으로 위계를 만들고, 그 위에 색을 얹는다.
 
-   결과 방향 3색은 '좋음/나쁨'이 아니라 서로 다른 결과 범주다.
-   색만으로 구분되지 않도록 모든 막대에 숫자와 텍스트 라벨을 함께 둔다. */
+   색은 두 갈래로 나뉜다.
+   1) 이름표 색 — 성분 분류 12종과 측정 항목 8계열. 어디를 보고 있는지
+      알려 주는 길잡이일 뿐, 색에 뜻이 없다. 언제나 한글 이름이 함께 붙는다.
+   2) 뜻이 있는 색 — 결과 방향 3색(--sig/--null/--unclear).
+      '좋음/나쁨'이 아니라 서로 다른 결과 범주이며, 색만으로 구분되지 않도록
+      모든 막대에 숫자와 글자 라벨을 함께 둔다.
+
+   실제 색값과 그 근거는 colors.css 머리말에 적어 두었다. */
 
 :root {
   color-scheme: light;
@@ -19,9 +24,11 @@
   --accent:#0a63ce;
   --accent-2:#0850a8;
 
-  --sig:#2f6fd0;           /* 유의한 결과 보고 */
-  --null:#c9633a;          /* 유의차 없음 */
-  --unclear:#c2c2ca;       /* 판정 불가 */
+  /* 결과 방향 3색(--sig/--null/--unclear)과 분류 색은 colors.css 가 만든다. */
+
+  /* 분류 색이 지정되지 않은 곳의 기본값. data-cat/data-fam 이 붙으면 덮인다. */
+  --tone:var(--ink); --tone-bg:var(--bg-2); --tone-edge:var(--line);
+  --tone-v:var(--accent); --tone-v2:var(--accent-2);
 
   --warnbg:#fff8e6; --warnbd:#c99700; --warnink:#5f4600;
   --alertbg:#fdeeec; --alertbd:#c8402a; --alertink:#8a2416;
@@ -47,7 +54,6 @@
     --ink:#f5f5f7; --ink-2:#9d9da6; --ink-3:#6e6e78;
     --line:rgba(255,255,255,.13); --line-2:rgba(255,255,255,.075);
     --accent:#4d9bff; --accent-2:#7bb5ff;
-    --sig:#5b9af0; --null:#e2895c; --unclear:#55555e;
     --warnbg:#2a2205; --warnbd:#c99700; --warnink:#f2dda1;
     --alertbg:#2c110d; --alertbd:#e0644a; --alertink:#f4b7a9;
     --nav-bg:rgba(0,0,0,.66);
@@ -61,7 +67,6 @@
   --ink:#f5f5f7; --ink-2:#9d9da6; --ink-3:#6e6e78;
   --line:rgba(255,255,255,.13); --line-2:rgba(255,255,255,.075);
   --accent:#4d9bff; --accent-2:#7bb5ff;
-  --sig:#5b9af0; --null:#e2895c; --unclear:#55555e;
   --warnbg:#2a2205; --warnbd:#c99700; --warnink:#f2dda1;
   --alertbg:#2c110d; --alertbd:#e0644a; --alertink:#f4b7a9;
   --nav-bg:rgba(0,0,0,.66);
@@ -72,6 +77,9 @@
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
 body {
+  /* 오로라가 화면 밖까지 번지므로 가로로만 잘라 낸다. clip 은 hidden 과 달리
+     스크롤 상자를 만들지 않아, 상단 고정 바가 그대로 붙어 있는다. */
+  overflow-x:clip;
   margin:0; background:var(--bg); color:var(--ink);
   font:400 17px/1.62 var(--font);
   letter-spacing:-.011em;
@@ -96,7 +104,17 @@ p { margin:0 0 16px; }
   border-bottom:1px solid transparent;
   transition:border-color var(--t) var(--ease-io);
 }
-.nav.scrolled { border-bottom-color:var(--line); }
+.nav.scrolled { border-bottom-color:transparent; }
+/* 스크롤하면 상단 바 아래에 분류 색을 이어 붙인 가는 선이 나타난다. */
+.nav::after {
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:linear-gradient(90deg,
+    var(--c-amino-vivid), var(--c-carotenoid-vivid), var(--c-vitamin-vivid),
+    var(--c-herb-vivid), var(--c-algae-vivid), var(--c-mineral-vivid),
+    var(--c-fatty_acid-vivid), var(--c-polyphenol-vivid), var(--c-animal-vivid));
+  opacity:0; transition:opacity var(--t) var(--ease-io);
+}
+.nav.scrolled::after { opacity:.85; }
 /* 블러를 못 쓰는 브라우저에서는 반투명 배경만 남아 뒤 글자가 비친다. 불투명으로 바꾼다. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
   .nav { background:var(--bg); }
@@ -119,7 +137,8 @@ p { margin:0 0 16px; }
        transition:color var(--t-fast) var(--ease-io); }
 .tab:hover { color:var(--ink); }
 .tab[aria-selected="true"] { color:var(--ink); font-weight:500; }
-.tab-underline { position:absolute; bottom:0; height:2px; background:var(--ink);
+.tab-underline { position:absolute; bottom:0; height:2.5px;
+                 background:linear-gradient(90deg,var(--c-fatty_acid-vivid),var(--c-polyphenol-vivid));
                  border-radius:2px; pointer-events:none;
                  transition:transform var(--t) var(--ease), width var(--t) var(--ease); }
 
@@ -138,6 +157,47 @@ h2 { font-size:clamp(26px,3.4vw,40px); font-weight:650; letter-spacing:-.028em;
 h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px; }
 
 /* ── 히어로 ───────────────────────────────────────────────────────────── */
+/* 화면마다 다른 색이 은은하게 깔린다. 글자 뒤에서만 움직이므로 읽는 데 지장이 없다. */
+.hero, .detail-head {
+  position:relative; isolation:isolate;
+  --a1:var(--c-fatty_acid-vivid); --a2:var(--c-polyphenol-vivid);
+  --a3:var(--c-algae-vivid);      --a4:var(--c-carotenoid-vivid);
+}
+#panel-outcome .hero { --a1:var(--c-mind-vivid); --a2:var(--c-hormone-vivid);
+                       --a3:var(--c-defense-vivid); --a4:var(--c-metabolic-vivid); }
+#panel-about   .hero { --a1:var(--c-mineral-vivid); --a2:var(--c-mushroom-vivid);
+                       --a3:var(--c-fiber-vivid); --a4:var(--c-other-vivid); }
+/* 상세 화면에서는 그 성분·항목 자신의 색으로 깔린다. */
+[data-cat] > .detail-head, [data-fam] > .detail-head {
+  --a1:var(--tone-v); --a2:var(--tone-v2); --a3:var(--tone-v2); --a4:var(--tone-v);
+}
+.hero::before, .detail-head::before {
+  content:""; position:absolute; z-index:-1; pointer-events:none;
+  left:50%; translate:-50% 0; width:min(1500px,132vw);
+  top:calc(-1 * var(--nav-h) - 40px); bottom:-30px;
+  background:
+    radial-gradient(44% 48% at 14% 28%, color-mix(in srgb, var(--a1) 62%, transparent), transparent 70%),
+    radial-gradient(40% 46% at 84% 16%, color-mix(in srgb, var(--a2) 56%, transparent), transparent 70%),
+    radial-gradient(48% 44% at 68% 80%, color-mix(in srgb, var(--a3) 48%, transparent), transparent 70%),
+    radial-gradient(38% 42% at 26% 86%, color-mix(in srgb, var(--a4) 44%, transparent), transparent 70%);
+  filter:blur(26px) saturate(125%);
+  opacity:.62;
+  -webkit-mask-image:linear-gradient(180deg,#000 62%,transparent);
+  mask-image:linear-gradient(180deg,#000 62%,transparent);
+}
+:root[data-theme="dark"] .hero::before, :root[data-theme="dark"] .detail-head::before { opacity:.5; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero::before,
+  :root:not([data-theme="light"]) .detail-head::before { opacity:.5; }
+}
+@keyframes drift {
+  from { transform:translate3d(-2%,-1%,0) scale(1.02) rotate(-1.4deg); }
+  to   { transform:translate3d(2%,2%,0)   scale(1.09) rotate(1.4deg); }
+}
+html.anim .hero::before, html.anim .detail-head::before {
+  animation:drift 30s var(--ease-io) infinite alternate;
+}
+
 .hero { padding:clamp(56px,9vw,116px) 0 clamp(40px,6vw,68px); text-align:center; }
 .hero.left { text-align:left; }
 .hero-title { font-size:clamp(38px,6.6vw,74px); font-weight:700; letter-spacing:-.04em;
@@ -161,9 +221,10 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
              box-shadow var(--t) var(--ease-io);
 }
 .sbox input::placeholder { color:var(--ink-3); }
-.sbox input:focus { background:var(--bg); border-color:var(--line);
-                    box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
-.sbox:focus-within svg { stroke:var(--ink-2); }
+.sbox input:focus { background:var(--bg); border-color:transparent;
+                    box-shadow:0 0 0 3px color-mix(in srgb, var(--sig) 26%, transparent),
+                               0 8px 26px color-mix(in srgb, var(--sig) 18%, transparent); }
+.sbox:focus-within svg { stroke:var(--sig); }
 .sbox input::-webkit-search-cancel-button { -webkit-appearance:none; appearance:none; }
 .sbox .clear { position:absolute; right:14px; border:0; background:none; color:var(--ink-3);
                font-size:24px; line-height:1; cursor:pointer; padding:4px 8px; border-radius:8px;
@@ -173,9 +234,16 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 /* ── 수치 줄 ──────────────────────────────────────────────────────────── */
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
          gap:12px; margin:0 0 56px; }
-.stat { background:var(--bg-2); border-radius:18px; padding:24px 22px; text-align:center; }
+.stat { position:relative; overflow:hidden; border-radius:18px; padding:24px 22px;
+        text-align:center; background:var(--tone-bg);
+        transition:transform var(--t) var(--ease), box-shadow var(--t) var(--ease); }
+/* 타일 위쪽에 제 색 띠를 하나 두르고, 안쪽에 같은 색을 아주 옅게 깔았다. */
+.stat::before { content:""; position:absolute; inset:0 0 auto; height:3px;
+                background:linear-gradient(90deg,var(--tone-v),var(--tone-v2)); }
+.stat:hover { transform:translateY(-3px);
+              box-shadow:0 10px 30px color-mix(in srgb, var(--tone-v) 24%, transparent); }
 .stat .v { font-size:clamp(26px,3vw,34px); font-weight:650; letter-spacing:-.032em;
-           line-height:1.1; font-variant-numeric:tabular-nums; }
+           line-height:1.1; font-variant-numeric:tabular-nums; color:var(--tone); }
 .stat .k { color:var(--ink-2); font-size:13.5px; margin-top:6px; letter-spacing:-.008em; }
 
 /* ── 알림 ─────────────────────────────────────────────────────────────── */
@@ -199,6 +267,23 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 .chip:hover { background:var(--bg-3); color:var(--ink); }
 .chip:active { transform:scale(.95); }
 .chip[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+
+/* 분류가 있는 칩은 그 분류의 색을 입는다. 고른 칩은 색을 꽉 채운다.
+   글자색으로 --bg 를 쓰므로 밝은 화면에서는 흰 글자, 어두운 화면에서는
+   검은 글자가 되어 어느 쪽에서도 4.5:1 을 넘는다. */
+.chip[data-cat]:not([data-cat=""]) { background:var(--tone-bg); color:var(--tone); }
+.chip[data-cat]:not([data-cat=""]):hover {
+  box-shadow:inset 0 0 0 1.5px var(--tone-edge); }
+.chip[data-cat]:not([data-cat=""])[aria-pressed="true"] {
+  background:var(--tone); color:var(--bg); box-shadow:none; }
+@keyframes pop { 0%{transform:scale(1)} 45%{transform:scale(1.07)} 100%{transform:scale(1)} }
+html.anim .chip[aria-pressed="true"] { animation:pop 320ms var(--ease); }
+
+/* 분류 이름표. 성분 목록과 역방향 목록 양쪽에서 쓴다. */
+.ctag { display:inline-block; background:var(--tone-bg); color:var(--tone);
+        border-radius:999px; padding:3px 10px; margin-right:8px;
+        font-size:12.5px; font-weight:500; letter-spacing:-.004em; white-space:nowrap; }
+.ctag.sm { font-size:11.5px; padding:2px 8px; margin:0 0 0 6px; }
 .chips > b { display:none; }
 
 :focus-visible { outline:3px solid color-mix(in srgb, var(--accent) 55%, transparent);
@@ -210,23 +295,34 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
         width:100%; text-align:left; font:inherit; color:inherit; background:none;
         border:0; border-bottom:1px solid var(--line-2); padding:22px 4px; cursor:pointer;
         transition:background var(--t) var(--ease-io); border-radius:12px; }
-.card:hover { background:var(--bg-2); }
+.card { position:relative; }
+.card:hover { background:linear-gradient(90deg,
+                var(--tone-bg), color-mix(in srgb, var(--tone-bg) 20%, transparent) 72%,
+                transparent); }
+/* 왼쪽 색 띠는 가리키는 동안만 자란다. */
+.card::before { content:""; position:absolute; left:-8px; top:16px; bottom:16px; width:3px;
+                border-radius:3px; background:linear-gradient(var(--tone-v),var(--tone-v2));
+                opacity:0; transform:scaleY(.35);
+                transition:opacity var(--t) var(--ease-io), transform var(--t) var(--ease); }
+.card:hover::before, .card:focus-visible::before { opacity:1; transform:none; }
 .card::after { content:""; width:8px; height:8px; border-right:1.8px solid var(--ink-3);
                border-top:1.8px solid var(--ink-3); transform:rotate(45deg);
                justify-self:end; transition:transform var(--t) var(--ease), border-color var(--t) var(--ease); }
-.card:hover::after { transform:rotate(45deg) translate(2px,-2px); border-color:var(--ink-2); }
+.card:hover::after { transform:rotate(45deg) translate(2px,-2px); border-color:var(--tone); }
 .chead { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
 .nm { font-size:20px; font-weight:600; letter-spacing:-.024em; }
 .en { color:var(--ink-3); font-size:14.5px; letter-spacing:-.006em; }
 .badge { font-size:14px; color:var(--ink-2); white-space:nowrap;
          font-variant-numeric:tabular-nums; }
 .badge.none { color:var(--ink-3); }
-.meta { color:var(--ink-2); font-size:14px; margin:4px 0 0; letter-spacing:-.006em; }
+.meta { color:var(--ink-2); font-size:14px; margin:7px 0 0; letter-spacing:-.006em; }
 .meta b { color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums; }
 
 /* ── 성분 상세 ────────────────────────────────────────────────────────── */
 .detail-head { text-align:center; padding:clamp(28px,5vw,56px) 0 clamp(34px,5vw,56px); }
-.kicker { font-size:14px; font-weight:500; color:var(--accent); letter-spacing:-.005em; }
+.kicker { display:inline-block; font-size:13px; font-weight:600; color:var(--tone);
+          letter-spacing:-.005em; background:var(--tone-bg);
+          padding:5px 13px; border-radius:999px; }
 .detail-title { font-size:clamp(44px,7.6vw,84px); font-weight:700; letter-spacing:-.042em;
                 line-height:1.03; margin:12px 0 0; text-wrap:balance; }
 .detail-sub { font-size:16.5px; color:var(--ink-3); margin-top:14px; letter-spacing:-.01em; }
@@ -238,7 +334,7 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 .pull { text-align:center; margin:0 0 10px; }
 .pull .v { font-size:clamp(64px,11vw,124px); font-weight:700; letter-spacing:-.05em;
            line-height:1; display:block; font-variant-numeric:tabular-nums;
-           background:linear-gradient(180deg, var(--ink) 30%, var(--ink-2));
+           background:linear-gradient(155deg, var(--tone-v) 8%, var(--tone-v2) 92%);
            -webkit-background-clip:text; background-clip:text; color:transparent; }
 .pull .k { display:block; font-size:15px; color:var(--ink-2); margin-top:14px;
            letter-spacing:-.01em; }
@@ -249,24 +345,48 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 .legend { display:flex; flex-wrap:wrap; gap:20px; margin:0 0 30px; font-size:14.5px;
           color:var(--ink-2); justify-content:center; }
 .legend span { display:inline-flex; align-items:center; gap:8px; }
-.sw { width:11px; height:11px; border-radius:50%; display:inline-block; flex:none; }
+.sw { width:12px; height:12px; border-radius:50%; display:inline-block; flex:none; }
+.sw.sig     { background:linear-gradient(140deg,var(--sig-2),var(--sig)); }
+.sw.null    { background:linear-gradient(140deg,var(--null-2),var(--null)); }
+.sw.unclear { background:var(--unclear); }
 
-.bars { background:var(--bg-2); border-radius:22px; padding:12px 28px; }
-.orow { display:grid; grid-template-columns:minmax(120px,180px) 1fr auto; gap:24px;
+/* 막대 상자에도 그 화면의 색을 아주 옅게 깔아 화면 전체가 한 색 아래 묶이게 한다. */
+.bars { border-radius:22px; padding:12px 28px;
+        background:linear-gradient(180deg,
+          color-mix(in srgb, var(--tone-bg) 78%, var(--bg-2)), var(--bg-2)); }
+.orow { display:grid; grid-template-columns:minmax(132px,196px) 1fr auto; gap:22px;
         align-items:center; padding:19px 0; border-bottom:1px solid var(--line-2); }
 .orow:last-child { border-bottom:0; }
-.oname { font-size:17px; font-weight:500; letter-spacing:-.018em;
-         overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* 색 점은 자리를 고정으로 차지하고, 이름만 줄어들며 말줄임표가 붙는다. */
+.oname { display:flex; align-items:center; gap:9px; min-width:0;
+         font-size:17px; font-weight:500; letter-spacing:-.018em; }
+.oname .obtn { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* 줄마다 그 항목이 속한 계통(또는 성분 분류)의 색 점을 하나 둔다. */
+.orow[data-fam]:not([data-fam=""]) .oname::before,
+.orow[data-cat]:not([data-cat=""]) .oname::before {
+  content:""; width:8px; height:8px; border-radius:50%; flex:none;
+  background:linear-gradient(140deg,var(--tone-v2),var(--tone-v));
+}
 .oname .obtn { background:none; border:0; padding:0; font:inherit; color:var(--ink);
                cursor:pointer; text-align:left;
                transition:color var(--t-fast) var(--ease-io); }
-.oname .obtn:hover { color:var(--accent); }
-.bar { display:flex; gap:3px; height:12px; min-width:4px;
+.oname .obtn:hover { color:var(--tone); }
+.bar { display:flex; gap:3px; height:14px; min-width:4px;
        transition:width var(--t-slow) var(--ease); }
-.seg { min-width:4px; border-radius:6px; }
-.seg.sig { background:var(--sig); }
-.seg.null { background:var(--null); }
+.seg { min-width:4px; border-radius:7px; position:relative; overflow:hidden; }
+/* 세 색은 뜻이 있는 색이다. 색만으로 읽히지 않도록 막대마다 숫자와 글자 라벨을 함께 둔다. */
+.seg.sig  { background:linear-gradient(115deg,var(--sig-2),var(--sig));
+            box-shadow:0 2px 10px color-mix(in srgb,var(--sig) 30%,transparent); }
+.seg.null { background:linear-gradient(115deg,var(--null-2),var(--null));
+            box-shadow:0 2px 10px color-mix(in srgb,var(--null) 30%,transparent); }
 .seg.unclear { background:var(--unclear); }
+/* 막대가 자란 뒤 빛이 한 번 훑고 지나간다. */
+@keyframes sheen { from { transform:translateX(-130%); } to { transform:translateX(230%); } }
+html.anim .bar.grown .seg::after {
+  content:""; position:absolute; inset:0; width:45%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  animation:sheen 1100ms var(--ease-io) 260ms 1 both;
+}
 .onum { font-size:14px; color:var(--ink-2); white-space:nowrap;
         font-variant-numeric:tabular-nums; }
 .orow.few { opacity:.55; }
@@ -275,29 +395,38 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 
 /* ── 연도 분포 ────────────────────────────────────────────────────────── */
 .years { display:flex; align-items:flex-end; gap:3px; height:70px; margin:12px 0 8px; }
-.years i { flex:1; background:var(--sig); opacity:.4; border-radius:3px; min-height:3px;
-           transition:opacity var(--t-fast) var(--ease-io); }
-.years i:hover { opacity:1; }
+.years i { flex:1; border-radius:3px 3px 1px 1px; min-height:3px; opacity:.55;
+           background:linear-gradient(180deg,var(--tone-v2),var(--tone-v));
+           transition:opacity var(--t-fast) var(--ease-io),
+                      filter var(--t-fast) var(--ease-io); }
+.years i:hover { opacity:1; filter:saturate(130%); }
 .yearlbl { display:flex; justify-content:space-between; font-size:13px; color:var(--ink-3);
            font-variant-numeric:tabular-nums; }
 
 /* ── 논문 타일 ────────────────────────────────────────────────────────── */
-.paper { background:var(--bg-2); border-radius:20px; padding:26px 30px; margin-bottom:12px;
+.paper { position:relative; overflow:hidden; background:var(--bg-2); border-radius:20px;
+         padding:26px 30px 26px 32px; margin-bottom:12px;
          transition:transform var(--t) var(--ease), box-shadow var(--t) var(--ease); }
-.paper:hover { transform:translateY(-2px); box-shadow:var(--shadow-1); }
+/* 왼쪽 색 띠는 결과 방향을 한 번 더 알려 준다. 아래 글자 라벨이 본체다. */
+.paper[data-dir]::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; }
+.paper[data-dir="significant"]::before { background:linear-gradient(var(--sig-2),var(--sig)); }
+.paper[data-dir="null"]::before        { background:linear-gradient(var(--null-2),var(--null)); }
+.paper[data-dir="unclear"]::before     { background:var(--unclear); }
+.paper[data-dir=""]::before            { display:none; }
+.paper:hover { transform:translateY(-2px); box-shadow:var(--shadow-2); }
 .paper .pmeta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
 .paper .pmeta > span { font-size:12.5px; font-weight:500; letter-spacing:-.004em;
                        padding:4px 11px; border-radius:999px; background:var(--bg);
                        color:var(--ink-2); }
-.paper .pmeta .dirtag.sig { color:var(--sig); }
-.paper .pmeta .dirtag.null { color:var(--null); }
-.paper .pmeta .dirtag.unclear { color:var(--ink-3); }
+.paper .pmeta .dirtag.significant { background:var(--sig-tint);  color:var(--sig-ink); }
+.paper .pmeta .dirtag.null        { background:var(--null-tint); color:var(--null-ink); }
+.paper .pmeta .dirtag.unclear     { background:var(--unclear-tint); color:var(--unclear-ink); }
 .paper .pmeta .retracted { color:var(--alertbd); font-weight:600; }
 .paper .ptitle { font-size:18px; line-height:1.5; letter-spacing:-.018em; font-weight:500;
                  text-wrap:pretty; word-break:normal; }
 .evidence, .psrc { word-break:normal; }
 .paper .ptitle a { color:var(--ink); }
-.paper .ptitle a:hover { color:var(--accent); text-decoration:none; }
+.paper .ptitle a:hover { color:var(--tone); text-decoration:none; }
 .paper .psrc { font-size:13.5px; color:var(--ink-3); margin-top:8px;
                font-variant-numeric:tabular-nums; }
 .evidence { margin-top:16px; padding:16px 18px; background:var(--bg); border-radius:14px;
@@ -307,14 +436,23 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 
 /* ── 지표 타일 ────────────────────────────────────────────────────────── */
 .ogrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(238px,1fr)); gap:12px; }
-.ocard { text-align:left; background:var(--bg-2); border:0; border-radius:20px;
-         padding:26px 24px; cursor:pointer; font:inherit; color:var(--ink);
+.ocard { position:relative; overflow:hidden; text-align:left; border:0; border-radius:20px;
+         padding:24px 22px; cursor:pointer; font:inherit; color:var(--ink);
+         background:var(--tone-bg);
          transition:transform var(--t) var(--ease), box-shadow var(--t) var(--ease),
                     background var(--t) var(--ease-io); }
-.ocard:hover { transform:translateY(-3px); box-shadow:var(--shadow-1); }
+.ocard::before { content:""; position:absolute; inset:0 0 auto; height:3px;
+                 background:linear-gradient(90deg,var(--tone-v),var(--tone-v2));
+                 transform:scaleX(.34); transform-origin:left;
+                 transition:transform var(--t) var(--ease); }
+.ocard:hover { transform:translateY(-4px);
+               box-shadow:0 12px 34px color-mix(in srgb, var(--tone-v) 26%, transparent); }
+.ocard:hover::before { transform:none; }
+.ocard .ofam { display:block; font-size:11.5px; font-weight:600; color:var(--tone);
+               letter-spacing:.01em; margin-bottom:7px; }
 .ocard .ol { font-size:19px; font-weight:600; letter-spacing:-.024em; display:block;
              margin-bottom:8px; }
-.ocard .oc { font-size:14px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+.ocard .oc { font-size:13.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
 
 /* ── 버튼·상태 ────────────────────────────────────────────────────────── */
 .btnrow { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin:32px 0; }
@@ -326,9 +464,11 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 .btn:hover { background:var(--bg-3); }
 .btn:active { transform:scale(.97); }
 .btn[disabled] { opacity:.35; cursor:default; transform:none; }
-.btn.primary { background:var(--accent); color:#fff; }
-.btn.primary:hover { background:var(--accent-2); }
-.back { background:none; border:0; color:var(--accent); font:400 15px/1 var(--font);
+.btn.primary { background:linear-gradient(120deg,var(--sig),var(--c-polyphenol-vivid));
+               color:#fff; box-shadow:0 6px 20px color-mix(in srgb,var(--sig) 32%,transparent); }
+.btn.primary:hover { filter:brightness(1.07) saturate(112%);
+                     box-shadow:0 10px 28px color-mix(in srgb,var(--sig) 40%,transparent); }
+.back { position:relative; z-index:1; background:none; border:0; color:var(--tone); font:400 15px/1 var(--font);
         cursor:pointer; padding:14px 0; display:inline-flex; gap:7px; align-items:center;
         letter-spacing:-.01em; }
 .back:hover { text-decoration:underline; text-underline-offset:3px; }

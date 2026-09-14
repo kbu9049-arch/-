@@ -2,7 +2,7 @@ PY ?= python3
 PORT ?= 8000
 TARGET ?= 100000
 
-.PHONY: help install probe harvest ingest serve dev stats test clean reset fixture snapshot site
+.PHONY: help install probe harvest ingest serve dev stats test clean reset fixture snapshot site colors
 
 help:
 	@echo "make install    의존성 설치 (웹서버용, 수집은 표준 라이브러리만 사용)"
@@ -14,6 +14,7 @@ help:
 	@echo "make test       테스트 실행"
 	@echo "make fixture    테스트용 합성 코퍼스로 화면 확인 (실제 데이터 아님)"
 	@echo "make site       정적 사이트 빌드 → _site/ (그대로 올리면 됨)"
+	@echo "make colors     분류 색 다시 계산 → web/colors.css"
 	@echo "make reset      색인 DB 삭제"
 
 install:
@@ -42,6 +43,9 @@ test:
 	$(PY) tests/test_pipeline.py
 	$(PY) tests/test_parity.py
 
+colors:
+	$(PY) scripts/gen_colors.py
+
 snapshot: site
 
 # 서버 없이 어디든 올릴 수 있는 정적 사이트. GitHub Pages, Netlify, Vercel,
@@ -49,7 +53,8 @@ snapshot: site
 # 색인 하나와 성분·지표별 상세 파일로 나뉘어 있어, 첫 화면에서는 색인만 받는다.
 site:
 	rm -rf _site && mkdir -p _site
-	cp web/index.html web/style.css web/app.js _site/
+	$(PY) scripts/gen_colors.py
+	cp web/index.html web/colors.css web/style.css web/app.js _site/
 	$(PY) -m ingest.build export _site/data
 	touch _site/.nojekyll
 	@echo "\n_site/ 준비 완료 ($$(du -sh _site | cut -f1))"

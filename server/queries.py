@@ -28,6 +28,15 @@ def norm(text: str) -> str:
 
 
 # ── 레퍼런스 로딩 ────────────────────────────────────────────────────────────
+def _load_palette() -> dict | None:
+    """계통 묶음표를 읽는다. 없으면 색 없이도 화면은 그대로 돈다."""
+    import ingest.config as cfg
+    try:
+        return json.loads(cfg.PALETTE_JSON.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
 class Reference:
     """성분·지표 사전을 메모리에 올려 두고 이름 검색에 쓴다."""
 
@@ -37,6 +46,15 @@ class Reference:
         self.categories: dict[str, str] = {}
         for i in ingredients:
             self.categories[i["category"]] = i["category_ko"]
+
+        # 측정 항목 30가지를 몸의 계통으로 묶은 표. scripts/gen_colors.py 가 만든다.
+        # 화면에서 항목마다 계통 이름과 색을 함께 보여 주는 데 쓴다.
+        self.families: dict[str, str] = {}
+        self.family_of: dict[str, str] = {}
+        pal = _load_palette()
+        if pal:
+            self.families = {k: v["ko"] for k, v in pal["outcome_families"].items()}
+            self.family_of = pal["outcome_family_of"]
 
         # 성분 검색: 한글명·영문명·검색어를 모두 색인
         self._ing_index: list[tuple[str, str, int]] = []   # (표기, 성분 id, 가중치)
@@ -251,6 +269,7 @@ def ingredient_detail(conn, ref: Reference, iid: str, *, top_papers: int = 8) ->
         outcomes.append({
             "outcome_id": r["outcome_id"],
             "label_ko": oc["label_ko"],
+            "family": ref.family_of.get(r["outcome_id"], ""),
             "label_en": oc["label_en"],
             "total": r["total"],
             "human": r["human"],
@@ -416,6 +435,8 @@ def outcome_list(conn, ref: Reference) -> list[dict]:
             "id": oid,
             "label_ko": oc["label_ko"],
             "label_en": oc["label_en"],
+            "family": ref.family_of.get(oid, ""),
+            "family_ko": ref.families.get(ref.family_of.get(oid, ""), ""),
             "aliases": oc["ko_aliases"],
             "ingredients": a["ingredients"] if a else 0,
             "papers": a["papers"] if a else 0,
@@ -451,6 +472,7 @@ def outcome_detail(conn, ref: Reference, oid: str, *, min_human: int = 1,
             "id": r["ingredient_id"],
             "name_ko": ing["name_ko"],
             "name_en": ing["name_en"],
+            "category": ing["category"],
             "category_ko": ing["category_ko"],
             "total": r["total"],
             "human": r["human"],
@@ -469,6 +491,8 @@ def outcome_detail(conn, ref: Reference, oid: str, *, min_human: int = 1,
         "id": oid,
         "label_ko": oc["label_ko"],
         "label_en": oc["label_en"],
+        "family": ref.family_of.get(oid, ""),
+        "family_ko": ref.families.get(ref.family_of.get(oid, ""), ""),
         "aliases": oc["ko_aliases"],
         "measures": oc["measures"][:8],
         "ingredients": items,
@@ -494,7 +518,8 @@ def unified_search(conn, ref: Reference, q: str, *, limit: int = 10) -> dict:
         st = _stats_row(stats.get(iid))
         result["ingredients"].append({
             "id": iid, "name_ko": ing["name_ko"], "name_en": ing["name_en"],
-            "category_ko": ing["category_ko"], "score": score, "stats": st,
+            "category": ing["category"], "category_ko": ing["category_ko"],
+            "score": score, "stats": st,
         })
 
     out_stats = {r["outcome_id"]: r for r in conn.execute(
@@ -548,7 +573,8 @@ def fulltext_ingredients(conn, ref: Reference, q: str, *, limit: int = 10) -> li
         ing = ref.ingredients.get(r["iid"])
         if ing:
             out.append({"id": r["iid"], "name_ko": ing["name_ko"], "name_en": ing["name_en"],
-                        "category_ko": ing["category_ko"], "papers": r["c"], "human": r["human"]})
+                        "category": ing["category"], "category_ko": ing["category_ko"],
+                        "papers": r["c"], "human": r["human"]})
     return out
 
 
@@ -683,6 +709,7 @@ def export_site(conn, out_dir, *, paper_cap: int = SNAPSHOT_PAPER_CAP,
         "corpus": corpus_summary(conn),
         "meta": {
             "categories": ref.categories,
+            "outcome_families": ref.families,
             "study_types": {k: v[0] for k, v in STUDY_TYPES.items()},
             "subjects": SUBJECTS,
             "directions": DIRECTIONS,

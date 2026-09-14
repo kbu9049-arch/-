@@ -9,6 +9,7 @@ DATA = ROOT / "data"
 DB_PATH = pathlib.Path(os.environ.get("EVIDENCE_DB", DATA / "evidence.db"))
 INGREDIENTS_JSON = DATA / "ingredients.json"
 OUTCOMES_JSON = DATA / "outcomes.json"
+PALETTE_JSON = DATA / "palette.json"
 
 # ── 문헌 DB 엔드포인트 ───────────────────────────────────────────────────────
 EUROPEPMC_BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest"

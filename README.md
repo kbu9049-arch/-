@@ -143,8 +143,35 @@ server/
   queries.py             조회 로직 (API 와 정적 스냅샷이 공유)
   live.py                색인 밖 검색어의 실시간 조회
   app.py                 FastAPI
-web/                   정적 프런트엔드 (빌드 도구·외부 CDN 없음)
-tests/                 분류기 단위 테스트 + 파이프라인 통합 테스트
+web/                   정적 프런트엔드 (빌드 도구 없음)
+  colors.css           분류 색 (scripts/gen_colors.py 가 만든다 — 직접 고치지 말 것)
+scripts/
+  gen_ingredients.py   성분 사전 생성
+  gen_colors.py        분류 색 계산 (OKLCH → sRGB, 대비·구분 정도 자동 검사)
+tests/                 분류기 단위 테스트 + 파이프라인 통합 테스트 + 정적/서버 동등성 테스트
+```
+
+### 색 체계
+
+화면의 색은 `scripts/gen_colors.py` 가 계산해 `web/colors.css` 로 내보냅니다.
+`make site` 와 배포 워크플로가 매번 다시 계산하므로 손으로 고칠 일이 없습니다.
+색은 OKLCH(사람 눈이 느끼는 밝기 기준 색 공간)에서 밝기·진하기를 거의 고정하고
+색상만 돌려 뽑기 때문에, 어느 색을 골라도 화면에서 느껴지는 무게가 같습니다.
+
+색은 두 갈래이고, 쓰임이 다릅니다.
+
+| | 뜻이 있나 | 검사 |
+|---|---|---|
+| **결과 방향 3색** (`--sig`/`--null`/`--unclear`) | 있음 — 차이 있었음 / 없었음 / 알 수 없음 | 색각 이상에서도 최소 ΔE 24.7(라이트)·26.8(다크). 그래도 막대마다 숫자와 글자 라벨을 함께 둔다 |
+| **성분 분류 12종·측정 항목 8계열** | 없음 — 그냥 이름표 | 열두 가지를 색만으로 구별되게 만들 수는 없다(색각 이상에서 최소 ΔE 1.4). 그래서 색에 뜻을 싣지 않고, 이름표에 언제나 한글 이름을 붙인다 |
+
+글자로 쓰는 색은 모두 제 바탕 대비 4.5:1 이상, 채워 쓰는 색은 3:1 이상을
+스크립트가 직접 재서 미달이면 밝기를 옮깁니다.
+
+```bash
+python scripts/gen_colors.py            # web/colors.css 다시 만들기 (= make colors)
+python scripts/gen_colors.py --report   # 색별 대비값 표
+python scripts/gen_colors.py --audit    # 색끼리 얼마나 구분되는지 (색각 이상 포함)
 ```
 
 ### 수집 전략
@@ -252,7 +279,7 @@ python3 -m http.server -d _site 8080   # 확인
 
 ```
 _site/
-  index.html  style.css  app.js
+  index.html  colors.css  style.css  app.js
   data/
     index.json        코퍼스 요약·성분 목록·지표 목록·검색 색인 (첫 화면에서 이것만 받음)
     i/<성분>.json      성분 상세 + 그 성분의 논문 전부   (성분을 열 때만 받음)

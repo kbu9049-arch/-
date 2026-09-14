@@ -1,0 +1,390 @@
+/* 이 파일은 scripts/gen_colors.py 가 만든다. 직접 고치지 말 것.
+   다시 만들기:  python scripts/gen_colors.py
+
+   성분 분류 12종과 측정 항목 8계열의 이름표 색.
+   OKLCH(사람 눈이 느끼는 밝기 기준 색 공간)에서 뽑았고, 밝기와 진하기를
+   거의 고정한 채 색상만 돌렸다. 그래서 어느 색을 골라도 화면에서 느껴지는
+   무게가 같고, 어떤 분류가 더 중요해 보이는 일이 없다.
+
+   ■ 이 색들은 '데이터'가 아니라 '이름표'다.
+     분류가 12가지나 되므로 색만으로 서로 구분되게 만들 수는 없다.
+     실제로 재보면 두 색이 가장 비슷할 때의 차이(OKLab ΔE×100)는
+     light 분류 12종  보통 시각 8.1 · 색각 이상 1.4
+     light 항목 8계열  보통 시각 11.4 · 색각 이상 2.8
+     dark  분류 12종  보통 시각 8.7 · 색각 이상 3.3
+     dark  항목 8계열  보통 시각 12.8 · 색각 이상 1.7
+     이고, 색각 이상에서는 사실상 겹친다. 그래서 색에 뜻을 싣지 않았다.
+     분류 이름표에는 언제나 한글 이름이 함께 붙고, 색을 못 보아도
+     읽는 데 아무 지장이 없다.
+
+   ■ 뜻을 나르는 색은 따로 있다: 결과 방향 3색(--sig/--null/--unclear).
+     그 3색만 색각 이상 검사를 통과하도록 골랐고, 그마저도 막대마다
+     숫자와 글자 라벨을 함께 둔다. */
+
+:root {
+  --c-amino-tint:#ffeeee;
+  --c-amino-edge:#f6c2c4;
+  --c-amino-ink:#b13e4f;
+  --c-amino-vivid:#d74f63;
+  --c-amino-vivid2:#e36b4d;
+  --c-carotenoid-tint:#fff1eb;
+  --c-carotenoid-edge:#f8cbb4;
+  --c-carotenoid-ink:#b55000;
+  --c-carotenoid-vivid:#e77022;
+  --c-carotenoid-vivid2:#e5900e;
+  --c-vitamin-tint:#fbefda;
+  --c-vitamin-edge:#e1c9a0;
+  --c-vitamin-ink:#855e00;
+  --c-vitamin-vivid:#966a00;
+  --c-vitamin-vivid2:#948200;
+  --c-fiber-tint:#f2f5de;
+  --c-fiber-edge:#d1d6a9;
+  --c-fiber-ink:#6d7200;
+  --c-fiber-vivid:#868c00;
+  --c-fiber-vivid2:#6ca737;
+  --c-herb-tint:#e8fae9;
+  --c-herb-edge:#bde1bf;
+  --c-herb-ink:#1a822f;
+  --c-herb-vivid:#34a847;
+  --c-herb-vivid2:#00b888;
+  --c-algae-tint:#dcf8f1;
+  --c-algae-edge:#a2dacd;
+  --c-algae-ink:#007767;
+  --c-algae-vivid:#008674;
+  --c-algae-vivid2:#009499;
+  --c-mineral-tint:#ddf8fe;
+  --c-mineral-edge:#a3dce7;
+  --c-mineral-ink:#007a8a;
+  --c-mineral-vivid:#0095a9;
+  --c-mineral-vivid2:#00a1d6;
+  --c-fatty_acid-tint:#ecf6ff;
+  --c-fatty_acid-edge:#b5dbfb;
+  --c-fatty_acid-ink:#0075b6;
+  --c-fatty_acid-vivid:#009bf0;
+  --c-fatty_acid-vivid2:#73a0ff;
+  --c-polyphenol-tint:#ecf0ff;
+  --c-polyphenol-edge:#c2c9f4;
+  --c-polyphenol-ink:#5359b9;
+  --c-polyphenol-vivid:#5d63d4;
+  --c-polyphenol-vivid2:#8d69d3;
+  --c-mushroom-tint:#f7eeff;
+  --c-mushroom-edge:#ddc7ef;
+  --c-mushroom-ink:#864eab;
+  --c-mushroom-vivid:#a462d0;
+  --c-mushroom-vivid2:#c86cc1;
+  --c-animal-tint:#ffeff8;
+  --c-animal-edge:#f3c7e1;
+  --c-animal-ink:#aa488a;
+  --c-animal-vivid:#da66b4;
+  --c-animal-vivid2:#f4789e;
+  --c-other-tint:#eef3f8;
+  --c-other-edge:#cad2db;
+  --c-other-ink:#5e6e7f;
+  --c-other-vivid:#74879b;
+  --c-other-vivid2:#8b93aa;
+  --c-metabolic-tint:#ffeeed;
+  --c-metabolic-edge:#f6c2bf;
+  --c-metabolic-ink:#b23f43;
+  --c-metabolic-vivid:#d85154;
+  --c-metabolic-vivid2:#e16e3e;
+  --c-organ-tint:#fff2e5;
+  --c-organ-edge:#f1cfac;
+  --c-organ-ink:#9f6200;
+  --c-organ-vivid:#d18200;
+  --c-organ-vivid2:#cd9f00;
+  --c-defense-tint:#f0f3dc;
+  --c-defense-edge:#ccd1a4;
+  --c-defense-ink:#686b00;
+  --c-defense-vivid:#757900;
+  --c-defense-vivid2:#5d941c;
+  --c-breath-tint:#e3f9eb;
+  --c-breath-edge:#b1dec2;
+  --c-breath-ink:#007d4d;
+  --c-breath-vivid:#009e62;
+  --c-breath-vivid2:#00ac94;
+  --c-mind-tint:#defbfe;
+  --c-mind-edge:#a8e2e9;
+  --c-mind-ink:#007b85;
+  --c-mind-vivid:#00a4b1;
+  --c-mind-vivid2:#00b0de;
+  --c-movement-tint:#e6f2ff;
+  --c-movement-edge:#afd0f3;
+  --c-movement-ink:#0068b4;
+  --c-movement-vivid:#0075ca;
+  --c-movement-vivid2:#5e79de;
+  --c-surface-tint:#f3f0ff;
+  --c-surface-edge:#d3caf5;
+  --c-surface-ink:#7455b8;
+  --c-surface-vivid:#8e6bde;
+  --c-surface-vivid2:#b773d5;
+  --c-hormone-tint:#ffeffa;
+  --c-hormone-edge:#f1c7e4;
+  --c-hormone-ink:#a74990;
+  --c-hormone-vivid:#d768bb;
+  --c-hormone-vivid2:#f278a6;
+  --sig:#2a78d6;
+  --sig-2:#698cf0;
+  --sig-tint:#e7f1ff;
+  --sig-ink:#246bc0;
+  --null:#eb6834;
+  --null-2:#e47415;
+  --null-tint:#ffece5;
+  --null-ink:#b04518;
+  --unclear:#c2c2ca;
+  --unclear-2:#c2c2ca;
+  --unclear-tint:#f2f2f5;
+  --unclear-ink:#6b6b6e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-amino-tint:#34171a;
+    --c-amino-edge:#643035;
+    --c-amino-ink:#ff9ea6;
+    --c-amino-vivid:#e26675;
+    --c-amino-vivid2:#ea7c61;
+    --c-carotenoid-tint:#341b0e;
+    --c-carotenoid-edge:#663920;
+    --c-carotenoid-ink:#ffaf85;
+    --c-carotenoid-vivid:#f28446;
+    --c-carotenoid-vivid2:#eea03f;
+    --c-vitamin-tint:#2b1d03;
+    --c-vitamin-edge:#533901;
+    --c-vitamin-ink:#deaf5c;
+    --c-vitamin-vivid:#a87800;
+    --c-vitamin-vivid2:#a18e00;
+    --c-fiber-tint:#212307;
+    --c-fiber-edge:#43460f;
+    --c-fiber-ink:#bec66b;
+    --c-fiber-vivid:#959c00;
+    --c-fiber-vivid2:#7cb250;
+    --c-herb-tint:#132815;
+    --c-herb-edge:#29512d;
+    --c-herb-ink:#93d997;
+    --c-herb-vivid:#5dbf68;
+    --c-herb-vivid2:#3bcf9e;
+    --c-algae-tint:#002620;
+    --c-algae-edge:#004a3f;
+    --c-algae-ink:#53cfb8;
+    --c-algae-vivid:#009783;
+    --c-algae-vivid2:#00a1a7;
+    --c-mineral-tint:#00262d;
+    --c-mineral-edge:#004b56;
+    --c-mineral-ink:#51d1e8;
+    --c-mineral-vivid:#00a6bc;
+    --c-mineral-vivid2:#00aee8;
+    --c-fatty_acid-tint:#0d2537;
+    --c-fatty_acid-edge:#1d4a6c;
+    --c-fatty_acid-ink:#8dccff;
+    --c-fatty_acid-vivid:#3caeff;
+    --c-fatty_acid-vivid2:#8cb1ff;
+    --c-polyphenol-tint:#1a1d35;
+    --c-polyphenol-edge:#353a65;
+    --c-polyphenol-ink:#a5b0ff;
+    --c-polyphenol-vivid:#6c75dc;
+    --c-polyphenol-vivid2:#9879d9;
+    --c-mushroom-tint:#281b31;
+    --c-mushroom-edge:#4f3660;
+    --c-mushroom-ink:#d4a9f5;
+    --c-mushroom-vivid:#b175da;
+    --c-mushroom-vivid2:#d17dca;
+    --c-animal-tint:#311929;
+    --c-animal-edge:#613552;
+    --c-animal-ink:#f8a6d9;
+    --c-animal-vivid:#e67cc1;
+    --c-animal-vivid2:#fc89ab;
+    --c-other-tint:#1c2227;
+    --c-other-edge:#3b434c;
+    --c-other-ink:#b2bfce;
+    --c-other-vivid:#8496a8;
+    --c-other-vivid2:#989fb4;
+    --c-metabolic-tint:#341817;
+    --c-metabolic-edge:#643130;
+    --c-metabolic-ink:#ffa09c;
+    --c-metabolic-vivid:#e36767;
+    --c-metabolic-vivid2:#e97f54;
+    --c-organ-tint:#311e08;
+    --c-organ-edge:#613e12;
+    --c-organ-ink:#f6b66f;
+    --c-organ-vivid:#e59114;
+    --c-organ-vivid2:#d8ac2f;
+    --c-defense-tint:#202206;
+    --c-defense-edge:#404208;
+    --c-defense-ink:#b9be64;
+    --c-defense-vivid:#848900;
+    --c-defense-vivid2:#6c9f3a;
+    --c-breath-tint:#0b2819;
+    --c-breath-edge:#164e33;
+    --c-breath-ink:#79d4a1;
+    --c-breath-vivid:#03af6e;
+    --c-breath-vivid2:#00baa0;
+    --c-mind-tint:#00282d;
+    --c-mind-edge:#005058;
+    --c-mind-ink:#56dae8;
+    --c-mind-vivid:#00bccb;
+    --c-mind-vivid2:#13c4f6;
+    --c-movement-tint:#0e2134;
+    --c-movement-edge:#1c4064;
+    --c-movement-ink:#7cbcfe;
+    --c-movement-vivid:#2385da;
+    --c-movement-vivid2:#6c87e4;
+    --c-surface-tint:#231c34;
+    --c-surface-edge:#453966;
+    --c-surface-ink:#c3afff;
+    --c-surface-vivid:#9c7de8;
+    --c-surface-vivid2:#c183dc;
+    --c-hormone-tint:#301a2a;
+    --c-hormone-edge:#603654;
+    --c-hormone-ink:#f5a7de;
+    --c-hormone-vivid:#e37dc8;
+    --c-hormone-vivid2:#fa8ab2;
+    --sig:#3987e5;
+    --sig-2:#7398fc;
+    --sig-tint:#0c2039;
+    --sig-ink:#91c1ff;
+    --null:#d95926;
+    --null-2:#ea7b27;
+    --null-tint:#35150a;
+    --null-ink:#fda485;
+    --unclear:#55555e;
+    --unclear-2:#55555e;
+    --unclear-tint:#212123;
+    --unclear-ink:#bdbdc0;
+  }
+}
+:root[data-theme="dark"] {
+  --c-amino-tint:#34171a;
+  --c-amino-edge:#643035;
+  --c-amino-ink:#ff9ea6;
+  --c-amino-vivid:#e26675;
+  --c-amino-vivid2:#ea7c61;
+  --c-carotenoid-tint:#341b0e;
+  --c-carotenoid-edge:#663920;
+  --c-carotenoid-ink:#ffaf85;
+  --c-carotenoid-vivid:#f28446;
+  --c-carotenoid-vivid2:#eea03f;
+  --c-vitamin-tint:#2b1d03;
+  --c-vitamin-edge:#533901;
+  --c-vitamin-ink:#deaf5c;
+  --c-vitamin-vivid:#a87800;
+  --c-vitamin-vivid2:#a18e00;
+  --c-fiber-tint:#212307;
+  --c-fiber-edge:#43460f;
+  --c-fiber-ink:#bec66b;
+  --c-fiber-vivid:#959c00;
+  --c-fiber-vivid2:#7cb250;
+  --c-herb-tint:#132815;
+  --c-herb-edge:#29512d;
+  --c-herb-ink:#93d997;
+  --c-herb-vivid:#5dbf68;
+  --c-herb-vivid2:#3bcf9e;
+  --c-algae-tint:#002620;
+  --c-algae-edge:#004a3f;
+  --c-algae-ink:#53cfb8;
+  --c-algae-vivid:#009783;
+  --c-algae-vivid2:#00a1a7;
+  --c-mineral-tint:#00262d;
+  --c-mineral-edge:#004b56;
+  --c-mineral-ink:#51d1e8;
+  --c-mineral-vivid:#00a6bc;
+  --c-mineral-vivid2:#00aee8;
+  --c-fatty_acid-tint:#0d2537;
+  --c-fatty_acid-edge:#1d4a6c;
+  --c-fatty_acid-ink:#8dccff;
+  --c-fatty_acid-vivid:#3caeff;
+  --c-fatty_acid-vivid2:#8cb1ff;
+  --c-polyphenol-tint:#1a1d35;
+  --c-polyphenol-edge:#353a65;
+  --c-polyphenol-ink:#a5b0ff;
+  --c-polyphenol-vivid:#6c75dc;
+  --c-polyphenol-vivid2:#9879d9;
+  --c-mushroom-tint:#281b31;
+  --c-mushroom-edge:#4f3660;
+  --c-mushroom-ink:#d4a9f5;
+  --c-mushroom-vivid:#b175da;
+  --c-mushroom-vivid2:#d17dca;
+  --c-animal-tint:#311929;
+  --c-animal-edge:#613552;
+  --c-animal-ink:#f8a6d9;
+  --c-animal-vivid:#e67cc1;
+  --c-animal-vivid2:#fc89ab;
+  --c-other-tint:#1c2227;
+  --c-other-edge:#3b434c;
+  --c-other-ink:#b2bfce;
+  --c-other-vivid:#8496a8;
+  --c-other-vivid2:#989fb4;
+  --c-metabolic-tint:#341817;
+  --c-metabolic-edge:#643130;
+  --c-metabolic-ink:#ffa09c;
+  --c-metabolic-vivid:#e36767;
+  --c-metabolic-vivid2:#e97f54;
+  --c-organ-tint:#311e08;
+  --c-organ-edge:#613e12;
+  --c-organ-ink:#f6b66f;
+  --c-organ-vivid:#e59114;
+  --c-organ-vivid2:#d8ac2f;
+  --c-defense-tint:#202206;
+  --c-defense-edge:#404208;
+  --c-defense-ink:#b9be64;
+  --c-defense-vivid:#848900;
+  --c-defense-vivid2:#6c9f3a;
+  --c-breath-tint:#0b2819;
+  --c-breath-edge:#164e33;
+  --c-breath-ink:#79d4a1;
+  --c-breath-vivid:#03af6e;
+  --c-breath-vivid2:#00baa0;
+  --c-mind-tint:#00282d;
+  --c-mind-edge:#005058;
+  --c-mind-ink:#56dae8;
+  --c-mind-vivid:#00bccb;
+  --c-mind-vivid2:#13c4f6;
+  --c-movement-tint:#0e2134;
+  --c-movement-edge:#1c4064;
+  --c-movement-ink:#7cbcfe;
+  --c-movement-vivid:#2385da;
+  --c-movement-vivid2:#6c87e4;
+  --c-surface-tint:#231c34;
+  --c-surface-edge:#453966;
+  --c-surface-ink:#c3afff;
+  --c-surface-vivid:#9c7de8;
+  --c-surface-vivid2:#c183dc;
+  --c-hormone-tint:#301a2a;
+  --c-hormone-edge:#603654;
+  --c-hormone-ink:#f5a7de;
+  --c-hormone-vivid:#e37dc8;
+  --c-hormone-vivid2:#fa8ab2;
+  --sig:#3987e5;
+  --sig-2:#7398fc;
+  --sig-tint:#0c2039;
+  --sig-ink:#91c1ff;
+  --null:#d95926;
+  --null-2:#ea7b27;
+  --null-tint:#35150a;
+  --null-ink:#fda485;
+  --unclear:#55555e;
+  --unclear-2:#55555e;
+  --unclear-tint:#212123;
+  --unclear-ink:#bdbdc0;
+}
+
+/* data-cat / data-fam 이 붙은 곳에서 --tone-* 가 그 분류의 색이 된다.
+   style.css 는 분류 이름을 하나도 몰라도 된다. */
+[data-cat="amino"] { --tone:var(--c-amino-ink); --tone-bg:var(--c-amino-tint); --tone-edge:var(--c-amino-edge); --tone-v:var(--c-amino-vivid); --tone-v2:var(--c-amino-vivid2); }
+[data-cat="carotenoid"] { --tone:var(--c-carotenoid-ink); --tone-bg:var(--c-carotenoid-tint); --tone-edge:var(--c-carotenoid-edge); --tone-v:var(--c-carotenoid-vivid); --tone-v2:var(--c-carotenoid-vivid2); }
+[data-cat="vitamin"] { --tone:var(--c-vitamin-ink); --tone-bg:var(--c-vitamin-tint); --tone-edge:var(--c-vitamin-edge); --tone-v:var(--c-vitamin-vivid); --tone-v2:var(--c-vitamin-vivid2); }
+[data-cat="fiber"] { --tone:var(--c-fiber-ink); --tone-bg:var(--c-fiber-tint); --tone-edge:var(--c-fiber-edge); --tone-v:var(--c-fiber-vivid); --tone-v2:var(--c-fiber-vivid2); }
+[data-cat="herb"] { --tone:var(--c-herb-ink); --tone-bg:var(--c-herb-tint); --tone-edge:var(--c-herb-edge); --tone-v:var(--c-herb-vivid); --tone-v2:var(--c-herb-vivid2); }
+[data-cat="algae"] { --tone:var(--c-algae-ink); --tone-bg:var(--c-algae-tint); --tone-edge:var(--c-algae-edge); --tone-v:var(--c-algae-vivid); --tone-v2:var(--c-algae-vivid2); }
+[data-cat="mineral"] { --tone:var(--c-mineral-ink); --tone-bg:var(--c-mineral-tint); --tone-edge:var(--c-mineral-edge); --tone-v:var(--c-mineral-vivid); --tone-v2:var(--c-mineral-vivid2); }
+[data-cat="fatty_acid"] { --tone:var(--c-fatty_acid-ink); --tone-bg:var(--c-fatty_acid-tint); --tone-edge:var(--c-fatty_acid-edge); --tone-v:var(--c-fatty_acid-vivid); --tone-v2:var(--c-fatty_acid-vivid2); }
+[data-cat="polyphenol"] { --tone:var(--c-polyphenol-ink); --tone-bg:var(--c-polyphenol-tint); --tone-edge:var(--c-polyphenol-edge); --tone-v:var(--c-polyphenol-vivid); --tone-v2:var(--c-polyphenol-vivid2); }
+[data-cat="mushroom"] { --tone:var(--c-mushroom-ink); --tone-bg:var(--c-mushroom-tint); --tone-edge:var(--c-mushroom-edge); --tone-v:var(--c-mushroom-vivid); --tone-v2:var(--c-mushroom-vivid2); }
+[data-cat="animal"] { --tone:var(--c-animal-ink); --tone-bg:var(--c-animal-tint); --tone-edge:var(--c-animal-edge); --tone-v:var(--c-animal-vivid); --tone-v2:var(--c-animal-vivid2); }
+[data-cat="other"] { --tone:var(--c-other-ink); --tone-bg:var(--c-other-tint); --tone-edge:var(--c-other-edge); --tone-v:var(--c-other-vivid); --tone-v2:var(--c-other-vivid2); }
+[data-fam="metabolic"] { --tone:var(--c-metabolic-ink); --tone-bg:var(--c-metabolic-tint); --tone-edge:var(--c-metabolic-edge); --tone-v:var(--c-metabolic-vivid); --tone-v2:var(--c-metabolic-vivid2); }
+[data-fam="organ"] { --tone:var(--c-organ-ink); --tone-bg:var(--c-organ-tint); --tone-edge:var(--c-organ-edge); --tone-v:var(--c-organ-vivid); --tone-v2:var(--c-organ-vivid2); }
+[data-fam="defense"] { --tone:var(--c-defense-ink); --tone-bg:var(--c-defense-tint); --tone-edge:var(--c-defense-edge); --tone-v:var(--c-defense-vivid); --tone-v2:var(--c-defense-vivid2); }
+[data-fam="breath"] { --tone:var(--c-breath-ink); --tone-bg:var(--c-breath-tint); --tone-edge:var(--c-breath-edge); --tone-v:var(--c-breath-vivid); --tone-v2:var(--c-breath-vivid2); }
+[data-fam="mind"] { --tone:var(--c-mind-ink); --tone-bg:var(--c-mind-tint); --tone-edge:var(--c-mind-edge); --tone-v:var(--c-mind-vivid); --tone-v2:var(--c-mind-vivid2); }
+[data-fam="movement"] { --tone:var(--c-movement-ink); --tone-bg:var(--c-movement-tint); --tone-edge:var(--c-movement-edge); --tone-v:var(--c-movement-vivid); --tone-v2:var(--c-movement-vivid2); }
+[data-fam="surface"] { --tone:var(--c-surface-ink); --tone-bg:var(--c-surface-tint); --tone-edge:var(--c-surface-edge); --tone-v:var(--c-surface-vivid); --tone-v2:var(--c-surface-vivid2); }
+[data-fam="hormone"] { --tone:var(--c-hormone-ink); --tone-bg:var(--c-hormone-tint); --tone-edge:var(--c-hormone-edge); --tone-v:var(--c-hormone-vivid); --tone-v2:var(--c-hormone-vivid2); }

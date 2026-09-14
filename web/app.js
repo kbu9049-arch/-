@@ -64,6 +64,7 @@ function growBars(root = document) {
     b.style.transitionDelay = REDUCED ? '0ms' : `${Math.min(i, 9) * 55}ms`;
     b.style.width = b.dataset.w || 'auto';
     b.classList.remove('grow');
+    b.classList.add('grown');   // 다 자란 뒤 빛이 한 번 훑고 지나가게 한다
   });
   if (REDUCED) paint();
   else requestAnimationFrame(() => requestAnimationFrame(paint));
@@ -312,7 +313,7 @@ function directionBar(o, maxHuman) {
     ? `<i class="seg ${cls}" style="flex:${v}" title="${esc(label)} ${n(v)}건"></i>` : '');
   const few = o.human > 0 && o.human < 3 ? ' few' : '';
   return `
-    <div class="orow${few}">
+    <div class="orow${few}" data-fam="${esc(o.family || '')}">
       <div class="oname">
         <button class="obtn" data-outcome="${esc(o.outcome_id || o.id)}"
                 title="이 항목의 논문만 보기">${esc(o.label_ko)}</button>
@@ -330,9 +331,9 @@ function directionBar(o, maxHuman) {
 
 const LEGEND = `
   <div class="legend">
-    <span><i class="sw" style="background:var(--sig)"></i>차이 있었음</span>
-    <span><i class="sw" style="background:var(--null)"></i>차이 없었음</span>
-    <span><i class="sw" style="background:var(--unclear)"></i>알 수 없음</span>
+    <span><i class="sw sig"></i>차이 있었음</span>
+    <span><i class="sw null"></i>차이 없었음</span>
+    <span><i class="sw unclear"></i>알 수 없음</span>
   </div>`;
 
 function paperItem(p, { showEvidence = true } = {}) {
@@ -343,7 +344,7 @@ function paperItem(p, { showEvidence = true } = {}) {
                p.cited_by ? `인용 ${n(p.cited_by)}회` : '']
     .filter(Boolean).map(esc).join(' · ');
   return `
-    <div class="paper reveal">
+    <div class="paper reveal" data-dir="${esc(p.direction || '')}">
       <div class="pmeta">
         <span>${esc(p.study_type_ko)}</span>
         ${p.year ? `<span>${esc(p.year)}년</span>` : ''}
@@ -386,13 +387,14 @@ function renderCorpusStats() {
   const c = state.meta.corpus || {};
   // 여섯 개를 늘어놓으면 어느 것도 눈에 안 들어온다. 네 개로 줄인다.
   const tiles = [
-    [n(c.papers), '모은 논문'],
-    [n(c.human_papers), '사람에게 한 연구'],
-    [n(c.systematic_papers), '여러 연구 종합'],
-    [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분'],
+    [n(c.papers), '모은 논문', 'metabolic'],
+    [n(c.human_papers), '사람에게 한 연구', 'mind'],
+    [n(c.systematic_papers), '여러 연구 종합', 'breath'],
+    [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분', 'hormone'],
   ];
   $('#corpus-stats').innerHTML = tiles
-    .map(([v, k]) => `<div class="stat"><div class="v num">${v}</div><div class="k">${esc(k)}</div></div>`)
+    .map(([v, k, fam]) => `<div class="stat" data-fam="${fam}"><div class="v num">${v}</div>
+        <div class="k">${esc(k)}</div></div>`)
     .join('');
 
   const built = c.last_aggregate ? new Date(c.last_aggregate).toLocaleString('ko-KR') : '아직 없음';
@@ -451,13 +453,13 @@ function ingredientCard(it) {
        · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}년` : ''}`
     : '아직 모은 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
   return `
-    <button class="card reveal" data-ing="${esc(it.id)}">
+    <button class="card reveal" data-ing="${esc(it.id)}" data-cat="${esc(it.category || '')}">
       <div class="chead">
         <span class="nm">${esc(it.name_ko)}</span>
         <span class="en">${esc(it.name_en)}</span>
         ${badge}
       </div>
-      <div class="meta">${esc(it.category_ko)} · ${detail}</div>
+      <div class="meta"><span class="ctag">${esc(it.category_ko)}</span>${detail}</div>
     </button>`;
 }
 
@@ -553,6 +555,7 @@ async function renderIngredient(id) {
   // 영문명과 겹치는 검색어는 빼고 보여 준다 ("Vitamin A · vitamin a, …"는 중복).
   const extra = d.synonyms.filter((x) => x.toLowerCase() !== d.name_en.toLowerCase());
 
+  box.dataset.cat = d.category || '';
   box.innerHTML = `
     <button class="back" data-back><span class="arw">←</span> 성분</button>
 
@@ -695,7 +698,8 @@ function renderOutcomeGrid(filter = '') {
     || o.label_en.toLowerCase().includes(q)
     || (o.aliases || []).some((a) => a.toLowerCase().includes(q)));
   $('#o-grid').innerHTML = items.length ? items.map((o) => `
-    <button class="ocard reveal" data-outcome="${esc(o.id)}">
+    <button class="ocard reveal" data-outcome="${esc(o.id)}" data-fam="${esc(o.family || '')}">
+      ${o.family_ko ? `<span class="ofam">${esc(o.family_ko)}</span>` : ''}
       <span class="ol">${esc(o.label_ko)}</span>
       <span class="oc num">성분 ${n(o.ingredients)}종 · 사람 대상 연구 ${n(o.human)}건</span>
     </button>`).join('')
@@ -718,10 +722,11 @@ async function renderOutcome(id) {
   }
   const maxHuman = Math.max(1, ...d.ingredients.map((i) => i.human));
 
+  box.dataset.fam = d.family || '';
   box.innerHTML = `
     <button class="back" data-back><span class="arw">←</span> 효능</button>
     <div class="detail-head reveal">
-      <div class="kicker">이런 걸 재 봤어요</div>
+      <div class="kicker">${esc(d.family_ko || '이런 걸 재 봤어요')}</div>
       <h1 class="detail-title">${esc(d.label_ko)}</h1>
       <div class="detail-sub">${esc(d.label_en)}</div>
     </div>
@@ -729,9 +734,9 @@ async function renderOutcome(id) {
     <div class="smallprint reveal" style="margin-bottom:34px">${esc(d.note)}</div>
     ${LEGEND}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
-      <div class="orow">
+      <div class="orow" data-cat="${esc(i.category || '')}">
         <div class="oname"><button class="obtn" data-ing="${esc(i.id)}">${esc(i.name_ko)}</button>
-          <span class="dim" style="font-size:12px">${esc(i.category_ko)}</span></div>
+          <span class="ctag sm">${esc(i.category_ko)}</span></div>
         <div class="bar grow" data-w="${Math.max(3, Math.round((i.human / maxHuman) * 100))}%">
           <i class="seg sig" style="flex:${i.human_significant}" title="차이 있었음 ${n(i.human_significant)}건"></i>
           <i class="seg null" style="flex:${i.human_null}" title="차이 없었음 ${n(i.human_null)}건"></i>

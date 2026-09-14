@@ -122,7 +122,7 @@ def main() -> int:
 
     # 정적 배포를 하위 경로에 올린 상태를 재현한다 (GitHub Pages 의 /저장소명/)
     site = tmp / "site" / "repo-name"
-    for f in ("index.html", "style.css", "app.js"):
+    for f in ("index.html", "colors.css", "style.css", "app.js"):
         shutil.copy(ROOT / "web" / f, site / f)
     if not (site / "data" / "index.json").exists():
         print("정적 사이트 내보내기가 index.json 을 만들지 못했습니다.")
