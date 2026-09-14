@@ -10,6 +10,7 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 web/data/
+web/snapshot.json
 tests/fixtures/sample_papers.jsonl
 *.log
 .DS_Store
