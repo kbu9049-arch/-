@@ -83,15 +83,25 @@ function countUp(el) {
   requestAnimationFrame(step);
 }
 
-/** 선택된 탭 아래로 밑줄이 미끄러진다. */
-function moveUnderline() {
-  const u = $('.tab-underline');
-  const on = $('.tab[aria-selected="true"]');
-  if (!u || !on) return;
-  u.style.width = `${on.offsetWidth}px`;
-  u.style.transform = `translateX(${on.offsetLeft}px)`;
+/** 큰 숫자는 화면에 들어올 때 세어 올린다. 검정 띠는 대개 첫 화면 아래에 있다. */
+function countOnView(root = document) {
+  const els = $$('[data-count]:not(.counted)', root);
+  if (!els.length) return;
+  if (REDUCED || !('IntersectionObserver' in window)) {
+    els.forEach((el) => { el.classList.add('counted'); countUp(el); });
+    return;
+  }
+  const io = new IntersectionObserver((entries, obs) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      en.target.classList.add('counted');
+      countUp(en.target);
+      obs.unobserve(en.target);
+    }
+  }, { threshold: 0.3 });
+  els.forEach((el) => io.observe(el));
 }
-addEventListener('resize', moveUnderline);
+
 addEventListener('beforeprint', () => revealAll());
 
 /* 스크롤이 시작되면 상단 바에 경계선이 생긴다. 맨 위에서는 배경과 이어져 보인다. */
@@ -385,23 +395,29 @@ function renderAlerts() {
 function renderCorpusStats() {
   const c = state.meta.corpus || {};
   // 여섯 개를 늘어놓으면 어느 것도 눈에 안 들어온다. 네 개로 줄인다.
-  const tiles = [
-    [n(c.papers), '모은 논문'],
-    [n(c.human_papers), '사람에게 한 연구'],
-    [n(c.systematic_papers), '여러 연구 종합'],
-    [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분'],
-  ];
-  $('#corpus-stats').innerHTML = tiles
-    .map(([v, k]) => `<div class="stat"><div class="v num">${v}</div>
-        <div class="k">${esc(k)}</div></div>`)
-    .join('');
+  const big = (v, k) => `<div class="hl-item"><span class="hl-v num" data-count="${v}">0</span>
+      <span class="hl-k">${esc(k)}</span></div>`;
+  $('#corpus-stats').innerHTML = [
+    big(c.papers, '모은 논문'),
+    big(c.human_papers, '사람에게 한 연구'),
+    big(c.systematic_papers, '여러 연구 종합'),
+    `<div class="hl-item"><span class="hl-v num" data-count="${c.ingredients_with_papers}">0</span>
+      <span class="hl-k">논문이 있는 성분 (${n(state.meta.ingredient_count)}종 중)</span></div>`,
+  ].join('');
+  countOnView($('#corpus-stats'));
+
+  $('#tile-outcome-fig').innerHTML = `
+    <div><b class="num">${n(state.outcomes.length)}</b><span>측정 항목</span></div>
+    <div><b class="num">${n(c.human_papers)}</b><span>사람에게 한 연구</span></div>`;
+  $('#tile-about-fig').innerHTML = `
+    <div><b class="num">${n(c.rct_papers)}</b><span>무작위 배정 시험</span></div>
+    <div><b class="num">${n(c.retracted_papers)}</b><span>취소된 논문, 숫자에서 뺌</span></div>`;
 
   const built = c.last_aggregate ? new Date(c.last_aggregate).toLocaleString('ko-KR') : '아직 없음';
   const range = (c.year_min && c.year_max) ? ` · 논문 ${c.year_min}–${c.year_max}년` : '';
-  $('#footer-build').innerHTML = `자료 정리 ${esc(built)}${esc(range)} · `;
+  $('#footer-build').textContent = `자료 정리 ${built}${range} · 논문 정보 Europe PMC, PubMed·NLM`;
 
   $('#about-corpus').innerHTML = `
-    <h3>지금 모아 둔 자료</h3>
     <div class="scroll-x"><table class="plain">
       <tr><th>모은 논문</th><td class="num">${n(c.papers)}</td></tr>
       <tr><th>요약글이 있는 논문</th><td class="num">${n(c.papers)}</td></tr>
@@ -423,7 +439,6 @@ function showTab(name) {
     $('#' + id).hidden = !active;
     $('#tab-' + key).setAttribute('aria-selected', String(active));
   });
-  moveUnderline();
 }
 Object.keys(PANELS).forEach((key) => {
   $('#tab-' + key).addEventListener('click', () => {
@@ -463,6 +478,8 @@ function ingredientCard(it) {
 }
 
 async function loadIngredients({ append = false } = {}) {
+  // 검색어를 치면 숫자 띠와 타일을 치워 결과가 히어로 바로 밑에 오게 한다.
+  $('#panel-ingredient').classList.toggle('searching', !!state.query);
   if (!append) { state.offset = 0; $('#ing-list').innerHTML = '<p class="loading">불러오는 중…</p>'; }
   const params = new URLSearchParams({
     limit: state.pageSize, offset: state.offset, category: state.category, q: state.query,
@@ -498,12 +515,12 @@ async function liveLookup(term, mount) {
     const dc = d.direction_counts || {};
     mount.innerHTML = `
       <div class="note"><b>바로 찾아본 결과</b> — ${esc(d.note)}</div>
-      <div class="stats">
-        <div class="stat"><div class="v num">${n(d.hit_count)}</div><div class="k">데이터베이스 전체</div></div>
-        <div class="stat"><div class="v num">${n(d.fetched)}</div><div class="k">살펴본 논문</div></div>
-        <div class="stat"><div class="v num">${n(d.human)}</div><div class="k">사람에게 한 연구</div></div>
-        <div class="stat"><div class="v num">${n(dc.significant)} / ${n(dc.null)} / ${n(dc.unclear)}</div>
-          <div class="k">차이 있음 / 없음 / 모름</div></div>
+      <div class="hl" style="margin:28px 0 36px">
+        <div class="hl-item"><span class="hl-v num">${n(d.hit_count)}</span><span class="hl-k">데이터베이스 전체</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(d.fetched)}</span><span class="hl-k">살펴본 논문</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(d.human)}</span><span class="hl-k">사람에게 한 연구</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(dc.significant)} / ${n(dc.null)} / ${n(dc.unclear)}</span>
+          <span class="hl-k">차이 있음 / 없음 / 모름</span></div>
       </div>
       ${d.outcomes.length ? `<h3>많이 재 본 항목</h3>${d.outcomes.map((o) =>
         `<div class="orow"><div class="oname">${esc(o.label_ko)}</div>
@@ -522,10 +539,33 @@ function yearChart(byYear) {
   const max = Math.max(...byYear.map((y) => y.count));
   const bars = byYear.map((y) =>
     `<i style="height:${Math.max(3, (y.count / max) * 100)}%" title="${y.year}년 ${y.count}건"></i>`).join('');
-  return `<h2>해마다 나온 논문 수</h2>
-    <div class="yearbox reveal">
-      <div class="years">${bars}</div>
-      <div class="yearlbl"><span>${byYear[0].year}</span><span>${byYear[byYear.length - 1].year}</span></div>
+  return `
+    <section class="band">
+      <div class="inner">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">해마다 나온 논문 수.</h2>
+          <p class="sec-sub">${byYear[0].year}년부터 ${byYear[byYear.length - 1].year}년까지.</p>
+        </div>
+        <div class="reveal">
+          <div class="years">${bars}</div>
+          <div class="yearlbl"><span>${byYear[0].year}</span><span>${byYear[byYear.length - 1].year}</span></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+/** 상세 화면 위에 붙는 두 번째 바. 이름과 구간 링크, 파란 알약 하나. */
+function localNav(name, backLabel, links, cta) {
+  return `
+    <div class="lnav">
+      <div class="lnav-in">
+        <button class="back-crumb" data-back>${esc(backLabel)}</button>
+        <span class="lnav-name">${esc(name)}</span>
+        <div class="lnav-links">
+          ${links.map(([id, label]) => `<a href="#/" data-scroll="${esc(id)}">${esc(label)}</a>`).join('')}
+          ${cta ? `<a class="pill" href="#/" data-scroll="${esc(cta[0])}">${esc(cta[1])}</a>` : ''}
+        </div>
+      </div>
     </div>`;
 }
 
@@ -538,8 +578,8 @@ async function renderIngredient(id) {
   try {
     d = await api('/api/ingredients/' + encodeURIComponent(id));
   } catch (e) {
-    box.innerHTML = `<button class="back" data-back>← 목록으로</button>
-      <div class="empty"><b>${esc(e.message)}</b></div>`;
+    box.innerHTML = `${localNav(id, '성분', [], null)}
+      <section class="band"><div class="inner narrow"><div class="empty"><b>${esc(e.message)}</b></div></div></section>`;
     return;
   }
 
@@ -554,37 +594,69 @@ async function renderIngredient(id) {
   // 영문명과 겹치는 검색어는 빼고 보여 준다 ("Vitamin A · vitamin a, …"는 중복).
   const extra = d.synonyms.filter((x) => x.toLowerCase() !== d.name_en.toLowerCase());
 
-  box.innerHTML = `
-    <button class="back" data-back><span class="arw">←</span> 성분</button>
+  const years = s.year_min ? `${s.year_min}–${s.year_max}` : '—';
 
-    <div class="detail-head reveal">
-      <div class="kicker" data-cat="${esc(d.category || '')}">${esc(d.category_ko)}</div>
-      <h1 class="detail-title">${esc(d.name_ko)}</h1>
-      <div class="detail-sub">${esc(d.name_en)}${extra.length ? ` · ${extra.map(esc).join(', ')}` : ''}</div>
-    </div>
+  box.innerHTML = `
+    ${localNav(d.name_ko, '성분',
+      hasData ? [['sec-measured', '어떤 걸 재 봤나'], ['sec-top', '대표 논문'], ['sec-all', '논문 전부']] : [],
+      hasData ? ['sec-all', '논문 전부 보기'] : null)}
+
+    <section class="band">
+      <div class="inner detail-head reveal">
+        <div class="kicker" data-cat="${esc(d.category || '')}">${esc(d.category_ko)}</div>
+        <h1 class="detail-title">${esc(d.name_ko)}</h1>
+        <div class="detail-sub">${esc(d.name_en)}${extra.length ? ` · ${extra.map(esc).join(', ')}` : ''}</div>
+        ${hasData ? `<p class="lede">${esc(lede)}</p>
+          ${small ? `<div class="smallprint">${esc(small)}</div>` : ''}` : ''}
+      </div>
+    </section>
 
     ${hasData ? `
-      <div class="pull reveal">
-        <span class="v num" data-count="${s.human}">0</span>
-        <span class="k">사람에게 한 연구 · 전체 ${n(s.total)}건 중</span>
-      </div>
-      <p class="lede reveal">${esc(lede)}</p>
-      ${small ? `<div class="smallprint reveal">${esc(small)}</div>` : ''}
+      <section class="band dark">
+        <div class="inner">
+          <div class="pull reveal">
+            <span class="v num" data-count="${s.human}">0</span>
+            <span class="k">사람에게 한 연구 · 전체 ${n(s.total)}건 중</span>
+          </div>
+          <div class="hl reveal">
+            <div class="hl-item"><span class="hl-v num" data-count="${s.systematic}">0</span><span class="hl-k">여러 연구 종합</span></div>
+            <div class="hl-item"><span class="hl-v num" data-count="${s.rct}">0</span><span class="hl-k">무작위 배정 시험</span></div>
+            <div class="hl-item"><span class="hl-v num">${esc(years)}</span><span class="hl-k">논문이 나온 해</span></div>
+          </div>
+        </div>
+      </section>
 
-      <h2>어떤 걸 재 봤나</h2>
-      ${LEGEND}
-      ${d.outcomes.length
-        ? `<div class="bars reveal">${d.outcomes.map((o) => directionBar(o, maxHuman)).join('')}</div>`
-        : '<p class="dim" style="text-align:center">사람에게 한 연구에서 잡힌 항목이 없습니다.</p>'}
+      <section class="band" id="sec-measured">
+        <div class="inner">
+          <div class="sec-head reveal">
+            <h2 class="sec-title">어떤 걸 재 봤나.</h2>
+            <p class="sec-sub">사람에게 한 연구에서 측정한 항목과, 결과가 어떻게 갈렸는지.</p>
+          </div>
+          ${LEGEND}
+          ${d.outcomes.length
+            ? `<div class="bars reveal">${d.outcomes.map((o) => directionBar(o, maxHuman)).join('')}</div>`
+            : '<p class="dim" style="text-align:center">사람에게 한 연구에서 잡힌 항목이 없습니다.</p>'}
+        </div>
+      </section>
 
-      <h2>대표 논문</h2>
-      <p class="count">믿을 만한 연구부터 보여줍니다 —
-        여러 연구 종합 → 논문 모아 정리 → 무작위 배정 시험 순.</p>
-      ${d.top_papers.map((p) => paperItem(p, { showEvidence: false })).join('')}
+      <section class="band alt" id="sec-top">
+        <div class="inner">
+          <div class="sec-head reveal">
+            <h2 class="sec-title">대표 논문.</h2>
+            <p class="sec-sub">믿을 만한 연구부터 — 여러 연구 종합 → 논문 모아 정리 → 무작위 배정 시험 순.</p>
+          </div>
+          ${d.top_papers.map((p) => paperItem(p, { showEvidence: false })).join('')}
+        </div>
+      </section>
 
       ${yearChart(d.by_year)}
 
-      <h2>논문 전부 보기</h2>
+      <section class="band alt" id="sec-all">
+        <div class="inner">
+          <div class="sec-head reveal">
+            <h2 class="sec-title">논문 전부 보기.</h2>
+            <p class="sec-sub">측정 항목, 연구 대상, 연구 방식, 결과로 거를 수 있습니다.</p>
+          </div>
       <div class="filters">
         <select id="f-outcome" aria-label="측정 항목으로 거르기">
           <option value="">측정 항목 전체</option>
@@ -609,27 +681,32 @@ async function renderIngredient(id) {
         </select>
       </div>
       <div id="paper-list"></div>
-      <div class="btnrow">
+      <div class="btnrow center">
         <button class="btn" id="p-prev">← 이전</button>
         <span id="p-info" class="dim"></span>
         <button class="btn" id="p-next">다음 →</button>
-      </div>`
-    : `
-      <div class="empty" style="margin-top:26px">
-        <b>${esc(d.name_ko)} 관련 논문을 아직 못 모았습니다.</b><br>
-        아직 아무도 연구하지 않았거나, 여기 못 모았을 수 있습니다.
-        <b>“효과가 없다”는 뜻이 아닙니다.</b>
-        <div class="btnrow">
-          <button class="btn primary" id="live-btn2">논문 데이터베이스에서 바로 찾아보기</button>
+      </div>
         </div>
-        <div id="live-result2"></div>
-      </div>`}`;
+      </section>`
+    : `
+      <section class="band alt tight">
+        <div class="inner narrow">
+          <div class="empty">
+            <b>${esc(d.name_ko)} 관련 논문을 아직 못 모았습니다.</b><br>
+            아직 아무도 연구하지 않았거나, 여기 못 모았을 수 있습니다.
+            <b>“효과가 없다”는 뜻이 아닙니다.</b>
+            <div class="btnrow center">
+              <button class="btn primary" id="live-btn2">논문 데이터베이스에서 바로 찾아보기</button>
+            </div>
+            <div id="live-result2"></div>
+          </div>
+        </div>
+      </section>`}`;
 
   window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
   reveal(box);
   growBars(box);
-  const pull = $('.pull .v', box);
-  if (pull) countUp(pull);
+  countOnView(box);
 
   if (!hasData) {
     $('#live-btn2')?.addEventListener('click', () =>
@@ -700,6 +777,7 @@ function renderOutcomeGrid(filter = '') {
       ${o.family_ko ? `<span class="ofam">${esc(o.family_ko)}</span>` : ''}
       <span class="ol">${esc(o.label_ko)}</span>
       <span class="oc num">성분 ${n(o.ingredients)}종 · 사람 대상 연구 ${n(o.human)}건</span>
+      <span class="more sm">성분 보기</span>
     </button>`).join('')
     : `<div class="empty">“${esc(filter)}”에 해당하는 항목이 없습니다.</div>`;
   reveal($('#o-grid'), 22);
@@ -714,21 +792,46 @@ async function renderOutcome(id) {
   try {
     d = await api('/api/outcomes/' + encodeURIComponent(id) + '?min_human=1&limit=80');
   } catch (e) {
-    box.innerHTML = `<button class="back" data-back>← 목록으로</button>
-      <div class="empty"><b>${esc(e.message)}</b></div>`;
+    box.innerHTML = `${localNav(id, '효능', [], null)}
+      <section class="band"><div class="inner narrow"><div class="empty"><b>${esc(e.message)}</b></div></div></section>`;
     return;
   }
   const maxHuman = Math.max(1, ...d.ingredients.map((i) => i.human));
 
+  // 상세 파일은 성분 수에 상한이 있어, 건수는 목록 색인의 값을 우선한다.
+  const listed = state.outcomes.find((o) => o.id === id) || {};
+  const ingCount = listed.ingredients ?? d.ingredients.length;
+  const humanTotal = listed.human ?? d.ingredients.reduce((a, i) => a + (i.human || 0), 0);
+
   box.innerHTML = `
-    <button class="back" data-back><span class="arw">←</span> 효능</button>
-    <div class="detail-head reveal">
-      <div class="kicker">${esc(d.family_ko || '측정 항목')}</div>
-      <h1 class="detail-title">${esc(d.label_ko)}</h1>
-      <div class="detail-sub">${esc(d.label_en)}</div>
-    </div>
-    <p class="lede reveal">이걸 실제로 재 본 사람 연구가 있는 성분입니다.</p>
-    <div class="smallprint reveal" style="margin-bottom:34px">${esc(d.note)}</div>
+    ${localNav(d.label_ko, '효능',
+      [['sec-ings', '재 본 성분'], ['sec-top', '대표 논문']], ['sec-ings', '성분 보기'])}
+
+    <section class="band">
+      <div class="inner detail-head reveal">
+        <div class="kicker">${esc(d.family_ko || '측정 항목')}</div>
+        <h1 class="detail-title">${esc(d.label_ko)}</h1>
+        <div class="detail-sub">${esc(d.label_en)}</div>
+        <p class="lede">이걸 실제로 재 본 사람 연구가 있는 성분입니다.</p>
+        <div class="smallprint">${esc(d.note)}</div>
+      </div>
+    </section>
+
+    <section class="band dark">
+      <div class="inner">
+        <div class="hl reveal" style="grid-template-columns:repeat(2,1fr)">
+          <div class="hl-item"><span class="hl-v num" data-count="${ingCount}">0</span><span class="hl-k">재 본 성분</span></div>
+          <div class="hl-item"><span class="hl-v num" data-count="${humanTotal}">0</span><span class="hl-k">사람에게 한 연구</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="sec-ings">
+      <div class="inner">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">재 본 성분.</h2>
+          <p class="sec-sub">사람에게 한 연구 건수 순입니다. 순서는 효과의 우열이 아닙니다.</p>
+        </div>
     ${LEGEND}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
       <div class="orow">
@@ -742,12 +845,22 @@ async function renderOutcome(id) {
         <div class="onum">사람 ${n(i.human)} · 전체 ${n(i.total)}</div>
       </div>`).join('') + `</div>`
       : '<div class="empty">이걸 재 본 사람 연구를 아직 못 모았습니다.</div>'}
+      </div>
+    </section>
 
-    <h2>대표 논문</h2>
-    ${d.top_papers.map((p) => paperItem(p)).join('') || '<p class="dim">없습니다.</p>'}`;
+    <section class="band alt" id="sec-top">
+      <div class="inner">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">대표 논문.</h2>
+          <p class="sec-sub">이 항목을 재 본 논문 가운데 믿을 만한 연구부터.</p>
+        </div>
+        ${d.top_papers.map((p) => paperItem(p)).join('') || '<p class="dim" style="text-align:center">없습니다.</p>'}
+      </div>
+    </section>`;
   window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
   reveal(box);
   growBars(box);
+  countOnView(box);
 }
 
 /* ── 라우팅 ──────────────────────────────────────────────────────────────── */
@@ -782,6 +895,14 @@ addEventListener('hashchange', route);
 /* ── 이벤트 위임 ─────────────────────────────────────────────────────────── */
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-home]')) { location.hash = '#/'; return; }
+
+  // 두 번째 바의 구간 링크. 해시를 바꾸면 라우터가 목록으로 되돌리므로 직접 옮긴다.
+  const jump = e.target.closest('[data-scroll]');
+  if (jump) {
+    e.preventDefault();
+    $('#' + jump.dataset.scroll)?.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
 
   const back = e.target.closest('[data-back]');
   if (back) { history.length > 1 ? history.back() : (location.hash = '#/'); return; }
@@ -859,13 +980,12 @@ async function bootstrap() {
     return;
   }
   renderAlerts();
-  renderCorpusStats();
-  renderCategoryChips();
-
   try {
     state.outcomes = (await api('/api/outcomes')).items;
     renderOutcomeGrid('');
   } catch { /* 지표 목록 실패는 성분 검색을 막지 않는다 */ }
+  renderCorpusStats();
+  renderCategoryChips();
 
   if (state.meta.corpus_ready && state.meta.corpus.papers) {
     await loadIngredients();
@@ -877,6 +997,5 @@ async function bootstrap() {
       논문을 모으면 이 화면이 실제 자료로 채워집니다.</div>`;
   }
   route();
-  moveUnderline();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveUnderline);
+  reveal(document);
 })();
