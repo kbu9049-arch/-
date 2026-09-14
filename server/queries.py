@@ -317,60 +317,60 @@ def ingredient_detail(conn, ref: Reference, iid: str, *, top_papers: int = 8) ->
 def build_summary(ing: dict, st: dict, outcomes: list[dict], papers: list[dict]) -> dict:
     """집계된 숫자만으로 한국어 요약을 만든다. 새로운 주장은 넣지 않는다."""
     if not st["total"]:
-        note = ("논문이 없다는 건 '효과가 없다'는 뜻이 아니라 "
-                "'아직 여기 못 모았다'는 뜻입니다.")
+        note = ("논문이 없다는 것은 '효과가 없다'는 뜻이 아니라 "
+                "'아직 여기에 수집되지 않았다'는 뜻입니다.")
         return {
-            "headline": f"{ing['name_ko']}은(는) 아직 모은 논문이 없습니다.",
+            "headline": f"{ing['name_ko']}은(는) 아직 수집된 논문이 없습니다.",
             "lines": [note], "lede": note, "small": [],
         }
     lines = [
-        f"모은 논문 {st['total']:,}건 중 사람에게 한 연구는 {st['human']:,}건입니다."
+        f"수집한 논문 {st['total']:,}건 중 사람 대상 연구는 {st['human']:,}건입니다."
     ]
     if st["systematic"] or st["rct"]:
         lines.append(
-            f"믿을 만한 연구로는 여러 연구 종합 {st['systematic']:,}건, "
-            f"무작위 배정 시험 {st['rct']:,}건이 있습니다.")
+            f"근거 수준이 높은 연구로는 메타분석 {st['systematic']:,}건, "
+            f"무작위 대조 시험 {st['rct']:,}건이 있습니다.")
     if st["year_min"] and st["year_max"]:
-        lines.append(f"논문이 나온 해는 {st['year_min']}년부터 {st['year_max']}년까지입니다.")
+        lines.append(f"논문 발표 연도는 {st['year_min']}년부터 {st['year_max']}년까지입니다.")
 
     top = [o for o in outcomes if o["human"] > 0][:3]
     if top:
         parts = [f"{o['label_ko']} {o['human']:,}건" for o in top]
-        lines.append("사람에게 한 연구가 가장 많이 재 본 것은 " + ", ".join(parts) + " 입니다.")
+        lines.append("사람 대상 연구에서 가장 많이 측정된 항목은 " + ", ".join(parts) + "입니다.")
         o = top[0]
         lines.append(
             f"이 중 {o['label_ko']} 연구 {o['human']:,}건은 "
-            f"차이 있었음 {o['human_significant']:,}건, "
-            f"차이 없었음 {o['human_null']:,}건, "
-            f"알 수 없음 {o['human_unclear']:,}건으로 갈립니다.")
+            f"차이 있음 {o['human_significant']:,}건, "
+            f"차이 없음 {o['human_null']:,}건, "
+            f"불분명 {o['human_unclear']:,}건으로 나뉩니다.")
     else:
-        lines.append("사람에게 한 연구에서 잡힌 항목이 아직 없습니다.")
+        lines.append("사람 대상 연구에서 분류된 측정 항목이 아직 없습니다.")
 
     if st["retracted"]:
-        lines.append(f"나중에 취소된 논문 {st['retracted']:,}건은 숫자에서 뺐습니다.")
+        lines.append(f"철회된 논문 {st['retracted']:,}건은 집계에서 제외했습니다.")
 
     # 화면 상단에 크게 놓을 한 문단(lede)과, 그 아래 작게 붙일 부속 정보(small).
     # 논문 총계·사람 대상 수는 표제 숫자와 표에서 이미 보이므로 lede 에서 뺀다.
     if top:
         o = top[0]
-        lede = (f"가장 많이 재 본 것은 {o['label_ko']}입니다. "
-                f"사람에게 한 연구 {o['human']:,}건 중에 "
+        lede = (f"가장 많이 측정된 항목은 {o['label_ko']}입니다. "
+                f"사람 대상 연구 {o['human']:,}건 중 "
                 f"차이가 있었다는 논문이 {o['human_significant']:,}건, "
                 f"차이가 없었다는 논문이 {o['human_null']:,}건입니다.")
     else:
-        lede = "사람에게 한 연구에서 잡힌 항목이 아직 없습니다."
+        lede = "사람 대상 연구에서 분류된 측정 항목이 아직 없습니다."
 
     small = []
     if st["year_min"] and st["year_max"]:
         small.append(f"{st['year_min']}–{st['year_max']}년")
     if st["systematic"]:
-        small.append(f"여러 연구 종합 {st['systematic']:,}")
+        small.append(f"메타분석 {st['systematic']:,}")
     if st["rct"]:
-        small.append(f"무작위 배정 시험 {st['rct']:,}")
+        small.append(f"무작위 대조 시험 {st['rct']:,}")
     if st["preclinical"]:
         small.append(f"동물·세포 {st['preclinical']:,}")
     if st["retracted"]:
-        small.append(f"취소된 논문 {st['retracted']:,} (숫자에서 뺌)")
+        small.append(f"철회된 논문 {st['retracted']:,} (집계 제외)")
 
     headline = (f"{ing['name_ko']}({ing['name_en']}) — 논문 {st['total']:,}건, "
                 f"사람 {st['human']:,}건")
@@ -497,7 +497,7 @@ def outcome_detail(conn, ref: Reference, oid: str, *, min_human: int = 1,
         "measures": oc["measures"][:8],
         "ingredients": items,
         "top_papers": top,
-        "note": "연구가 몇 건인지로만 줄 세웠습니다. 위에 있다고 효과가 큰 게 아닙니다.",
+        "note": "연구 건수 순으로만 정렬했습니다. 위에 있다고 효과가 더 큰 것은 아닙니다.",
     }
 
 

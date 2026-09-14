@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>성분 근거 찾기</title>
-<meta name="description" content="광고에서 본 성분에 어떤 연구가 얼마나 있는지, 거꾸로 원하는 효능을 재 본 성분은 무엇인지 논문 링크와 함께 찾아봅니다.">
+<meta name="description" content="광고에서 본 성분에 어떤 연구가 얼마나 있는지, 반대로 원하는 효능을 연구한 성분은 무엇인지 논문 링크와 함께 확인합니다.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
@@ -22,7 +22,7 @@
       <button class="tab" id="tab-outcome" role="tab" aria-selected="false" aria-controls="panel-outcome">효능</button>
       <button class="tab" id="tab-about" role="tab" aria-selected="false" aria-controls="panel-about">데이터</button>
     </nav>
-    <button id="theme-toggle" type="button" aria-label="화면 밝기 전환">
+    <button id="theme-toggle" type="button" aria-label="다크 모드 전환">
       <svg viewBox="0 0 24 24" aria-hidden="true" width="17" height="17">
         <path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M18.4 5.6l-1.1 1.1M6.7 17.3l-1.1 1.1"/>
         <circle cx="12" cy="12" r="4"/>
@@ -31,7 +31,7 @@
   </div>
 </header>
 
-<div class="ribbon">이 화면은 의사의 조언이 아닙니다. 병을 진단하거나 치료·예방하는 데 쓸 수 없습니다.
+<div class="ribbon">이 사이트는 의학적 조언을 제공하지 않습니다. 질병의 진단·치료·예방 목적으로 사용할 수 없습니다.
   <a href="#/about">자세히 보기 ›</a></div>
 
 <main>
@@ -43,8 +43,8 @@
 
       <section class="band">
         <div class="inner hero">
-          <h1 class="hero-title">광고에서 본 그 성분,<br>논문은 뭐라고 하나.</h1>
-          <p class="hero-sub">어떤 걸 재 본 연구가 몇 건이고 결과가 어떻게 갈렸는지, 논문 링크와 함께.</p>
+          <h1 class="hero-title">광고에서 본 그 성분,<br>논문은 뭐라고 할까.</h1>
+          <p class="hero-sub">어떤 효능을 연구한 논문이 몇 건인지, 결과는 어떻게 나뉘는지 논문 링크와 함께 보여드립니다.</p>
           <div class="sbox">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
             <input id="q" type="search" autocomplete="off" spellcheck="false"
@@ -53,7 +53,7 @@
           </div>
           <div class="hero-links">
             <a class="more" href="#/outcome">효능으로 찾기</a>
-            <a class="more" href="#/about">숫자는 어디서 왔나</a>
+            <a class="more" href="#/about">데이터 출처 보기</a>
           </div>
         </div>
       </section>
@@ -61,8 +61,8 @@
       <section class="band dark">
         <div class="inner">
           <div class="sec-head reveal">
-            <h2 class="sec-title">지어낸 숫자는 없습니다.</h2>
-            <p class="sec-sub">논문 데이터베이스에서 받아 온 논문을 하나씩 실제로 센 값입니다.</p>
+            <h2 class="sec-title">모든 숫자는 실제 집계입니다.</h2>
+            <p class="sec-sub">공개 논문 데이터베이스에서 가져온 논문을 한 건씩 세어 낸 값입니다.</p>
           </div>
           <div class="hl reveal" id="corpus-stats"></div>
         </div>
@@ -71,8 +71,8 @@
       <section class="band" id="list-band">
         <div class="inner">
           <div class="sec-head list-head">
-            <h2 class="sec-title">성분부터 찾기.</h2>
-            <p class="sec-sub">사람에게 한 연구가 많은 순입니다. 순서는 효과의 우열이 아닙니다.</p>
+            <h2 class="sec-title">성분으로 찾기.</h2>
+            <p class="sec-sub">사람 대상 연구가 많은 순서입니다. 순서가 효과의 우열을 뜻하지는 않습니다.</p>
           </div>
           <div class="chips" id="cat-chips"></div>
           <p class="count" id="ing-count" role="status" aria-live="polite"></p>
@@ -83,14 +83,14 @@
 
       <div class="tiles">
         <div class="tile reveal">
-          <h2 class="tile-title">찾는 효능이 먼저라면.</h2>
-          <p class="tile-sub">혈당, 수면, 관절처럼 원하는 효능을 고르면 그걸 실제로 재 본 사람 연구가 있는 성분이 나옵니다.</p>
+          <h2 class="tile-title">원하는 효능이 먼저라면.</h2>
+          <p class="tile-sub">혈당, 수면, 관절처럼 관심 있는 효능을 고르면 그 효능을 사람 대상 연구로 확인한 성분이 나옵니다.</p>
           <a class="more" href="#/outcome">효능으로 찾기</a>
           <div class="tile-figure" id="tile-outcome-fig"></div>
         </div>
         <div class="tile dark reveal">
-          <h2 class="tile-title">숫자는 어디서 왔나.</h2>
-          <p class="tile-sub">논문은 Europe PMC 와 PubMed 에서 그대로 받아 오고, 결과는 정해 둔 규칙으로 가려냅니다. 근거 문장을 항상 함께 보여줍니다.</p>
+          <h2 class="tile-title">데이터는 어디서 왔을까.</h2>
+          <p class="tile-sub">논문은 Europe PMC와 PubMed에서 그대로 가져오고, 결과는 미리 정한 규칙으로 분류합니다. 분류 근거가 된 문장을 항상 함께 보여드립니다.</p>
           <a class="more" href="#/about">데이터 설명 보기</a>
           <div class="tile-figure" id="tile-about-fig"></div>
         </div>
@@ -105,8 +105,8 @@
     <div id="outcome-browse">
       <section class="band">
         <div class="inner hero">
-          <h1 class="hero-title">찾는 효능이<br>먼저라면.</h1>
-          <p class="hero-sub">효능을 고르면, 그걸 실제로 재 본 사람 연구가 있는 성분이 나옵니다.</p>
+          <h1 class="hero-title">원하는 효능이<br>먼저라면.</h1>
+          <p class="hero-sub">효능을 고르면 그 효능을 사람 대상 연구로 확인한 성분이 나옵니다.</p>
           <div class="sbox">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
             <input id="oq" type="search" autocomplete="off" spellcheck="false"
@@ -126,8 +126,8 @@
   <section id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
     <section class="band">
       <div class="inner hero">
-        <h1 class="hero-title">숫자는<br>어디서 왔나.</h1>
-        <p class="hero-sub">누구나 볼 수 있는 논문 데이터베이스에서 그대로 받아 와, 하나씩 실제로 센 값입니다. 어림잡거나 손댄 숫자는 없습니다.</p>
+        <h1 class="hero-title">데이터는<br>어디서 왔을까.</h1>
+        <p class="hero-sub">누구나 볼 수 있는 공개 논문 데이터베이스에서 그대로 가져와 한 건씩 세어 낸 값입니다. 추정하거나 손댄 숫자는 없습니다.</p>
       </div>
     </section>
 
@@ -135,65 +135,65 @@
       <div class="inner">
         <div class="facts">
           <div class="fact reveal">
-            <h3>논문은 어디서 가져오나</h3>
+            <h3>논문 출처</h3>
             <ul>
               <li><a href="https://europepmc.org/RestfulWebService" target="_blank" rel="noopener">Europe PMC Articles RESTful API</a>
-                  — 주로 여기서 받아 옵니다. 제목, 요약글, 분야 태그, 연구 방식, 인용 횟수를 가져옵니다.</li>
+                  — 주요 출처입니다. 제목, 초록, 분야 태그(MeSH), 연구 유형, 인용 횟수를 가져옵니다.</li>
               <li><a href="https://www.ncbi.nlm.nih.gov/books/NBK25501/" target="_blank" rel="noopener">NCBI E-utilities (PubMed)</a>
-                  — 여기서도 받아 올 수 있습니다.</li>
-              <li>논문 제목을 누르면 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a> 의 원래 논문으로 갑니다.</li>
+                  — 보조 출처로도 쓸 수 있습니다.</li>
+              <li>논문 제목을 누르면 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a>의 원문 페이지로 이동합니다.</li>
             </ul>
           </div>
           <div class="fact reveal">
             <h3>성분 목록과 측정 항목</h3>
-            <p>성분의 한글 이름과 분류는 국내에서 쓰는 건강기능식품 원료 이름을 보고 <b>직접 정리</b>했습니다.
-              다만 논문을 찾고 성분과 이어 붙이는 일은 <b>영어 단어로만</b> 하기 때문에, 화면의 숫자는
-              한글 이름을 어떻게 붙였는지와 상관없이 논문 데이터베이스가 준 그대로입니다.
-              측정 항목 30가지는 의학계가 쓰는 표준 용어와, 분야마다 쓰는 대표 측정 방법을 기준으로 나눴습니다.</p>
+            <p>성분의 한글 이름과 분류는 국내 건강기능식품 원료 명칭을 참고해 <b>직접 정리</b>했습니다.
+              다만 논문 검색과 성분 매칭은 <b>영문 검색어로만</b> 이루어지므로, 화면의 숫자는
+              한글 이름을 어떻게 붙였는지와 무관하게 논문 데이터베이스가 돌려준 값 그대로입니다.
+              측정 항목 30가지는 의학 표준 용어(MeSH)와 분야별 대표 측정 도구를 기준으로 나눴습니다.</p>
           </div>
           <div class="fact reveal">
-            <h3>결과는 어떻게 가려내나</h3>
-            <p>논문 요약글에 어떤 표현이 들어 있는지 보고 <b>정해 둔 규칙</b>으로 자동으로 나눕니다.
-              AI가 알아서 판단하는 게 아니라, 미리 적어 둔 규칙이 정해진 표현을 찾는 방식입니다.
-              그래서 <b>어떤 문장을 보고 그렇게 나눴는지</b>를 항상 같이 보여줍니다.
-              결과는 “효과 있다 / 없다”가 아니라 세 가지로만 나눕니다.</p>
+            <h3>결과를 나누는 방법</h3>
+            <p>논문 초록에 어떤 표현이 들어 있는지를 보고 <b>미리 정한 규칙</b>에 따라 자동으로 분류합니다.
+              AI가 스스로 판단하는 것이 아니라, 정해진 표현을 규칙으로 찾아내는 방식입니다.
+              그래서 <b>어떤 문장을 근거로 분류했는지</b>를 항상 함께 보여드립니다.
+              결과는 “효과 있음 / 없음”이 아니라 다음 세 가지로만 나눕니다.</p>
             <ul style="margin-top:12px">
-              <li><b>차이 있었음</b> — 그 논문이 “의미 있는 차이가 있었다”고 밝혔습니다.
-                  좋아졌는지 나빠졌는지, 몸으로 느낄 만한 차이인지까지는 가리지 않습니다.</li>
-              <li><b>차이 없었음</b> — 가짜약을 먹은 사람들과 견줘 이렇다 할 차이가 없었습니다.</li>
-              <li><b>알 수 없음</b> — 논문 요약글만으로는 어느 쪽인지 가릴 수 없었습니다.</li>
+              <li><b>차이 있음</b> — 논문이 “통계적으로 의미 있는 차이가 있었다”고 밝힌 경우입니다.
+                  좋아진 것인지 나빠진 것인지, 체감할 만한 차이인지까지는 구분하지 않습니다.</li>
+              <li><b>차이 없음</b> — 위약(가짜약) 그룹과 비교해 의미 있는 차이가 없었던 경우입니다.</li>
+              <li><b>불분명</b> — 초록만으로는 어느 쪽인지 판단할 수 없었던 경우입니다.</li>
             </ul>
           </div>
           <div class="fact reveal">
-            <h3>화면의 색은 무슨 뜻인가</h3>
-            <p>화면은 거의 흑백입니다. 색은 딱 두 군데만 씁니다.</p>
+            <h3>화면의 색이 뜻하는 것</h3>
+            <p>화면은 대부분 흑백입니다. 색은 두 곳에만 씁니다.</p>
             <ul style="margin-top:12px">
-              <li><b>결과 막대의 세 가지 색</b>에만 뜻이 있습니다 — 파랑은 차이 있었음,
-                  주황은 차이 없었음, 회색은 알 수 없음. 막대마다 <b>숫자와 글자 라벨</b>을 반드시 함께 둡니다.</li>
-              <li><b>성분 분류 이름표</b>(비타민·미네랄 같은 것)에는 분류마다 다른 색을 줬습니다.
-                  지금 어느 갈래를 보고 있는지 알려 줄 뿐, 색이 좋다·나쁘다를 뜻하지 않습니다.
-                  이름표에는 <b>언제나 한글 이름</b>이 함께 붙습니다.</li>
+              <li><b>결과 막대의 세 가지 색</b>에만 의미가 있습니다 — 파랑은 차이 있음,
+                  주황은 차이 없음, 회색은 불분명. 막대마다 <b>숫자와 글자 라벨</b>을 반드시 함께 표시합니다.</li>
+              <li><b>성분 분류 태그</b>(비타민·미네랄 등)에는 분류마다 다른 색을 썼습니다.
+                  지금 어느 분류를 보고 있는지 알려 줄 뿐, 색이 좋고 나쁨을 뜻하지는 않습니다.
+                  태그에는 <b>항상 한글 이름</b>이 함께 붙습니다.</li>
             </ul>
           </div>
           <div class="fact reveal">
-            <h3>볼 때 알아두면 좋은 것</h3>
+            <h3>볼 때 알아 두면 좋은 점</h3>
             <ul>
-              <li><b>연구가 없다 ≠ 효과가 없다.</b> 논문이 안 나온다는 건 아직 아무도 연구하지
-                  않았거나, 여기 못 모았다는 뜻입니다.</li>
-              <li><b>효과 없다는 연구는 잘 안 실립니다.</b> 그래서 “차이 있었음”의 비율이
+              <li><b>연구가 없다 ≠ 효과가 없다.</b> 논문이 나오지 않는다는 것은 아직 연구되지
+                  않았거나, 여기에 아직 모이지 않았다는 뜻입니다.</li>
+              <li><b>효과가 없다는 연구는 잘 발표되지 않습니다.</b> 그래서 “차이 있음”의 비율이
                   실제보다 높아 보일 수 있습니다.</li>
-              <li><b>논문이 많다고 믿을 만한 건 아닙니다.</b> 허술한 논문 100건보다
-                  잘 만든 큰 시험 1건이 더 셀 수 있습니다.</li>
-              <li><b>나중에 취소된 논문</b>은 따로 표시하고 숫자에서 뺍니다.</li>
+              <li><b>논문이 많다고 더 믿을 만한 것은 아닙니다.</b> 허술한 논문 100건보다
+                  잘 설계된 대규모 시험 1건이 더 중요할 수 있습니다.</li>
+              <li><b>철회된 논문</b>은 따로 표시하고 집계에서 제외합니다.</li>
             </ul>
           </div>
           <div class="fact reveal">
             <h3>이 도구가 하지 않는 것</h3>
             <ul>
               <li>“이 성분은 ○○에 효과가 있다”고 <b>판정하지 않습니다.</b></li>
-              <li>성분에 <b>점수·등급·순위를 매기지 않습니다.</b> 연구 건수만 보여줍니다.</li>
-              <li>논문 제목과 인용 문장은 <b>번역하지 않습니다.</b> 옮기다 뜻이 달라지면 근거로서 값어치가 없어집니다.</li>
-              <li>데이터가 없을 때 <b>빈칸을 메우지 않습니다.</b></li>
+              <li>성분에 <b>점수·등급·순위를 매기지 않습니다.</b> 연구 건수만 보여드립니다.</li>
+              <li>논문 제목과 인용 문장은 <b>번역하지 않습니다.</b> 번역 과정에서 뜻이 달라지면 근거로서의 가치가 사라지기 때문입니다.</li>
+              <li>데이터가 없을 때 <b>빈칸을 채워 넣지 않습니다.</b></li>
             </ul>
           </div>
         </div>
@@ -202,7 +202,7 @@
 
     <section class="band">
       <div class="inner narrow">
-        <div class="sec-head"><h2 class="sec-title">지금 모아 둔 자료.</h2></div>
+        <div class="sec-head"><h2 class="sec-title">현재 수집된 자료.</h2></div>
         <div id="about-corpus"></div>
       </div>
     </section>
@@ -212,7 +212,7 @@
 <footer>
   <div class="foot-in">
     <div class="foot-legal">
-      <p>이 화면은 의사의 조언이 아닙니다. 질병의 진단·치료·예방을 목적으로 사용할 수 없습니다. 건강 관련 판단은 의사·약사와 상의하세요.</p>
+      <p>이 사이트는 의학적 조언을 제공하지 않습니다. 질병의 진단·치료·예방 목적으로 사용할 수 없습니다. 건강에 관한 판단은 의사·약사와 상의하세요.</p>
       <p>화면의 모든 건수는 저장된 논문 레코드를 실제로 센 값이며, 연구 건수는 효과의 크기나 순위가 아닙니다. 연구가 없다는 것은 효과가 없다는 뜻이 아닙니다.</p>
       <p id="footer-build"></p>
     </div>

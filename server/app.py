@@ -70,10 +70,10 @@ def api_meta():
         "ingredient_count": len(REF.ingredients),
         "live_lookup": LIVE_ENABLED,
         "disclaimer": {
-            "not_medical_advice": "이 서비스는 의학적 조언이 아닙니다. 건강 관련 결정은 "
+            "not_medical_advice": "이 서비스는 의학적 조언을 제공하지 않습니다. 건강에 관한 결정은 "
                                   "의사·약사와 상의하세요.",
             "no_ranking": "성분에 점수나 등급을 매기지 않습니다. 목록 순서는 연구 '건수' 순이며 "
-                          "효과의 우열이 아닙니다.",
+                          "효과의 우열을 뜻하지 않습니다.",
             "publication_bias": "효과가 없다는 결과는 상대적으로 덜 출판되는 경향(출판 편향)이 "
                                 "있어, 유의한 결과의 비율이 실제보다 높게 보일 수 있습니다.",
             "auto_classification": "연구유형·결과지표·결과방향은 초록 문구에 대한 규칙 기반 "

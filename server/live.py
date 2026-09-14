@@ -29,7 +29,7 @@ class LiveLookup:
     def search(self, term: str, limit: int = 40) -> dict:
         term = (term or "").strip()
         if not self.enabled:
-            return {"available": False, "reason": "실시간 조회가 꺼져 있습니다.", "term": term}
+            return {"available": False, "reason": "실시간 검색이 꺼져 있습니다.", "term": term}
         if len(term) < 2:
             return {"available": False, "reason": "검색어가 너무 짧습니다.", "term": term}
 
@@ -46,7 +46,7 @@ class LiveLookup:
             page, hit_count = [], 0
         except Exception as e:
             return {"available": False, "term": term,
-                    "reason": f"문헌 DB 에 연결하지 못했습니다: {e}"}
+                    "reason": f"논문 데이터베이스에 연결하지 못했습니다: {e}"}
 
         papers, direction_counts, outcome_counts = [], {"significant": 0, "null": 0, "unclear": 0}, {}
         human = 0
@@ -91,8 +91,8 @@ class LiveLookup:
                  for oid, v in outcome_counts.items()),
                 key=lambda o: (-o["human"], -o["total"]))[:8],
             "papers": papers[:20],
-            "note": "색인에 없는 검색어라 문헌 DB 에 실시간으로 질의한 결과입니다. "
-                    "가져온 상위 일부만 분석했으므로 색인된 성분의 통계와 직접 비교하지 마세요.",
+            "note": "목록에 없는 검색어라 논문 데이터베이스에 실시간으로 검색한 결과입니다. "
+                    "상위 일부만 분석했으므로 목록에 있는 성분의 통계와 직접 비교하지 마세요.",
         }
         with _LOCK:
             _CACHE[key] = (time.time(), payload)

@@ -20,12 +20,12 @@ from dataclasses import dataclass, field
 # 화면에 나가는 말은 연구 용어를 모르는 사람이 그대로 읽을 수 있어야 한다.
 # 정식 용어를 쓰고 설명을 따로 띄우는 대신, 말 자체를 쉬운 쪽으로 고른다.
 STUDY_TYPES = {
-    "meta_analysis":     ("여러 연구 종합", 6),
-    "systematic_review": ("논문 모아 정리", 5),
-    "rct":               ("무작위 배정 시험", 4),
-    "clinical_trial":    ("사람 대상 시험", 3),
+    "meta_analysis":     ("메타분석", 6),
+    "systematic_review": ("체계적 문헌고찰", 5),
+    "rct":               ("무작위 대조 시험", 4),
+    "clinical_trial":    ("임상시험", 3),
     "observational":     ("관찰 연구", 2),
-    "review":            ("해설 글", 1),
+    "review":            ("종설(리뷰)", 1),
     "preclinical":       ("동물·세포 실험", 0),
     "other":             ("기타", 0),
 }
@@ -34,13 +34,13 @@ SUBJECTS = {
     "human": "사람",
     "animal": "동물",
     "invitro": "세포·시험관",
-    "unknown": "대상 모름",
+    "unknown": "대상 불명",
 }
 
 DIRECTIONS = {
-    "significant": "차이 있었음",
-    "null": "차이 없었음",
-    "unclear": "알 수 없음",
+    "significant": "차이 있음",
+    "null": "차이 없음",
+    "unclear": "불분명",
 }
 
 

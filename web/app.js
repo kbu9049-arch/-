@@ -125,7 +125,7 @@ async function api(path) {
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const detail = body && body.detail;
-    const msg = (detail && (detail.message || detail)) || `요청 실패 (${res.status})`;
+    const msg = (detail && (detail.message || detail)) || `요청에 실패했습니다 (${res.status})`;
     const err = new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
     err.status = res.status;
     err.code = detail && detail.error;
@@ -144,7 +144,7 @@ async function snapDetail(kind, id) {
   const key = `${kind}/${id}`;
   if (SNAP_CACHE.has(key)) return SNAP_CACHE.get(key);
   const res = await fetch(resolve(`data/${key}.json`));
-  if (!res.ok) throw new Error(`자료를 찾지 못했습니다 (${esc(id)})`);
+  if (!res.ok) throw new Error(`자료를 찾을 수 없습니다 (${esc(id)})`);
   const data = await res.json();
   SNAP_CACHE.set(key, data);
   return data;
@@ -205,11 +205,11 @@ async function snapshotRoute(path) {
     return {
       available: false,
       term: p.get('term') || '',
-      reason: '지금 방식으로는 바로 찾아보기를 쓸 수 없습니다. '
-            + '서버를 띄워서 실행하면 이 기능이 켜집니다.',
+      reason: '정적 사이트에서는 실시간 검색을 쓸 수 없습니다. '
+            + '서버 모드로 실행하면 이 기능이 켜집니다.',
     };
   }
-  throw new Error(`정적 배포에서 지원하지 않는 경로: ${rawPath}`);
+  throw new Error(`정적 사이트에서는 지원하지 않는 경로입니다: ${rawPath}`);
 }
 
 function snapshotIngredientList(p) {
@@ -325,13 +325,13 @@ function directionBar(o, maxHuman) {
     <div class="orow${few}">
       <div class="oname">
         <button class="obtn" data-outcome="${esc(o.outcome_id || o.id)}"
-                title="이 항목의 논문만 보기">${esc(o.label_ko)}</button>
-        ${o.human > 0 && o.human < 3 ? '<span class="few-tag">연구 적음</span>' : ''}
+                title="이 항목을 측정한 논문만 보기">${esc(o.label_ko)}</button>
+        ${o.human > 0 && o.human < 3 ? '<span class="few-tag">연구 수 적음</span>' : ''}
       </div>
       <div class="bar grow" data-w="${width}%">
-        ${total ? seg('sig', o.human_significant, '차이 있었음')
-                + seg('null', o.human_null, '차이 없었음')
-                + seg('unclear', o.human_unclear, '알 수 없음')
+        ${total ? seg('sig', o.human_significant, '차이 있음')
+                + seg('null', o.human_null, '차이 없음')
+                + seg('unclear', o.human_unclear, '불분명')
                 : '<i class="seg unclear" style="flex:1"></i>'}
       </div>
       <div class="onum">사람 ${n(o.human)} · 전체 ${n(o.total)}</div>
@@ -340,9 +340,9 @@ function directionBar(o, maxHuman) {
 
 const LEGEND = `
   <div class="legend">
-    <span><i class="sw sig"></i>차이 있었음</span>
-    <span><i class="sw null"></i>차이 없었음</span>
-    <span><i class="sw unclear"></i>알 수 없음</span>
+    <span><i class="sw sig"></i>차이 있음</span>
+    <span><i class="sw null"></i>차이 없음</span>
+    <span><i class="sw unclear"></i>불분명</span>
   </div>`;
 
 function paperItem(p, { showEvidence = true } = {}) {
@@ -359,12 +359,12 @@ function paperItem(p, { showEvidence = true } = {}) {
         ${p.year ? `<span>${esc(p.year)}년</span>` : ''}
         <span>${esc(p.subject_ko)}</span>
         ${p.direction ? `<span class="dirtag ${esc(p.direction)}">${esc(p.direction_ko)}</span>` : ''}
-        ${p.retracted ? '<span class="retracted">취소된 논문</span>' : ''}
+        ${p.retracted ? '<span class="retracted">철회된 논문</span>' : ''}
       </div>
       <div class="ptitle">${link}</div>
       ${src ? `<div class="psrc">${src}</div>` : ''}
       ${showEvidence && p.evidence
-        ? `<div class="evidence"><span class="kicker">이렇게 나눈 이유 — 논문에 적힌 문장 (영어 원문)</span>${esc(p.evidence)}</div>`
+        ? `<div class="evidence"><span class="kicker">분류 근거 — 초록에 적힌 문장 (영어 원문)</span>${esc(p.evidence)}</div>`
         : ''}
     </div>`;
 }
@@ -376,18 +376,18 @@ function renderAlerts() {
   const out = [];
 
   if (!state.meta.corpus_ready || !c.papers) {
-    out.push(`<div class="banner warn"><span class="bt">⚠ 아직 논문을 모으지 않았습니다</span>
+    out.push(`<div class="banner warn"><span class="bt">⚠ 아직 수집된 논문이 없습니다</span>
       보여드릴 자료가 없습니다. 저장소에서
       <code>python -m ingest.build all --target 100000</code> 을 실행해 논문을
-      모으면 이 화면이 실제 자료로 채워집니다.
-      <b>모으기 전에는 어떤 숫자도 지어내지 않습니다.</b></div>`);
+      수집하면 이 화면이 실제 자료로 채워집니다.
+      <b>수집 전에는 어떤 숫자도 만들어 내지 않습니다.</b></div>`);
   }
   if (c.fixture_papers > 0) {
-    out.push(`<div class="banner alert"><span class="bt">⚠ 시험용 가짜 자료가 섞여 있습니다 —
+    out.push(`<div class="banner alert"><span class="bt">⚠ 테스트용 가짜 자료가 섞여 있습니다 —
       건강 정보로 읽지 마세요</span>
-      지금 여기에 진짜 논문이 아닌 시험용 자료가 <b>${n(c.fixture_papers)}건</b>
-      들어 있습니다(전체 ${n(c.papers)}건 중). 프로그램 점검용이라 실제 근거와
-      아무 상관이 없습니다. <code>data/evidence.db</code> 를 지우고 다시 모으세요.</div>`);
+      실제 논문이 아닌 테스트용 자료가 <b>${n(c.fixture_papers)}건</b>
+      포함되어 있습니다(전체 ${n(c.papers)}건 중). 프로그램 점검용이라 실제 근거와는
+      무관합니다. <code>data/evidence.db</code>를 지우고 다시 수집하세요.</div>`);
   }
   box.innerHTML = out.join('');
 }
@@ -398,36 +398,36 @@ function renderCorpusStats() {
   const big = (v, k) => `<div class="hl-item"><span class="hl-v num" data-count="${v}">0</span>
       <span class="hl-k">${esc(k)}</span></div>`;
   $('#corpus-stats').innerHTML = [
-    big(c.papers, '모은 논문'),
-    big(c.human_papers, '사람에게 한 연구'),
-    big(c.systematic_papers, '여러 연구 종합'),
+    big(c.papers, '수집한 논문'),
+    big(c.human_papers, '사람 대상 연구'),
+    big(c.systematic_papers, '메타분석'),
     `<div class="hl-item"><span class="hl-v num" data-count="${c.ingredients_with_papers}">0</span>
-      <span class="hl-k">논문이 있는 성분 (${n(state.meta.ingredient_count)}종 중)</span></div>`,
+      <span class="hl-k">논문이 있는 성분 (전체 ${n(state.meta.ingredient_count)}종 중)</span></div>`,
   ].join('');
   countOnView($('#corpus-stats'));
 
   $('#tile-outcome-fig').innerHTML = `
     <div><b class="num">${n(state.outcomes.length)}</b><span>측정 항목</span></div>
-    <div><b class="num">${n(c.human_papers)}</b><span>사람에게 한 연구</span></div>`;
+    <div><b class="num">${n(c.human_papers)}</b><span>사람 대상 연구</span></div>`;
   $('#tile-about-fig').innerHTML = `
-    <div><b class="num">${n(c.rct_papers)}</b><span>무작위 배정 시험</span></div>
-    <div><b class="num">${n(c.retracted_papers)}</b><span>취소된 논문, 숫자에서 뺌</span></div>`;
+    <div><b class="num">${n(c.rct_papers)}</b><span>무작위 대조 시험</span></div>
+    <div><b class="num">${n(c.retracted_papers)}</b><span>철회된 논문 (집계 제외)</span></div>`;
 
   const built = c.last_aggregate ? new Date(c.last_aggregate).toLocaleString('ko-KR') : '아직 없음';
   const range = (c.year_min && c.year_max) ? ` · 논문 ${c.year_min}–${c.year_max}년` : '';
-  $('#footer-build').textContent = `자료 정리 ${built}${range} · 논문 정보 Europe PMC, PubMed·NLM`;
+  $('#footer-build').textContent = `마지막 집계 ${built}${range} · 논문 출처 Europe PMC, PubMed·NLM`;
 
   $('#about-corpus').innerHTML = `
     <div class="scroll-x"><table class="plain">
-      <tr><th>모은 논문</th><td class="num">${n(c.papers)}</td></tr>
-      <tr><th>요약글이 있는 논문</th><td class="num">${n(c.papers)}</td></tr>
-      <tr><th>사람에게 한 연구</th><td class="num">${n(c.human_papers)}</td></tr>
-      <tr><th>여러 연구 종합</th><td class="num">${n(c.systematic_papers)}</td></tr>
-      <tr><th>무작위 배정 시험</th><td class="num">${n(c.rct_papers)}</td></tr>
-      <tr><th>취소된 논문 (숫자에서 뺌)</th><td class="num">${n(c.retracted_papers)}</td></tr>
-      <tr><th>어디서 받았나</th><td>${esc(c.harvest_source || '—')}</td></tr>
-      <tr><th>마지막으로 받은 날</th><td>${esc(c.last_harvest || '—')}</td></tr>
-      <tr><th>마지막 정리</th><td>${esc(c.last_aggregate || '—')}</td></tr>
+      <tr><th>수집한 논문</th><td class="num">${n(c.papers)}</td></tr>
+      <tr><th>초록이 있는 논문</th><td class="num">${n(c.papers)}</td></tr>
+      <tr><th>사람 대상 연구</th><td class="num">${n(c.human_papers)}</td></tr>
+      <tr><th>메타분석</th><td class="num">${n(c.systematic_papers)}</td></tr>
+      <tr><th>무작위 대조 시험</th><td class="num">${n(c.rct_papers)}</td></tr>
+      <tr><th>철회된 논문 (집계 제외)</th><td class="num">${n(c.retracted_papers)}</td></tr>
+      <tr><th>수집 출처</th><td>${esc(c.harvest_source || '—')}</td></tr>
+      <tr><th>마지막 수집</th><td>${esc(c.last_harvest || '—')}</td></tr>
+      <tr><th>마지막 집계</th><td>${esc(c.last_aggregate || '—')}</td></tr>
     </table></div>`;
 }
 
@@ -463,9 +463,9 @@ function ingredientCard(it) {
     ? `<span class="badge">논문 ${n(s.total)}건 · 사람 ${n(s.human)}건</span>`
     : '<span class="badge none">논문 없음</span>';
   const detail = s.total > 0
-    ? `여러 연구 종합 <b>${n(s.systematic)}</b> · 무작위 배정 시험 <b>${n(s.rct)}</b>
+    ? `메타분석 <b>${n(s.systematic)}</b> · 무작위 대조 시험 <b>${n(s.rct)}</b>
        · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}년` : ''}`
-    : '아직 모은 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
+    : '아직 수집된 논문이 없습니다. <b>효과가 없다는 뜻은 아닙니다.</b>';
   return `
     <button class="card reveal" data-ing="${esc(it.id)}">
       <div class="chead">
@@ -490,14 +490,14 @@ async function loadIngredients({ append = false } = {}) {
     state.items = append ? state.items.concat(data.items) : data.items;
     const html = state.items.map(ingredientCard).join('');
     $('#ing-list').innerHTML = html || `
-      <div class="empty"><b>“${esc(state.query)}”에 맞는 성분이 목록에 없습니다.</b><br>
-        영어 이름(예: <i>lutein</i>)으로도 찾아보세요. 아래에서 바로 검색할 수도 있습니다.
-        <div class="btnrow"><button class="btn primary" id="live-btn">논문 데이터베이스에서 바로 찾아보기</button></div>
+      <div class="empty"><b>“${esc(state.query)}”에 해당하는 성분이 목록에 없습니다.</b><br>
+        영문 이름(예: <i>lutein</i>)으로도 검색해 보세요. 논문 데이터베이스에서 직접 검색할 수도 있습니다.
+        <div class="btnrow"><button class="btn primary" id="live-btn">논문 데이터베이스에서 실시간 검색</button></div>
         <div id="live-result"></div>
       </div>`;
     $('#ing-count').innerHTML = state.query
       ? `“<b>${esc(state.query)}</b>” 검색 결과 <b>${n(state.total)}</b>종`
-      : `<b>${n(state.total)}</b>종의 성분`;
+      : `전체 <b>${n(state.total)}</b>종`;
     $('#ing-more').hidden = state.items.length >= state.total;
     reveal($('#ing-list'), 28);
   } catch (e) {
@@ -508,28 +508,28 @@ async function loadIngredients({ append = false } = {}) {
 
 /* ── 실시간 조회 (색인에 없는 검색어) ────────────────────────────────────── */
 async function liveLookup(term, mount) {
-  mount.innerHTML = '<p class="loading">논문 데이터베이스에서 찾는 중…</p>';
+  mount.innerHTML = '<p class="loading">논문 데이터베이스에서 검색하는 중…</p>';
   try {
     const d = await api('/api/live?term=' + encodeURIComponent(term));
     if (!d.available) { mount.innerHTML = `<div class="note">${esc(d.reason)}</div>`; return; }
     const dc = d.direction_counts || {};
     mount.innerHTML = `
-      <div class="note"><b>바로 찾아본 결과</b> — ${esc(d.note)}</div>
+      <div class="note"><b>실시간 검색 결과</b> — ${esc(d.note)}</div>
       <div class="hl" style="margin:28px 0 36px">
-        <div class="hl-item"><span class="hl-v num">${n(d.hit_count)}</span><span class="hl-k">데이터베이스 전체</span></div>
-        <div class="hl-item"><span class="hl-v num">${n(d.fetched)}</span><span class="hl-k">살펴본 논문</span></div>
-        <div class="hl-item"><span class="hl-v num">${n(d.human)}</span><span class="hl-k">사람에게 한 연구</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(d.hit_count)}</span><span class="hl-k">데이터베이스 검색 결과</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(d.fetched)}</span><span class="hl-k">분석한 논문</span></div>
+        <div class="hl-item"><span class="hl-v num">${n(d.human)}</span><span class="hl-k">사람 대상 연구</span></div>
         <div class="hl-item"><span class="hl-v num">${n(dc.significant)} / ${n(dc.null)} / ${n(dc.unclear)}</span>
-          <span class="hl-k">차이 있음 / 없음 / 모름</span></div>
+          <span class="hl-k">차이 있음 / 없음 / 불분명</span></div>
       </div>
-      ${d.outcomes.length ? `<h3>많이 재 본 항목</h3>${d.outcomes.map((o) =>
+      ${d.outcomes.length ? `<h3>많이 측정된 항목</h3>${d.outcomes.map((o) =>
         `<div class="orow"><div class="oname">${esc(o.label_ko)}</div>
          <div class="bar"><i class="seg sig" style="flex:${o.human}"></i>
          <i class="seg unclear" style="flex:${Math.max(0, o.total - o.human)}"></i></div>
          <div class="onum num">사람 ${n(o.human)} · 전체 ${n(o.total)}</div></div>`).join('')}` : ''}
-      <h3>논문</h3>${d.papers.map((p) => paperItem(p)).join('') || '<p class="dim">없습니다.</p>'}`;
+      <h3>논문</h3>${d.papers.map((p) => paperItem(p)).join('') || '<p class="dim">해당 논문이 없습니다.</p>'}`;
   } catch (e) {
-    mount.innerHTML = `<div class="empty"><b>찾지 못했습니다:</b> ${esc(e.message)}</div>`;
+    mount.innerHTML = `<div class="empty"><b>검색에 실패했습니다:</b> ${esc(e.message)}</div>`;
   }
 }
 
@@ -543,7 +543,7 @@ function yearChart(byYear) {
     <section class="band">
       <div class="inner">
         <div class="sec-head reveal">
-          <h2 class="sec-title">해마다 나온 논문 수.</h2>
+          <h2 class="sec-title">연도별 논문 수.</h2>
           <p class="sec-sub">${byYear[0].year}년부터 ${byYear[byYear.length - 1].year}년까지.</p>
         </div>
         <div class="reveal">
@@ -598,8 +598,8 @@ async function renderIngredient(id) {
 
   box.innerHTML = `
     ${localNav(d.name_ko, '성분',
-      hasData ? [['sec-measured', '어떤 걸 재 봤나'], ['sec-top', '대표 논문'], ['sec-all', '논문 전부']] : [],
-      hasData ? ['sec-all', '논문 전부 보기'] : null)}
+      hasData ? [['sec-measured', '측정 항목'], ['sec-top', '대표 논문'], ['sec-all', '전체 논문']] : [],
+      hasData ? ['sec-all', '전체 논문 보기'] : null)}
 
     <section class="band">
       <div class="inner detail-head reveal">
@@ -616,12 +616,12 @@ async function renderIngredient(id) {
         <div class="inner">
           <div class="pull reveal">
             <span class="v num" data-count="${s.human}">0</span>
-            <span class="k">사람에게 한 연구 · 전체 ${n(s.total)}건 중</span>
+            <span class="k">사람 대상 연구 · 전체 ${n(s.total)}건 중</span>
           </div>
           <div class="hl reveal">
-            <div class="hl-item"><span class="hl-v num" data-count="${s.systematic}">0</span><span class="hl-k">여러 연구 종합</span></div>
-            <div class="hl-item"><span class="hl-v num" data-count="${s.rct}">0</span><span class="hl-k">무작위 배정 시험</span></div>
-            <div class="hl-item"><span class="hl-v num">${esc(years)}</span><span class="hl-k">논문이 나온 해</span></div>
+            <div class="hl-item"><span class="hl-v num" data-count="${s.systematic}">0</span><span class="hl-k">메타분석</span></div>
+            <div class="hl-item"><span class="hl-v num" data-count="${s.rct}">0</span><span class="hl-k">무작위 대조 시험</span></div>
+            <div class="hl-item"><span class="hl-v num">${esc(years)}</span><span class="hl-k">발표 연도</span></div>
           </div>
         </div>
       </section>
@@ -629,13 +629,13 @@ async function renderIngredient(id) {
       <section class="band" id="sec-measured">
         <div class="inner">
           <div class="sec-head reveal">
-            <h2 class="sec-title">어떤 걸 재 봤나.</h2>
-            <p class="sec-sub">사람에게 한 연구에서 측정한 항목과, 결과가 어떻게 갈렸는지.</p>
+            <h2 class="sec-title">무엇을 측정했나.</h2>
+            <p class="sec-sub">사람 대상 연구에서 측정한 항목과 결과가 나뉜 양상입니다.</p>
           </div>
           ${LEGEND}
           ${d.outcomes.length
             ? `<div class="bars reveal">${d.outcomes.map((o) => directionBar(o, maxHuman)).join('')}</div>`
-            : '<p class="dim" style="text-align:center">사람에게 한 연구에서 잡힌 항목이 없습니다.</p>'}
+            : '<p class="dim" style="text-align:center">사람 대상 연구에서 분류된 측정 항목이 없습니다.</p>'}
         </div>
       </section>
 
@@ -643,7 +643,7 @@ async function renderIngredient(id) {
         <div class="inner">
           <div class="sec-head reveal">
             <h2 class="sec-title">대표 논문.</h2>
-            <p class="sec-sub">믿을 만한 연구부터 — 여러 연구 종합 → 논문 모아 정리 → 무작위 배정 시험 순.</p>
+            <p class="sec-sub">근거 수준이 높은 순서 — 메타분석 → 체계적 문헌고찰 → 무작위 대조 시험.</p>
           </div>
           ${d.top_papers.map((p) => paperItem(p, { showEvidence: false })).join('')}
         </div>
@@ -654,30 +654,30 @@ async function renderIngredient(id) {
       <section class="band alt" id="sec-all">
         <div class="inner">
           <div class="sec-head reveal">
-            <h2 class="sec-title">논문 전부 보기.</h2>
-            <p class="sec-sub">측정 항목, 연구 대상, 연구 방식, 결과로 거를 수 있습니다.</p>
+            <h2 class="sec-title">전체 논문.</h2>
+            <p class="sec-sub">측정 항목, 연구 대상, 연구 유형, 결과로 걸러 볼 수 있습니다.</p>
           </div>
       <div class="filters">
-        <select id="f-outcome" aria-label="측정 항목으로 거르기">
+        <select id="f-outcome" aria-label="측정 항목 필터">
           <option value="">측정 항목 전체</option>
           ${d.outcomes.map((o) => `<option value="${esc(o.outcome_id)}">${esc(o.label_ko)} (${n(o.total)})</option>`).join('')}
         </select>
-        <select id="f-subject" aria-label="연구 대상으로 거르기">
-          <option value="">사람·동물 모두</option>
-          <option value="human">사람에게 한 연구만</option>
+        <select id="f-subject" aria-label="연구 대상 필터">
+          <option value="">연구 대상 전체</option>
+          <option value="human">사람 대상 연구만</option>
           <option value="animal">동물 실험만</option>
           <option value="invitro">세포·시험관 실험만</option>
         </select>
-        <select id="f-study" aria-label="연구 방식으로 거르기">
-          <option value="">연구 방식 전체</option>
+        <select id="f-study" aria-label="연구 유형 필터">
+          <option value="">연구 유형 전체</option>
           ${d.by_study_type.map((t) =>
             `<option value="${esc(t.study_type)}">${esc(t.label_ko)} (${n(t.count)})</option>`).join('')}
         </select>
-        <select id="f-direction" aria-label="결과로 거르기">
+        <select id="f-direction" aria-label="결과 필터">
           <option value="">결과 전체</option>
-          <option value="significant">차이 있었음</option>
-          <option value="null">차이 없었음</option>
-          <option value="unclear">알 수 없음</option>
+          <option value="significant">차이 있음</option>
+          <option value="null">차이 없음</option>
+          <option value="unclear">불분명</option>
         </select>
       </div>
       <div id="paper-list"></div>
@@ -692,11 +692,11 @@ async function renderIngredient(id) {
       <section class="band alt tight">
         <div class="inner narrow">
           <div class="empty">
-            <b>${esc(d.name_ko)} 관련 논문을 아직 못 모았습니다.</b><br>
-            아직 아무도 연구하지 않았거나, 여기 못 모았을 수 있습니다.
-            <b>“효과가 없다”는 뜻이 아닙니다.</b>
+            <b>${esc(d.name_ko)} 관련 논문이 아직 수집되지 않았습니다.</b><br>
+            아직 연구되지 않았거나, 여기에 아직 모이지 않았을 수 있습니다.
+            <b>“효과가 없다”는 뜻은 아닙니다.</b>
             <div class="btnrow center">
-              <button class="btn primary" id="live-btn2">논문 데이터베이스에서 바로 찾아보기</button>
+              <button class="btn primary" id="live-btn2">논문 데이터베이스에서 실시간 검색</button>
             </div>
             <div id="live-result2"></div>
           </div>
@@ -749,15 +749,15 @@ async function loadPapers(id) {
   try {
     const d = await api(`/api/ingredients/${encodeURIComponent(id)}/papers?` + params);
     const trunc = d.truncated
-      ? ' <span class="dim">— 논문이 너무 많아 믿을 만한 것부터 일부만 담았습니다.</span>'
+      ? ' <span class="dim">— 논문이 너무 많아 근거 수준이 높은 순으로 일부만 담았습니다.</span>'
       : '';
     mount.innerHTML = d.items.length
       ? `<p class="count">조건에 맞는 논문 <b>${n(d.total)}</b>건${trunc}</p>`
         + d.items.map((x) => paperItem(x)).join('')
-      : '<div class="empty">이 조건에 맞는 논문이 없습니다.</div>';
+      : '<div class="empty">조건에 맞는 논문이 없습니다.</div>';
     reveal(mount, 26);
     const pages = Math.max(1, Math.ceil(d.total / d.page_size));
-    $('#p-info').textContent = `${d.page} / ${pages} 쪽`;
+    $('#p-info').textContent = `${d.page} / ${pages} 페이지`;
     $('#p-prev').disabled = d.page <= 1;
     $('#p-next').disabled = d.page >= pages;
   } catch (e) {
@@ -779,7 +779,7 @@ function renderOutcomeGrid(filter = '') {
       <span class="oc num">성분 ${n(o.ingredients)}종 · 사람 대상 연구 ${n(o.human)}건</span>
       <span class="more sm">성분 보기</span>
     </button>`).join('')
-    : `<div class="empty">“${esc(filter)}”에 해당하는 항목이 없습니다.</div>`;
+    : `<div class="empty">“${esc(filter)}”에 해당하는 효능이 없습니다.</div>`;
   reveal($('#o-grid'), 22);
 }
 
@@ -805,14 +805,14 @@ async function renderOutcome(id) {
 
   box.innerHTML = `
     ${localNav(d.label_ko, '효능',
-      [['sec-ings', '재 본 성분'], ['sec-top', '대표 논문']], ['sec-ings', '성분 보기'])}
+      [['sec-ings', '연구된 성분'], ['sec-top', '대표 논문']], ['sec-ings', '성분 보기'])}
 
     <section class="band">
       <div class="inner detail-head reveal">
         <div class="kicker">${esc(d.family_ko || '측정 항목')}</div>
         <h1 class="detail-title">${esc(d.label_ko)}</h1>
         <div class="detail-sub">${esc(d.label_en)}</div>
-        <p class="lede">이걸 실제로 재 본 사람 연구가 있는 성분입니다.</p>
+        <p class="lede">이 효능을 사람 대상 연구로 측정한 성분입니다.</p>
         <div class="smallprint">${esc(d.note)}</div>
       </div>
     </section>
@@ -820,8 +820,8 @@ async function renderOutcome(id) {
     <section class="band dark">
       <div class="inner">
         <div class="hl reveal" style="grid-template-columns:repeat(2,1fr)">
-          <div class="hl-item"><span class="hl-v num" data-count="${ingCount}">0</span><span class="hl-k">재 본 성분</span></div>
-          <div class="hl-item"><span class="hl-v num" data-count="${humanTotal}">0</span><span class="hl-k">사람에게 한 연구</span></div>
+          <div class="hl-item"><span class="hl-v num" data-count="${ingCount}">0</span><span class="hl-k">연구된 성분</span></div>
+          <div class="hl-item"><span class="hl-v num" data-count="${humanTotal}">0</span><span class="hl-k">사람 대상 연구</span></div>
         </div>
       </div>
     </section>
@@ -829,8 +829,8 @@ async function renderOutcome(id) {
     <section class="band" id="sec-ings">
       <div class="inner">
         <div class="sec-head reveal">
-          <h2 class="sec-title">재 본 성분.</h2>
-          <p class="sec-sub">사람에게 한 연구 건수 순입니다. 순서는 효과의 우열이 아닙니다.</p>
+          <h2 class="sec-title">연구된 성분.</h2>
+          <p class="sec-sub">사람 대상 연구 건수 순서입니다. 순서가 효과의 우열을 뜻하지는 않습니다.</p>
         </div>
     ${LEGEND}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
@@ -838,13 +838,13 @@ async function renderOutcome(id) {
         <div class="oname"><button class="obtn" data-ing="${esc(i.id)}">${esc(i.name_ko)}</button>
           <span class="ctag sm" data-cat="${esc(i.category || '')}">${esc(i.category_ko)}</span></div>
         <div class="bar grow" data-w="${Math.max(3, Math.round((i.human / maxHuman) * 100))}%">
-          <i class="seg sig" style="flex:${i.human_significant}" title="차이 있었음 ${n(i.human_significant)}건"></i>
-          <i class="seg null" style="flex:${i.human_null}" title="차이 없었음 ${n(i.human_null)}건"></i>
-          <i class="seg unclear" style="flex:${i.human_unclear}" title="알 수 없음 ${n(i.human_unclear)}건"></i>
+          <i class="seg sig" style="flex:${i.human_significant}" title="차이 있음 ${n(i.human_significant)}건"></i>
+          <i class="seg null" style="flex:${i.human_null}" title="차이 없음 ${n(i.human_null)}건"></i>
+          <i class="seg unclear" style="flex:${i.human_unclear}" title="불분명 ${n(i.human_unclear)}건"></i>
         </div>
         <div class="onum">사람 ${n(i.human)} · 전체 ${n(i.total)}</div>
       </div>`).join('') + `</div>`
-      : '<div class="empty">이걸 재 본 사람 연구를 아직 못 모았습니다.</div>'}
+      : '<div class="empty">이 효능을 측정한 사람 대상 연구가 아직 수집되지 않았습니다.</div>'}
       </div>
     </section>
 
@@ -852,9 +852,9 @@ async function renderOutcome(id) {
       <div class="inner">
         <div class="sec-head reveal">
           <h2 class="sec-title">대표 논문.</h2>
-          <p class="sec-sub">이 항목을 재 본 논문 가운데 믿을 만한 연구부터.</p>
+          <p class="sec-sub">이 효능을 측정한 논문 가운데 근거 수준이 높은 순서입니다.</p>
         </div>
-        ${d.top_papers.map((p) => paperItem(p)).join('') || '<p class="dim" style="text-align:center">없습니다.</p>'}
+        ${d.top_papers.map((p) => paperItem(p)).join('') || '<p class="dim" style="text-align:center">해당 논문이 없습니다.</p>'}
       </div>
     </section>`;
   window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
@@ -964,8 +964,8 @@ async function bootstrap() {
 
   const res = await fetch(resolve('data/index.json'));
   if (!res.ok) {
-    throw new Error('서버 API 도 data/index.json 도 찾지 못했습니다. '
-                  + '`make serve` 로 서버를 띄우거나 `make site` 로 정적 사이트를 만드세요.');
+    throw new Error('서버 API도 data/index.json도 찾을 수 없습니다. '
+                  + '`make serve`로 서버를 실행하거나 `make site`로 정적 사이트를 만드세요.');
   }
   SNAPSHOT = await res.json();          // 정적 배포
   return snapshotRoute('/api/meta');
@@ -992,9 +992,9 @@ async function bootstrap() {
   } else {
     $('#ing-count').textContent = '';
     $('#ing-list').innerHTML = `<div class="empty">
-      <b>아직 모은 논문이 없습니다.</b><br>
-      <code>python -m ingest.build all --target 100000</code> 을 실행해
-      논문을 모으면 이 화면이 실제 자료로 채워집니다.</div>`;
+      <b>아직 수집된 논문이 없습니다.</b><br>
+      <code>python -m ingest.build all --target 100000</code>을 실행해
+      논문을 수집하면 이 화면이 실제 자료로 채워집니다.</div>`;
   }
   route();
   reveal(document);
