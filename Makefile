@@ -42,14 +42,15 @@ test:
 	$(PY) tests/test_pipeline.py
 	$(PY) tests/test_parity.py
 
-snapshot:
-	$(PY) -m ingest.build export web/snapshot.json --top-papers 40
+snapshot: site
 
 # 서버 없이 어디든 올릴 수 있는 정적 사이트. GitHub Pages, Netlify, Vercel,
 # S3, 심지어 USB 에 넣어도 열린다.
-site: snapshot
+# 색인 하나와 성분·지표별 상세 파일로 나뉘어 있어, 첫 화면에서는 색인만 받는다.
+site:
 	rm -rf _site && mkdir -p _site
-	cp web/index.html web/style.css web/app.js web/snapshot.json _site/
+	cp web/index.html web/style.css web/app.js _site/
+	$(PY) -m ingest.build export _site/data
 	touch _site/.nojekyll
 	@echo "\n_site/ 준비 완료 ($$(du -sh _site | cut -f1))"
 	@echo "확인:  python3 -m http.server -d _site 8080"

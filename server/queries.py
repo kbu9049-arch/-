@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import pathlib
 import re
 import sqlite3
 import unicodedata
@@ -591,53 +592,79 @@ def paper_detail(conn, ref: Reference, pid: int) -> dict | None:
     return d
 
 
-# ── 정적 스냅샷 ──────────────────────────────────────────────────────────────
-def _snapshot_papers(conn, iid: str, limit: int) -> list[dict]:
-    """정적 배포용 논문 목록.
+# ── 정적 사이트 내보내기 ─────────────────────────────────────────────────────
+# 서버 없이 도는 배포를 위해 색인 하나와 상세 파일 여러 개로 나눠 쓴다.
+# 예전에는 전부를 한 파일에 담느라 성분당 상위 40건만 실었는데, 그러면 "뼈 건강
+# (233)" 을 골라도 그 40건 안에 든 2건만 나와 목록과 숫자가 어긋났다. 지금은
+# 성분 상세를 열 때 그 성분 파일만 받아오므로 논문을 전부 실을 수 있다.
 
-    서버가 없으면 페이지네이션 질의를 할 수 없으므로, 성분당 상위 N건을 미리 담고
-    필터링은 브라우저에서 한다. 그래서 각 논문에 그 논문이 분류된 지표 목록을
-    함께 넣는다(지표 필터가 동작해야 하므로).
+SNAPSHOT_PAPER_CAP = 2000        # 병적으로 큰 성분 하나가 파일을 키우지 않도록
+
+
+def _site_papers(conn, iid: str, limit: int) -> tuple[list[dict], bool]:
+    """정적 배포용 논문 목록과 잘렸는지 여부.
+
+    서버가 없으면 페이지네이션 질의를 못 하므로 브라우저가 걸러 쓴다. 그래서 각
+    논문에 그 논문이 분류된 지표 목록을 함께 넣는다(지표 필터가 동작해야 하므로).
     """
+    total = conn.execute(
+        "SELECT COUNT(*) c FROM paper_ingredient WHERE ingredient_id = ?", (iid,)
+    ).fetchone()["c"]
     rows = conn.execute(
         """SELECT p.* FROM papers p JOIN paper_ingredient pi ON pi.paper_id = p.id
            WHERE pi.ingredient_id = ?
            ORDER BY p.retracted ASC, p.evidence_rank DESC, p.cited_by DESC, p.year DESC
            LIMIT ?""", (iid, limit)).fetchall()
     items = attach_top_outcome(conn, [paper_row(r, with_evidence=True) for r in rows])
-    if not items:
-        return items
-    ids = [it["id"] for it in items]
-    placeholders = ",".join("?" * len(ids))
-    per: dict[int, list[str]] = {}
-    for r in conn.execute(
-            f"SELECT paper_id, outcome_id FROM paper_outcome WHERE paper_id IN ({placeholders})",
-            ids):
-        per.setdefault(r["paper_id"], []).append(r["outcome_id"])
-    for it in items:
-        it["outcome_ids"] = per.get(it["id"], [])
-    return items
+    if items:
+        ids = [it["id"] for it in items]
+        placeholders = ",".join("?" * len(ids))
+        per: dict[int, list[str]] = {}
+        for r in conn.execute(
+                f"SELECT paper_id, outcome_id FROM paper_outcome WHERE paper_id IN ({placeholders})",
+                ids):
+            per.setdefault(r["paper_id"], []).append(r["outcome_id"])
+        for it in items:
+            it["outcome_ids"] = per.get(it["id"], [])
+    return items, total > len(items)
 
 
-def export_snapshot(conn, *, top_papers: int = 40, outcome_limit: int = 100) -> dict:
-    """서버 없이 브라우저만으로 돌아가는 정적 스냅샷.
+def export_site(conn, out_dir, *, paper_cap: int = SNAPSHOT_PAPER_CAP,
+                outcome_limit: int = 200, top_papers: int = 8) -> dict:
+    """정적 배포용 파일 묶음을 out_dir 에 쓴다.
 
-    web/app.js 가 이 구조를 읽어 /api/* 응답을 그대로 흉내 낸다. 따라서 화면 코드는
-    서버 배포와 정적 배포에서 완전히 동일하다.
+        index.json          코퍼스 요약·성분 목록·지표 목록·검색 색인
+        i/<성분id>.json      성분 상세 + 그 성분의 논문 전부
+        o/<지표id>.json      지표 상세 (효능 → 성분)
+
+    web/app.js 가 이 구조를 읽어 /api/* 응답을 그대로 흉내 낸다. 따라서 화면
+    코드는 서버 배포와 정적 배포에서 완전히 동일하다.
     """
     import ingest.config as cfg
-    from ingest.classify import DIRECTIONS, STUDY_TYPES, SUBJECTS
+    from ingest.classify import DIRECTIONS, STUDY_TYPES, SUBJECTS, plain_table
+
+    out_dir = pathlib.Path(out_dir)
+    (out_dir / "i").mkdir(parents=True, exist_ok=True)
+    (out_dir / "o").mkdir(parents=True, exist_ok=True)
 
     ingredients = json.loads(cfg.INGREDIENTS_JSON.read_text(encoding="utf-8"))["ingredients"]
     outcomes = json.loads(cfg.OUTCOMES_JSON.read_text(encoding="utf-8"))["outcomes"]
     ref = Reference(ingredients, outcomes)
 
-    ing_details, ing_list = {}, []
+    def write(rel: str, payload) -> int:
+        path = out_dir / rel
+        path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+                        encoding="utf-8")
+        return path.stat().st_size
+
+    ing_list, ing_bytes, max_papers, truncated = [], 0, 0, []
     for iid in ref.ingredients:
-        d = ingredient_detail(conn, ref, iid, top_papers=8)
-        d["papers"] = _snapshot_papers(conn, iid, top_papers)
-        d["papers_truncated"] = d["stats"]["total"] > len(d["papers"])
-        ing_details[iid] = d
+        d = ingredient_detail(conn, ref, iid, top_papers=top_papers)
+        d["papers"], d["papers_truncated"] = _site_papers(conn, iid, paper_cap)
+        if d["papers_truncated"]:
+            truncated.append(iid)
+        max_papers = max(max_papers, len(d["papers"]))
+        ing_bytes += write(f"i/{iid}.json", d)
         ing_list.append({
             "id": iid, "name_ko": d["name_ko"], "name_en": d["name_en"],
             "category": d["category"], "category_ko": d["category_ko"],
@@ -645,10 +672,12 @@ def export_snapshot(conn, *, top_papers: int = 40, outcome_limit: int = 100) -> 
             "indexed": d["stats"]["total"] > 0,
         })
 
-    out_details = {oid: outcome_detail(conn, ref, oid, min_human=1, limit=outcome_limit)
-                   for oid in ref.outcomes}
+    out_bytes = 0
+    for oid in ref.outcomes:
+        out_bytes += write(f"o/{oid}.json",
+                           outcome_detail(conn, ref, oid, min_human=1, limit=outcome_limit))
 
-    return {
+    index = {
         "generated_at": datetime.datetime.now(
             datetime.timezone.utc).isoformat(timespec="seconds"),
         "corpus": corpus_summary(conn),
@@ -657,14 +686,25 @@ def export_snapshot(conn, *, top_papers: int = 40, outcome_limit: int = 100) -> 
             "study_types": {k: v[0] for k, v in STUDY_TYPES.items()},
             "subjects": SUBJECTS,
             "directions": DIRECTIONS,
+            "plain": plain_table(),
             "ingredient_count": len(ref.ingredients),
             "outcome_count": len(ref.outcomes),
-            "snapshot_top_papers": top_papers,
+            "paper_cap": paper_cap,
         },
         "outcomes": outcome_list(conn, ref),
-        "outcome_details": out_details,
         "ingredients": ing_list,
-        "ingredient_details": ing_details,
         # 검색은 브라우저에서 한다. 서버와 같은 표기 색인을 그대로 넘겨준다.
         "search_index": ref.search_index(),
+    }
+    index_bytes = write("index.json", index)
+
+    return {
+        "out_dir": str(out_dir),
+        "index_bytes": index_bytes,
+        "ingredient_files": len(ing_list), "ingredient_bytes": ing_bytes,
+        "outcome_files": len(ref.outcomes), "outcome_bytes": out_bytes,
+        "max_papers_in_one_file": max_papers,
+        "truncated": truncated,
+        "papers": index["corpus"]["papers"],
+        "fixture_papers": index["corpus"].get("fixture_papers", 0),
     }

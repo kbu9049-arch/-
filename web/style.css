@@ -305,6 +305,47 @@ h3 { font-size:19px; font-weight:600; letter-spacing:-.016em; margin:40px 0 12px
 .evidence .kicker { display:block; margin-bottom:6px; font-size:12.5px; color:var(--ink-3);
                     font-weight:500; }
 
+/* ── 용어 설명 ────────────────────────────────────────────────────────────
+   연구 용어는 눌러서 뜻을 볼 수 있게 한다. 점선 밑줄로 '누를 수 있음'을 알린다. */
+.term { cursor:pointer; -webkit-tap-highlight-color:transparent;
+        text-decoration:underline dotted currentColor 1px; text-underline-offset:3px;
+        transition:background var(--t-fast) var(--ease-io), color var(--t-fast) var(--ease-io); }
+.paper .pmeta .term:hover { background:var(--bg-3); }
+.legend .term { display:inline-flex; align-items:center; gap:8px; }
+
+.termpop {
+  position:absolute; z-index:200; max-width:min(320px, calc(100vw - 20px));
+  background:var(--ink); color:var(--bg); padding:15px 17px; border-radius:14px;
+  font-size:14px; line-height:1.62; letter-spacing:-.008em; box-shadow:var(--shadow-2);
+  opacity:0; transform:translateY(-4px); transition:opacity 160ms var(--ease-io),
+  transform 160ms var(--ease-io); pointer-events:none;
+}
+.termpop.in { opacity:1; transform:none; }
+.termpop b { display:block; font-size:15px; font-weight:600; letter-spacing:-.015em; }
+.termpop .formal { display:block; font-size:12.5px; opacity:.6; margin-top:2px; }
+.termpop p { margin:8px 0 0; opacity:.92; }
+
+/* ── 읽는 법 ──────────────────────────────────────────────────────────── */
+.howto { background:var(--bg-2); border-radius:20px; margin:0 auto 44px; max-width:760px; }
+.howto summary { list-style:none; cursor:pointer; padding:20px 26px; font-size:16px;
+                 font-weight:500; letter-spacing:-.015em; display:flex; align-items:center;
+                 gap:10px; transition:color var(--t-fast) var(--ease-io); }
+.howto summary::-webkit-details-marker { display:none; }
+.howto summary::before { content:""; width:7px; height:7px; flex:none;
+  border-right:1.8px solid var(--ink-3); border-bottom:1.8px solid var(--ink-3);
+  transform:rotate(45deg) translate(-1px,-1px); transition:transform var(--t) var(--ease); }
+.howto[open] summary::before { transform:rotate(225deg) translate(-2px,-2px); }
+.howto summary:hover { color:var(--accent); }
+.howbody { padding:0 26px 22px; }
+.howbody h4 { font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--ink-3);
+              margin:18px 0 10px; }
+.howrow { display:grid; grid-template-columns:132px 1fr; gap:18px; padding:9px 0;
+          border-top:1px solid var(--line-2); }
+.howterm { font-size:14.5px; font-weight:600; letter-spacing:-.012em; }
+.howformal { display:block; font-size:12px; font-weight:400; color:var(--ink-3); margin-top:2px; }
+.howdesc { font-size:14.5px; color:var(--ink-2); line-height:1.65; }
+.howdesc b { color:var(--ink); font-weight:600; }
+
 /* ── 지표 타일 ────────────────────────────────────────────────────────── */
 .ogrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(238px,1fr)); gap:12px; }
 .ocard { text-align:left; background:var(--bg-2); border:0; border-radius:20px;
@@ -403,6 +444,10 @@ html.anim .reveal.in { animation:rise 760ms var(--ease) both; animation-delay:va
   .orow .bar { grid-column:1/-1; }
   .paper { padding:22px 20px; border-radius:18px; }
   .card { grid-template-columns:1fr auto; padding:18px 4px; }
+  .howto { border-radius:18px; }
+  .howto summary { padding:17px 20px; }
+  .howbody { padding:0 20px 18px; }
+  .howrow { grid-template-columns:1fr; gap:4px; }
   .card::after { display:none; }
   .lede { max-width:26ch; }
   footer { margin-top:80px; }

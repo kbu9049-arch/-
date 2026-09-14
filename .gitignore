@@ -9,7 +9,7 @@ venv/
 data/*.db
 data/*.db-wal
 data/*.db-shm
-web/snapshot.json
+web/data/
 tests/fixtures/sample_papers.jsonl
 *.log
 .DS_Store

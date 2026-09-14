@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from ingest import config
-from ingest.classify import DIRECTIONS, STUDY_TYPES, SUBJECTS
+from ingest.classify import DIRECTIONS, STUDY_TYPES, SUBJECTS, plain_table
 from server import queries
 from server.live import LiveLookup
 
@@ -65,6 +65,8 @@ def api_meta():
         "study_types": {k: v[0] for k, v in STUDY_TYPES.items()},
         "subjects": SUBJECTS,
         "directions": DIRECTIONS,
+        # 연구 용어를 모르는 사람이 읽을 수 있게, 쉬운 말 표기와 설명을 함께 내려보낸다.
+        "plain": plain_table(),
         "outcome_count": len(REF.outcomes),
         "ingredient_count": len(REF.ingredients),
         "live_lookup": LIVE_ENABLED,

@@ -8,7 +8,7 @@
   python -m ingest.build all --target 100000   # harvest → classify → aggregate
   python -m ingest.build stats
   python -m ingest.build load-jsonl FILE       # 내려받아 둔 JSONL 을 같은 경로로 적재
-  python -m ingest.build export out.json       # 정적 배포용 스냅샷
+  python -m ingest.build export web/data       # 정적 배포용 파일 묶음
 
 harvest 는 언제든 중단했다가 다시 실행할 수 있다. 진행 상태(커서)는 harvest_state
 테이블에 저장된다.
@@ -468,29 +468,36 @@ def cmd_stats(args) -> int:
 
 # ── export ───────────────────────────────────────────────────────────────────
 def cmd_export(args) -> int:
-    """정적 배포용 JSON 스냅샷. 서버 없이도 프런트를 띄울 수 있다."""
+    """정적 배포용 파일 묶음. 서버 없이도 프런트를 띄울 수 있다."""
     from server import queries          # 서버와 같은 조회 로직을 쓴다
     conn = require_db()
-    payload = queries.export_snapshot(conn, top_papers=args.top_papers)
-    corpus = payload["corpus"]
+    summary = queries.corpus_summary(conn)
 
-    if not corpus["papers"] and not args.allow_empty:
+    if not summary["papers"] and not args.allow_empty:
         raise SystemExit(
-            "코퍼스가 비어 있어 스냅샷을 만들지 않았습니다.\n"
+            "코퍼스가 비어 있어 내보내지 않았습니다.\n"
             "  그대로 내보내면 백지 사이트가 배포됩니다.\n"
             "  먼저 수집하세요:  python -m ingest.build all --target 100000\n"
             "  (의도한 것이라면 --allow-empty)")
-    if corpus.get("fixture_papers") and not args.allow_empty:
+    if summary.get("fixture_papers") and not args.allow_empty:
         raise SystemExit(
-            f"합성 테스트 레코드 {corpus['fixture_papers']:,}건이 섞여 있어 스냅샷을 "
-            "만들지 않았습니다.\n  실제 논문이 아니므로 공개 배포하면 안 됩니다.\n"
+            f"합성 테스트 레코드 {summary['fixture_papers']:,}건이 섞여 있어 "
+            "내보내지 않았습니다.\n  실제 논문이 아니므로 공개 배포하면 안 됩니다.\n"
             "  (화면 확인 목적이라면 --allow-empty)")
 
-    out = config.ROOT / args.path
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"{out} ({out.stat().st_size / 1e6:.1f} MB) — "
-          f"성분 {len(payload['ingredients'])}종 · 논문 {corpus['papers']:,}건")
+    out_dir = config.ROOT / args.path
+    r = queries.export_site(conn, out_dir, paper_cap=args.paper_cap)
+    mb = (r["index_bytes"] + r["ingredient_bytes"] + r["outcome_bytes"]) / 1e6
+    print(f"{out_dir}")
+    print(f"  index.json      {r['index_bytes'] / 1e6:.2f} MB  (첫 화면에서 이것만 받는다)")
+    print(f"  i/*.json        {r['ingredient_files']}개 · {r['ingredient_bytes'] / 1e6:.2f} MB "
+          f"(한 파일 최대 논문 {r['max_papers_in_one_file']:,}건)")
+    print(f"  o/*.json        {r['outcome_files']}개 · {r['outcome_bytes'] / 1e6:.2f} MB")
+    print(f"  합계            {mb:.2f} MB · 논문 {r['papers']:,}건")
+    if r["truncated"]:
+        print(f"  ! 논문이 {args.paper_cap:,}건을 넘어 잘린 성분 {len(r['truncated'])}종: "
+              f"{', '.join(r['truncated'][:6])}"
+              f"{' …' if len(r['truncated']) > 6 else ''}")
     return 0
 
 
@@ -548,10 +555,10 @@ def main(argv=None) -> int:
     sp.add_argument("path")
     sp.set_defaults(func=cmd_load_jsonl)
 
-    sp = sub.add_parser("export", help="정적 배포용 JSON 스냅샷")
-    sp.add_argument("path", nargs="?", default="web/snapshot.json")
-    sp.add_argument("--top-papers", type=int, default=40,
-                    help="성분당 스냅샷에 담을 논문 수 (기본 %(default)s)")
+    sp = sub.add_parser("export", help="정적 배포용 파일 묶음")
+    sp.add_argument("path", nargs="?", default="web/data")
+    sp.add_argument("--paper-cap", type=int, default=2000,
+                    help="성분 한 종당 담을 논문 수 상한 (기본 %(default)s)")
     sp.add_argument("--allow-empty", action="store_true",
                     help="빈 코퍼스나 테스트 픽스처도 내보낸다 (공개 배포 금지)")
     sp.set_defaults(func=cmd_export)

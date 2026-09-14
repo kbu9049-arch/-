@@ -101,16 +101,13 @@ jobs:
               sys.exit(f"논문이 연결된 성분이 {ings}종뿐입니다.")
           PY
 
-      - name: 정적 스냅샷 생성
-        run: python -m ingest.build export web/snapshot.json --top-papers 40
-
       - name: 사이트 구성
         run: |
           mkdir -p _site
-          cp web/index.html web/style.css web/app.js web/snapshot.json _site/
+          cp web/index.html web/style.css web/app.js _site/
+          python -m ingest.build export _site/data
           touch _site/.nojekyll
-          ls -la _site
-          echo "스냅샷 크기: $(du -h _site/snapshot.json | cut -f1)"
+          echo "전체 $(du -sh _site | cut -f1) · 첫 화면에서 받는 색인 $(du -h _site/data/index.json | cut -f1)"
 
       - uses: actions/upload-pages-artifact@v3
         with:

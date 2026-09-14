@@ -117,15 +117,16 @@ def main() -> int:
     run("-m", "ingest.build", "load-jsonl", str(fixture))
     run("-m", "ingest.build", "aggregate")
     # 픽스처 코퍼스라 --allow-empty 로 내보내기 가드를 통과시킨다(테스트 목적).
-    run("-m", "ingest.build", "export", str(tmp / "snapshot.json"),
-        "--top-papers", "40", "--allow-empty")
+    run("-m", "ingest.build", "export", str(tmp / "site" / "repo-name" / "data"),
+        "--allow-empty")
 
     # 정적 배포를 하위 경로에 올린 상태를 재현한다 (GitHub Pages 의 /저장소명/)
     site = tmp / "site" / "repo-name"
-    site.mkdir(parents=True)
     for f in ("index.html", "style.css", "app.js"):
         shutil.copy(ROOT / "web" / f, site / f)
-    shutil.copy(tmp / "snapshot.json", site / "snapshot.json")
+    if not (site / "data" / "index.json").exists():
+        print("정적 사이트 내보내기가 index.json 을 만들지 못했습니다.")
+        raise SystemExit(1)
 
     api_port, static_port = free_port(), free_port()
     procs = [

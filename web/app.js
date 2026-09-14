@@ -11,7 +11,7 @@ const n = (v) => Number(v || 0).toLocaleString('ko-KR');
 
 /* 이 앱은 두 가지 방식으로 배포된다.
      server   — FastAPI 가 /api/* 를 서빙 (실시간 조회·전체 논문 페이지네이션 가능)
-     snapshot — 정적 호스팅. snapshot.json 하나만 두고 브라우저가 API 를 흉내 낸다.
+     snapshot — 정적 호스팅. data/ 아래 색인과 상세 파일을 두고 브라우저가 API 를 흉내 낸다.
    화면 코드는 둘 다 완전히 동일하다. api() 아래에서만 갈린다. */
 let SNAPSHOT = null;
 
@@ -124,7 +124,22 @@ async function api(path) {
   return body;
 }
 
-/* ── 정적 스냅샷 모드 ────────────────────────────────────────────────────── */
+/* ── 정적 스냅샷 모드 ──────────────────────────────────────────────────────
+   색인(index.json)만 먼저 받고, 성분·지표 상세는 열 때 그 파일 하나만 받아온다.
+   전부를 한 파일에 담던 때는 성분당 상위 40건밖에 못 실어서, "뼈 건강 (233)"
+   을 골라도 그 40건 안에 든 몇 건만 나왔다. 지금은 논문을 전부 싣는다. */
+const SNAP_CACHE = new Map();
+
+async function snapDetail(kind, id) {
+  const key = `${kind}/${id}`;
+  if (SNAP_CACHE.has(key)) return SNAP_CACHE.get(key);
+  const res = await fetch(resolve(`data/${key}.json`));
+  if (!res.ok) throw new Error(`자료를 찾지 못했습니다 (${esc(id)})`);
+  const data = await res.json();
+  SNAP_CACHE.set(key, data);
+  return data;
+}
+
 const snorm = (v) => String(v ?? '').normalize('NFKC').trim().toLowerCase();
 
 /** server/queries.py 의 Reference._find 와 같은 점수 규칙. */
@@ -145,7 +160,7 @@ function findIn(index, q, limit) {
   return [...scores.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
 }
 
-function snapshotRoute(path) {
+async function snapshotRoute(path) {
   const [rawPath, rawQuery] = path.split('?');
   const p = new URLSearchParams(rawQuery || '');
   const S = SNAPSHOT;
@@ -155,7 +170,7 @@ function snapshotRoute(path) {
     return {
       corpus_ready: (S.corpus.papers || 0) > 0,
       corpus: S.corpus,
-      ...S.meta,
+      ...S.meta,          // categories / study_types / subjects / directions / plain …
       live_lookup: false,
       snapshot: true,
       generated_at: S.generated_at,
@@ -164,15 +179,12 @@ function snapshotRoute(path) {
 
   if (seg[0] === 'outcomes') {
     if (seg.length === 1) return { items: S.outcomes };
-    const d = S.outcome_details[seg[1]];
-    if (!d) throw new Error(`알 수 없는 지표 id: ${seg[1]}`);
-    return d;
+    return snapDetail('o', seg[1]);
   }
 
   if (seg[0] === 'ingredients') {
     if (seg.length === 1) return snapshotIngredientList(p);
-    const d = S.ingredient_details[seg[1]];
-    if (!d) throw new Error(`알 수 없는 성분 id: ${seg[1]}`);
+    const d = await snapDetail('i', seg[1]);
     if (seg[2] === 'papers') return snapshotPapers(d, p);
     return d;
   }
@@ -292,6 +304,98 @@ const state = {
   });
 })();
 
+/* ── 쉬운 말 ───────────────────────────────────────────────────────────────
+   연구 용어를 모르는 사람도 읽을 수 있어야 한다. 기본 표기는 쉬운 말로 두고,
+   누르면 정식 용어와 설명이 뜬다. 표는 서버(또는 색인 파일)가 내려준다. */
+function plain(kind, code) {
+  const t = state.meta && state.meta.plain && state.meta.plain[kind];
+  return (t && t[code]) || { label: code, term: code, desc: '' };
+}
+
+/** 용어 배지 하나. 누르면 설명이 뜬다. */
+function termTag(kind, code, extraClass = '') {
+  const t = plain(kind, code);
+  return `<span class="term ${extraClass}" data-term="${esc(kind)}" data-code="${esc(code)}"
+    role="button" tabindex="0" aria-label="${esc(t.label)} — 설명 보기">${esc(t.label)}</span>`;
+}
+
+let _pop = null;
+let _popAnchor = null;
+
+function closeTerm() {
+  if (_pop) { _pop.remove(); _pop = null; _popAnchor = null; }
+}
+
+/* 스크롤할 때 닫아 버리면 터치 기기에서 손가락이 조금만 움직여도 사라진다.
+   닫는 대신 누른 배지를 따라다니게 하고, 화면 밖으로 나갈 때만 닫는다. */
+function placeTerm() {
+  if (!_pop || !_popAnchor || !_popAnchor.isConnected) { closeTerm(); return; }
+  const r = _popAnchor.getBoundingClientRect();
+  if (r.bottom < -20 || r.top > innerHeight + 20) { closeTerm(); return; }
+  const w = _pop.offsetWidth;
+  const h = _pop.offsetHeight;
+  const left = Math.min(Math.max(10, r.left + r.width / 2 - w / 2),
+                        document.documentElement.clientWidth - w - 10);
+  const below = r.bottom + 10 + h < innerHeight;
+  _pop.style.left = `${left + scrollX}px`;
+  _pop.style.top = `${(below ? r.bottom + 8 : r.top - h - 8) + scrollY}px`;
+}
+
+function openTerm(el) {
+  const t = plain(el.dataset.term, el.dataset.code);
+  if (!t.desc) return;
+  // 같은 배지를 다시 누르면 닫는다.
+  const same = _popAnchor === el;
+  closeTerm();
+  if (same) return;
+
+  const pop = document.createElement('div');
+  pop.className = 'termpop';
+  pop.setAttribute('role', 'tooltip');
+  pop.innerHTML = `<b>${esc(t.label)}</b>`
+    + (t.term && t.term !== t.label ? `<span class="formal">정식 용어 · ${esc(t.term)}</span>` : '')
+    + `<p>${esc(t.desc)}</p>`;
+  document.body.appendChild(pop);
+  _pop = pop;
+  _popAnchor = el;
+  placeTerm();
+  requestAnimationFrame(() => pop.classList.add('in'));
+}
+addEventListener('scroll', placeTerm, { passive: true });
+addEventListener('resize', placeTerm);
+
+/** 화면에서 쓰는 용어를 한자리에 모아 보여주는 접이식 설명. */
+function howToRead() {
+  const P = (state.meta && state.meta.plain) || {};
+  const block = (title, kind, order) => {
+    const m = P[kind] || {};
+    const rows = (order || Object.keys(m)).filter((k) => m[k]).map((k) => `
+      <div class="howrow">
+        <div class="howterm">${esc(m[k].label)}${
+          m[k].term && m[k].term !== m[k].label
+            ? `<span class="howformal">${esc(m[k].term)}</span>` : ''}</div>
+        <div class="howdesc">${esc(m[k].desc)}</div>
+      </div>`).join('');
+    return rows ? `<h4>${esc(title)}</h4>${rows}` : '';
+  };
+  return `
+    <details class="howto reveal">
+      <summary>낯선 말이 있나요? 이 화면 읽는 법</summary>
+      <div class="howbody">
+        ${block('결과가 어떻게 나왔나', 'direction', ['significant', 'null', 'unclear'])}
+        ${block('어떤 방식으로 한 연구인가', 'study_type',
+                ['meta_analysis', 'systematic_review', 'rct', 'clinical_trial',
+                 'observational', 'preclinical'])}
+        ${block('누구를 대상으로 했나', 'subject', ['human', 'animal', 'invitro'])}
+        <h4>논문 제목이 영어인 이유</h4>
+        <div class="howrow"><div class="howterm">원문 그대로</div>
+          <div class="howdesc">논문 제목과 인용한 문장은 번역하지 않고 원문 그대로 둡니다.
+            옮기는 과정에서 뜻이 달라지면 근거로서 값어치가 없어지기 때문입니다.
+            대신 위의 배지로 <b>어떤 방식의 연구이고 결과가 어땠는지</b>를 한국어로 표시합니다.</div></div>
+      </div>
+    </details>`;
+}
+
 /* ── 공통 조각 ───────────────────────────────────────────────────────────── */
 function directionBar(o, maxHuman) {
   const total = o.human_significant + o.human_null + o.human_unclear;
@@ -316,12 +420,16 @@ function directionBar(o, maxHuman) {
     </div>`;
 }
 
-const LEGEND = `
-  <div class="legend">
-    <span><i class="sw" style="background:var(--sig)"></i>유의한 결과 보고</span>
-    <span><i class="sw" style="background:var(--null)"></i>유의차 없음</span>
-    <span><i class="sw" style="background:var(--unclear)"></i>판정 불가</span>
-  </div>`;
+function legend() {
+  const item = (code, color) => {
+    const t = plain('direction', code);
+    return `<span class="term legenditem" data-term="direction" data-code="${code}"
+      role="button" tabindex="0" aria-label="${esc(t.label)} — 설명 보기">
+      <i class="sw" style="background:var(${color})"></i>${esc(t.label)}</span>`;
+  };
+  return `<div class="legend">${item('significant', '--sig')}${item('null', '--null')}`
+       + `${item('unclear', '--unclear')}</div>`;
+}
 
 function paperItem(p, { showEvidence = true } = {}) {
   const link = p.url
@@ -333,17 +441,16 @@ function paperItem(p, { showEvidence = true } = {}) {
   return `
     <div class="paper reveal">
       <div class="pmeta">
-        <span>${esc(p.study_type_ko)}</span>
-        ${p.year ? `<span>${esc(p.year)}</span>` : ''}
-        <span>${esc(p.subject_ko)}</span>
-        ${p.direction
-          ? `<span class="dirtag ${esc(p.direction)}">${esc(p.direction_ko)}</span>` : ''}
-        ${p.retracted ? '<span class="retracted">철회된 논문</span>' : ''}
+        ${termTag('study_type', p.study_type)}
+        ${p.year ? `<span class="plainx">${esc(p.year)}년</span>` : ''}
+        ${termTag('subject', p.subject)}
+        ${p.direction ? termTag('direction', p.direction, `dirtag ${esc(p.direction)}`) : ''}
+        ${p.retracted ? '<span class="plainx retracted">철회된 논문</span>' : ''}
       </div>
       <div class="ptitle">${link}</div>
       ${src ? `<div class="psrc">${src}</div>` : ''}
       ${showEvidence && p.evidence
-        ? `<div class="evidence"><span class="kicker">분류 근거 · 초록 원문</span>${esc(p.evidence)}</div>`
+        ? `<div class="evidence"><span class="kicker">이렇게 분류한 이유 — 논문이 쓴 문장 그대로</span>${esc(p.evidence)}</div>`
         : ''}
     </div>`;
 }
@@ -436,8 +543,8 @@ function ingredientCard(it) {
     ? `<span class="badge">논문 ${n(s.total)}건 · 사람 ${n(s.human)}건</span>`
     : '<span class="badge none">색인된 논문 없음</span>';
   const detail = s.total > 0
-    ? `메타분석·체계적 고찰 <b>${n(s.systematic)}</b> · RCT <b>${n(s.rct)}</b>
-       · 동물·시험관 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}` : ''}`
+    ? `여러 연구를 합친 분석 <b>${n(s.systematic)}</b> · 무작위 비교 시험 <b>${n(s.rct)}</b>
+       · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}` : ''}`
     : '이 색인에 수집된 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
   return `
     <button class="card reveal" data-ing="${esc(it.id)}">
@@ -559,33 +666,44 @@ async function renderIngredient(id) {
       <p class="lede reveal">${esc(lede)}</p>
       ${small ? `<div class="smallprint reveal">${esc(small)}</div>` : ''}
 
+      ${howToRead()}
+
       <h2>측정한 항목</h2>
-      ${LEGEND}
+      ${legend()}
       ${d.outcomes.length
         ? `<div class="bars reveal">${d.outcomes.map((o) => directionBar(o, maxHuman)).join('')}</div>`
         : '<p class="dim" style="text-align:center">사람 대상 연구에서 분류된 결과지표가 없습니다.</p>'}
 
       <h2>대표 논문</h2>
-      <p class="count">근거 위계(메타분석 → 체계적 문헌고찰 → RCT → …)와 피인용 수 순입니다.</p>
+      <p class="count">믿을 만한 방식으로 한 연구부터 보여줍니다 —
+        여러 연구를 합친 분석 → 문헌 종합 검토 → 무작위 비교 시험 순.</p>
       ${d.top_papers.map((p) => paperItem(p, { showEvidence: false })).join('')}
 
       ${yearChart(d.by_year)}
 
       <h2>논문 전체 보기</h2>
       <div class="filters">
-        <select id="f-outcome"><option value="">전체 항목</option>
+        <select id="f-outcome" aria-label="측정 항목으로 거르기">
+          <option value="">측정 항목 전체</option>
           ${d.outcomes.map((o) => `<option value="${esc(o.outcome_id)}">${esc(o.label_ko)} (${n(o.total)})</option>`).join('')}
         </select>
-        <select id="f-subject"><option value="">사람·동물 전체</option>
-          <option value="human">사람 대상만</option><option value="animal">동물 실험만</option>
-          <option value="invitro">시험관·세포만</option></select>
-        <select id="f-study"><option value="">모든 연구 유형</option>
-          ${d.by_study_type.map((t) => `<option value="${esc(t.study_type)}">${esc(t.label_ko)} (${n(t.count)})</option>`).join('')}
+        <select id="f-subject" aria-label="연구 대상으로 거르기">
+          <option value="">사람·동물 모두</option>
+          <option value="human">${esc(plain('subject', 'human').label)}만</option>
+          <option value="animal">${esc(plain('subject', 'animal').label)}만</option>
+          <option value="invitro">${esc(plain('subject', 'invitro').label)}만</option>
         </select>
-        <select id="f-direction"><option value="">모든 결과</option>
-          <option value="significant">유의한 결과 보고</option>
-          <option value="null">유의차 없음</option>
-          <option value="unclear">판정 불가</option></select>
+        <select id="f-study" aria-label="연구 방식으로 거르기">
+          <option value="">연구 방식 전체</option>
+          ${d.by_study_type.map((t) =>
+            `<option value="${esc(t.study_type)}">${esc(plain('study_type', t.study_type).label)} (${n(t.count)})</option>`).join('')}
+        </select>
+        <select id="f-direction" aria-label="결과로 거르기">
+          <option value="">결과 전체</option>
+          <option value="significant">${esc(plain('direction', 'significant').label)}</option>
+          <option value="null">${esc(plain('direction', 'null').label)}</option>
+          <option value="unclear">${esc(plain('direction', 'unclear').label)}</option>
+        </select>
       </div>
       <div id="paper-list"></div>
       <div class="btnrow">
@@ -705,9 +823,10 @@ async function renderOutcome(id) {
       <h1 class="detail-title">${esc(d.label_ko)}</h1>
       <div class="detail-sub">${esc(d.label_en)}</div>
     </div>
-    <p class="lede reveal">이 항목을 실제로 측정한 사람 대상 연구가 있는 성분입니다.</p>
-    <div class="smallprint reveal" style="margin-bottom:40px">${esc(d.note)}</div>
-    ${LEGEND}
+    <p class="lede reveal">이 항목을 실제로 재 본 사람 대상 연구가 있는 성분입니다.</p>
+    <div class="smallprint reveal" style="margin-bottom:34px">${esc(d.note)}</div>
+    ${howToRead()}
+    ${legend()}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
       <div class="orow">
         <div class="oname"><button class="obtn" data-ing="${esc(i.id)}">${esc(i.name_ko)}</button>
@@ -756,9 +875,19 @@ function route() {
   $('#ingredient-search').hidden = false;
 }
 addEventListener('hashchange', route);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeTerm(); return; }
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const term = e.target.closest && e.target.closest('[data-term]');
+  if (term) { e.preventDefault(); openTerm(term); }
+});
 
 /* ── 이벤트 위임 ─────────────────────────────────────────────────────────── */
 document.addEventListener('click', (e) => {
+  const term = e.target.closest('[data-term]');
+  if (term) { e.stopPropagation(); openTerm(term); return; }
+  closeTerm();
+
   if (e.target.closest('[data-home]')) { location.hash = '#/'; return; }
 
   const back = e.target.closest('[data-back]');
@@ -819,10 +948,10 @@ async function bootstrap() {
     }
   } catch { /* 정적 호스팅에서는 /api/meta 가 없다. 아래로 넘어간다. */ }
 
-  const res = await fetch(resolve('snapshot.json'));
+  const res = await fetch(resolve('data/index.json'));
   if (!res.ok) {
-    throw new Error('서버 API 도 snapshot.json 도 찾지 못했습니다. '
-                  + '`make serve` 로 서버를 띄우거나 `make snapshot` 으로 스냅샷을 만드세요.');
+    throw new Error('서버 API 도 data/index.json 도 찾지 못했습니다. '
+                  + '`make serve` 로 서버를 띄우거나 `make site` 로 정적 사이트를 만드세요.');
   }
   SNAPSHOT = await res.json();          // 정적 배포
   return snapshotRoute('/api/meta');
