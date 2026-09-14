@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""분류 색 생성기.
+"""성분 분류 색 생성기.
 
-성분 12분류와 측정 항목 8계열에 각각 고유한 색을 준다.
+화면에서 색을 쓰는 곳은 두 군데뿐이다.
+
+1. 성분 분류 12종의 이름표 — 이 스크립트가 만든다.
+2. 결과 방향 3색 — 표준 팔레트 값을 그대로 쓰고, 주변 색만 여기서 계산한다.
+
+측정 항목의 계통 묶음(30 → 8)도 여기서 정하지만 색은 주지 않는다.
+계통은 화면에 글자로만 나온다. data/palette.json 으로 내보낸다.
 색은 OKLCH(사람 눈이 느끼는 밝기 기준 색 공간)에서 계산한다.
 밝기(L)와 진하기(C)를 고정하고 색상(H)만 돌리므로,
 어떤 색을 골라도 화면에서 느껴지는 무게가 같다.
@@ -181,10 +187,11 @@ MUTED = {"other"}
 
 # 밝기를 번갈아 주는 폭. scripts/gen_colors.py --sweep 로 고른 값.
 CATEGORY_DELTA = 0.06
-FAMILY_DELTA = 0.06
 
 # 측정 항목 30가지를 몸의 계통 8개로 묶는다. 묶음은 편집 판단이며,
-# 어떤 항목이 어느 묶음인지는 화면에도 글자로 나온다.
+# 화면에는 계통 '이름'만 글자로 나온다. 색은 주지 않는다 —
+# 색은 성분 분류에만 쓴다는 원칙이 있고, 여덟 색을 더 얹으면 그 원칙이 무너진다.
+# (가운데 숫자는 예전에 색상으로 쓰던 값이다. 지금은 목록 순서를 잡는 데만 쓴다.)
 OUTCOME_FAMILIES: dict[str, tuple[str, float, list[str]]] = {
     "metabolic":  ("혈액·대사", 22,  ["lipid", "glucose", "blood_pressure", "weight",
                                       "blood_flow", "cardio_event", "anemia"]),
@@ -207,9 +214,9 @@ RESULT = {
 
 # 라이트/다크 각각의 목표값. ink 는 대비를 보고 자동으로 다시 잡는다.
 THEMES = {
-    "light": dict(bg="#ffffff", tint_L=0.962, tint_C=0.030, ink_L=0.53, ink_C=0.150,
+    "light": dict(surface="#f5f5f7", bg="#ffffff", tint_L=0.962, tint_C=0.030, ink_L=0.53, ink_C=0.150,
                   ink_step=-0.01, vivid_L=0.615, vivid_C=0.170, edge_L=0.86, edge_C=0.060),
-    "dark":  dict(bg="#000000", tint_L=0.248, tint_C=0.045, ink_L=0.80, ink_C=0.115,
+    "dark":  dict(surface="#1d1d1f", bg="#000000", tint_L=0.248, tint_C=0.045, ink_L=0.80, ink_C=0.115,
                   ink_step=+0.01, vivid_L=0.665, vivid_C=0.155, edge_L=0.38, edge_C=0.075),
 }
 
@@ -274,35 +281,28 @@ def audit(name: str, colors: list[str], surface: str) -> list[str]:
 
 
 def build_result(theme: str) -> tuple[dict, list[str]]:
-    """결과 3색에서 그러데이션 끝색·바탕색·글자색을 뽑아낸다.
+    """결과 3색과, 그 색으로 쓰는 글자색을 정한다.
 
-    본색은 표준 팔레트 값 그대로 두고, 주변 색만 같은 색상으로 계산한다.
-    글자로 쓰는 색은 자기 바탕 대비 4.5:1, 채워 쓰는 색은 3:1 을 확인한다."""
+    본색은 표준 팔레트 값 그대로 두고 손대지 않는다.
+    막대는 페이지 바탕(--bg) 위에 놓이고, 글자는 카드 바탕(--bg-2) 위에도 놓인다.
+    그래서 막대는 페이지 바탕 기준 3:1(WCAG 1.4.11), 글자는 둘 중 더 빡빡한
+    카드 바탕 기준 4.5:1 을 확인한다."""
     t = THEMES[theme]
-    bg = t["bg"]
+    surface, page = t["surface"], t["bg"]
     css: dict[str, str] = {}
     notes = []
     for key, base in RESULT[theme].items():
         L, C, H = hex_to_oklch(base)
-        css[f"--{key}"] = base
         if key == "unclear":
-            # 판정 불가는 색이 아니라 '색 없음'이다. 회색 그대로 둔다.
-            css["--unclear-2"] = base
-            css["--unclear-tint"] = oklch_to_hex(t["tint_L"], 0.004, H)
-            css["--unclear-ink"] = ink_for(H, 0.004, css["--unclear-tint"],
-                                           start=t["ink_L"], step=t["ink_step"])[0]
-            continue
-        # 그러데이션 끝색: 같은 색상 안에서 조금 밝히고 살짝 돌린다.
-        two, _, _ = ink_for((H + 12) % 360, C * 0.95, bg,
-                            start=L + (0.085 if theme == "light" else 0.075),
-                            step=t["ink_step"], floor=3.0)
-        tint = oklch_to_hex(t["tint_L"] - 0.006, t["tint_C"] * 1.2, H)
-        ink, _, ratio = ink_for(H, t["ink_C"], tint, start=t["ink_L"], step=t["ink_step"])
-        css[f"--{key}-2"] = two
-        css[f"--{key}-tint"] = tint
+            # 판정 불가는 색이 아니라 '색 없음'이다. 회색으로 두되,
+            # 카드 바탕에 묻히지 않을 만큼만 진하게 잡는다.
+            base = ink_for(H, 0.004, page, start=L, step=t["ink_step"], floor=3.0)[0]
+        css[f"--{key}"] = base
+        chroma = 0.004 if key == "unclear" else t["ink_C"]
+        ink, _, ratio = ink_for(H, chroma, surface, start=t["ink_L"], step=t["ink_step"])
         css[f"--{key}-ink"] = ink
-        notes.append(f"  {theme:5} {key:8} 본색 {base} · 끝색 {two} (바탕 대비 "
-                     f"{contrast(two, bg):.2f}:1) · 글자 {ink} (제 바탕 대비 {ratio:.2f}:1)")
+        notes.append(f"  {theme:5} {key:8} 막대 {base} (페이지 바탕 대비 "
+                     f"{contrast(base, page):.2f}:1) · 글자 {ink} (카드 바탕 대비 {ratio:.2f}:1)")
     return css, notes
 
 
@@ -318,22 +318,17 @@ def main() -> int:
     ap.add_argument("--sweep", action="store_true", help="밝기 폭 후보를 훑어 최소 ΔE 비교")
     args = ap.parse_args()
 
-    fam_hues_only = {k: v[1] for k, v in OUTCOME_FAMILIES.items()}
     if args.sweep:
-        print("밝기 폭별 최소 ΔE (라이트/다크 중 나쁜 쪽)")
-        print(f"{'폭':>6} | {'분류 12종':>18} | {'항목 8계열':>18}")
-        print(f"{'':6} | {'보통시각':>8} {'색각이상':>9} | {'보통시각':>8} {'색각이상':>9}")
+        print("밝기 폭별 최소 ΔE — 성분 분류 12종 (라이트/다크 중 나쁜 쪽)")
+        print(f"{'폭':>6} | {'보통시각':>8} {'색각이상':>9}")
         for d in [round(x / 200, 3) for x in range(0, 29, 2)]:
-            row = [f"{d:6.3f}"]
-            for hues, muted in ((CATEGORY_HUES, MUTED), (fam_hues_only, set())):
-                norm, cvd = [], []
-                for theme in ("light", "dark"):
-                    css, _ = build(theme, hues, muted, d)
-                    cols = [v for k, v in css.items() if k.endswith("-vivid")]
-                    norm.append(worst_pair(cols)[0])
-                    cvd.append(min(worst_pair(cols, v)[0] for v in ("protan", "deutan")))
-                row.append(f"{min(norm):8.1f} {min(cvd):9.1f}")
-            print(" | ".join(row))
+            norm, cvd = [], []
+            for theme in ("light", "dark"):
+                css, _ = build(theme, CATEGORY_HUES, MUTED, d)
+                cols = [v for k, v in css.items() if k.endswith("-vivid")]
+                norm.append(worst_pair(cols)[0])
+                cvd.append(min(worst_pair(cols, v)[0] for v in ("protan", "deutan")))
+            print(f"{d:6.3f} | {min(norm):8.1f} {min(cvd):9.1f}")
         return 0
 
     cat_names = json.loads((ROOT / "data" / "ingredients.json").read_text("utf-8"))["_meta"]["categories"]
@@ -344,10 +339,9 @@ def main() -> int:
     result_notes: list[str] = []
     for theme in ("light", "dark"):
         a, ra = build(theme, CATEGORY_HUES, MUTED, CATEGORY_DELTA)
-        b, rb = build(theme, fam_hues, set(), FAMILY_DELTA)
         c, notes = build_result(theme)
-        blocks[theme] = {**a, **b, **c}
-        report += ra + rb
+        blocks[theme] = {**a, **c}
+        report += ra
         result_notes += notes
 
     if args.report:
@@ -365,8 +359,7 @@ def main() -> int:
         for theme in ("light", "dark"):
             surface = THEMES[theme]["bg"]
             print(f"\n[{theme}]")
-            for name, hues, muted, d in (("성분 분류 12종", CATEGORY_HUES, MUTED, CATEGORY_DELTA),
-                                         ("측정 항목 8계열", fam_hues_only, set(), FAMILY_DELTA)):
+            for name, hues, muted, d in (("성분 분류 12종", CATEGORY_HUES, MUTED, CATEGORY_DELTA),):
                 css, _ = build(theme, hues, muted, d)
                 for line in audit(name, [v for k, v in css.items() if k.endswith("-vivid")], surface):
                     print(line)
@@ -379,8 +372,7 @@ def main() -> int:
 
     worst_lines = []
     for theme in ("light", "dark"):
-        for name, hues, muted, d in (("분류 12종", CATEGORY_HUES, MUTED, CATEGORY_DELTA),
-                                     ("항목 8계열", fam_hues_only, set(), FAMILY_DELTA)):
+        for name, hues, muted, d in (("분류 12종", CATEGORY_HUES, MUTED, CATEGORY_DELTA),):
             css_, _ = build(theme, hues, muted, d)
             cols = [v for k, v in css_.items() if k.endswith("-vivid")]
             n = worst_pair(cols)[0]
@@ -390,7 +382,7 @@ def main() -> int:
     head = (
         "/* 이 파일은 scripts/gen_colors.py 가 만든다. 직접 고치지 말 것.\n"
         "   다시 만들기:  python scripts/gen_colors.py\n\n"
-        "   성분 분류 12종과 측정 항목 8계열의 이름표 색.\n"
+        "   성분 분류 12종의 이름표 색.\n"
         "   OKLCH(사람 눈이 느끼는 밝기 기준 색 공간)에서 뽑았고, 밝기와 진하기를\n"
         "   거의 고정한 채 색상만 돌렸다. 그래서 어느 색을 골라도 화면에서 느껴지는\n"
         "   무게가 같고, 어떤 분류가 더 중요해 보이는 일이 없다.\n\n"
@@ -403,7 +395,9 @@ def main() -> int:
         "     읽는 데 아무 지장이 없다.\n\n"
         "   ■ 뜻을 나르는 색은 따로 있다: 결과 방향 3색(--sig/--null/--unclear).\n"
         "     그 3색만 색각 이상 검사를 통과하도록 골랐고, 그마저도 막대마다\n"
-        "     숫자와 글자 라벨을 함께 둔다. */\n\n"
+        "     숫자와 글자 라벨을 함께 둔다.\n\n"
+        "   ■ 이 둘 말고는 화면에 색을 쓰지 않는다. 측정 항목의 계통 묶음도\n"
+        "     이름만 글자로 보여 주고 색은 주지 않는다. */\n\n"
     )
     css = head
     css += ":root {\n" + emit(blocks["light"]) + "\n}\n"
@@ -413,9 +407,9 @@ def main() -> int:
 
     # 화면 코드가 분류 이름만 붙이면 그 자리의 색이 통째로 바뀌도록 이름을 이어 준다.
     # style.css 는 --tone-* 만 쓰고 분류 목록을 알 필요가 없다.
-    css += ("\n/* data-cat / data-fam 이 붙은 곳에서 --tone-* 가 그 분류의 색이 된다.\n"
+    css += ("\n/* data-cat 이 붙은 곳에서 --tone-* 가 그 분류의 색이 된다.\n"
             "   style.css 는 분류 이름을 하나도 몰라도 된다. */\n")
-    for attr, keys in (("data-cat", CATEGORY_HUES), ("data-fam", fam_hues)):
+    for attr, keys in (("data-cat", CATEGORY_HUES),):
         for key in keys:
             css += (f'[{attr}="{key}"] {{ '
                     f"--tone:var(--c-{key}-ink); "
@@ -435,8 +429,8 @@ def main() -> int:
     (ROOT / "data" / "palette.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2) + "\n", "utf-8")
 
-    print(f"{args.out} — 분류 {len(CATEGORY_HUES)}종, 계열 {len(OUTCOME_FAMILIES)}종")
-    print(f"{ROOT / 'data' / 'palette.json'} — 계열 매핑 {len(fam_map)}개")
+    print(f"{args.out} — 성분 분류 {len(CATEGORY_HUES)}종의 색")
+    print(f"{ROOT / 'data' / 'palette.json'} — 측정 항목 계통 묶음 {len(fam_map)}개 (색 없음, 이름만)")
     return 0
 
 

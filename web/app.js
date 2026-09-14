@@ -64,7 +64,6 @@ function growBars(root = document) {
     b.style.transitionDelay = REDUCED ? '0ms' : `${Math.min(i, 9) * 55}ms`;
     b.style.width = b.dataset.w || 'auto';
     b.classList.remove('grow');
-    b.classList.add('grown');   // 다 자란 뒤 빛이 한 번 훑고 지나가게 한다
   });
   if (REDUCED) paint();
   else requestAnimationFrame(() => requestAnimationFrame(paint));
@@ -313,7 +312,7 @@ function directionBar(o, maxHuman) {
     ? `<i class="seg ${cls}" style="flex:${v}" title="${esc(label)} ${n(v)}건"></i>` : '');
   const few = o.human > 0 && o.human < 3 ? ' few' : '';
   return `
-    <div class="orow${few}" data-fam="${esc(o.family || '')}">
+    <div class="orow${few}">
       <div class="oname">
         <button class="obtn" data-outcome="${esc(o.outcome_id || o.id)}"
                 title="이 항목의 논문만 보기">${esc(o.label_ko)}</button>
@@ -344,7 +343,7 @@ function paperItem(p, { showEvidence = true } = {}) {
                p.cited_by ? `인용 ${n(p.cited_by)}회` : '']
     .filter(Boolean).map(esc).join(' · ');
   return `
-    <div class="paper reveal" data-dir="${esc(p.direction || '')}">
+    <div class="paper reveal">
       <div class="pmeta">
         <span>${esc(p.study_type_ko)}</span>
         ${p.year ? `<span>${esc(p.year)}년</span>` : ''}
@@ -387,13 +386,13 @@ function renderCorpusStats() {
   const c = state.meta.corpus || {};
   // 여섯 개를 늘어놓으면 어느 것도 눈에 안 들어온다. 네 개로 줄인다.
   const tiles = [
-    [n(c.papers), '모은 논문', 'metabolic'],
-    [n(c.human_papers), '사람에게 한 연구', 'mind'],
-    [n(c.systematic_papers), '여러 연구 종합', 'breath'],
-    [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분', 'hormone'],
+    [n(c.papers), '모은 논문'],
+    [n(c.human_papers), '사람에게 한 연구'],
+    [n(c.systematic_papers), '여러 연구 종합'],
+    [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분'],
   ];
   $('#corpus-stats').innerHTML = tiles
-    .map(([v, k, fam]) => `<div class="stat" data-fam="${fam}"><div class="v num">${v}</div>
+    .map(([v, k]) => `<div class="stat"><div class="v num">${v}</div>
         <div class="k">${esc(k)}</div></div>`)
     .join('');
 
@@ -453,13 +452,13 @@ function ingredientCard(it) {
        · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}년` : ''}`
     : '아직 모은 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
   return `
-    <button class="card reveal" data-ing="${esc(it.id)}" data-cat="${esc(it.category || '')}">
+    <button class="card reveal" data-ing="${esc(it.id)}">
       <div class="chead">
         <span class="nm">${esc(it.name_ko)}</span>
         <span class="en">${esc(it.name_en)}</span>
         ${badge}
       </div>
-      <div class="meta"><span class="ctag">${esc(it.category_ko)}</span>${detail}</div>
+      <div class="meta"><span class="ctag" data-cat="${esc(it.category || '')}">${esc(it.category_ko)}</span>${detail}</div>
     </button>`;
 }
 
@@ -524,7 +523,7 @@ function yearChart(byYear) {
   const bars = byYear.map((y) =>
     `<i style="height:${Math.max(3, (y.count / max) * 100)}%" title="${y.year}년 ${y.count}건"></i>`).join('');
   return `<h2>해마다 나온 논문 수</h2>
-    <div class="bars reveal" style="padding:26px 28px">
+    <div class="yearbox reveal">
       <div class="years">${bars}</div>
       <div class="yearlbl"><span>${byYear[0].year}</span><span>${byYear[byYear.length - 1].year}</span></div>
     </div>`;
@@ -555,12 +554,11 @@ async function renderIngredient(id) {
   // 영문명과 겹치는 검색어는 빼고 보여 준다 ("Vitamin A · vitamin a, …"는 중복).
   const extra = d.synonyms.filter((x) => x.toLowerCase() !== d.name_en.toLowerCase());
 
-  box.dataset.cat = d.category || '';
   box.innerHTML = `
     <button class="back" data-back><span class="arw">←</span> 성분</button>
 
     <div class="detail-head reveal">
-      <div class="kicker">${esc(d.category_ko)}</div>
+      <div class="kicker" data-cat="${esc(d.category || '')}">${esc(d.category_ko)}</div>
       <h1 class="detail-title">${esc(d.name_ko)}</h1>
       <div class="detail-sub">${esc(d.name_en)}${extra.length ? ` · ${extra.map(esc).join(', ')}` : ''}</div>
     </div>
@@ -698,7 +696,7 @@ function renderOutcomeGrid(filter = '') {
     || o.label_en.toLowerCase().includes(q)
     || (o.aliases || []).some((a) => a.toLowerCase().includes(q)));
   $('#o-grid').innerHTML = items.length ? items.map((o) => `
-    <button class="ocard reveal" data-outcome="${esc(o.id)}" data-fam="${esc(o.family || '')}">
+    <button class="ocard reveal" data-outcome="${esc(o.id)}">
       ${o.family_ko ? `<span class="ofam">${esc(o.family_ko)}</span>` : ''}
       <span class="ol">${esc(o.label_ko)}</span>
       <span class="oc num">성분 ${n(o.ingredients)}종 · 사람 대상 연구 ${n(o.human)}건</span>
@@ -722,11 +720,10 @@ async function renderOutcome(id) {
   }
   const maxHuman = Math.max(1, ...d.ingredients.map((i) => i.human));
 
-  box.dataset.fam = d.family || '';
   box.innerHTML = `
     <button class="back" data-back><span class="arw">←</span> 효능</button>
     <div class="detail-head reveal">
-      <div class="kicker">${esc(d.family_ko || '이런 걸 재 봤어요')}</div>
+      <div class="kicker">${esc(d.family_ko || '측정 항목')}</div>
       <h1 class="detail-title">${esc(d.label_ko)}</h1>
       <div class="detail-sub">${esc(d.label_en)}</div>
     </div>
@@ -734,9 +731,9 @@ async function renderOutcome(id) {
     <div class="smallprint reveal" style="margin-bottom:34px">${esc(d.note)}</div>
     ${LEGEND}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
-      <div class="orow" data-cat="${esc(i.category || '')}">
+      <div class="orow">
         <div class="oname"><button class="obtn" data-ing="${esc(i.id)}">${esc(i.name_ko)}</button>
-          <span class="ctag sm">${esc(i.category_ko)}</span></div>
+          <span class="ctag sm" data-cat="${esc(i.category || '')}">${esc(i.category_ko)}</span></div>
         <div class="bar grow" data-w="${Math.max(3, Math.round((i.human / maxHuman) * 100))}%">
           <i class="seg sig" style="flex:${i.human_significant}" title="차이 있었음 ${n(i.human_significant)}건"></i>
           <i class="seg null" style="flex:${i.human_null}" title="차이 없었음 ${n(i.human_null)}건"></i>
