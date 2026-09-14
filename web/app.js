@@ -195,8 +195,8 @@ async function snapshotRoute(path) {
     return {
       available: false,
       term: p.get('term') || '',
-      reason: '정적 배포에서는 문헌 DB 실시간 조회를 쓸 수 없습니다. '
-            + '서버 배포(FastAPI)로 실행하면 이 기능이 켜집니다.',
+      reason: '지금 방식으로는 바로 찾아보기를 쓸 수 없습니다. '
+            + '서버를 띄워서 실행하면 이 기능이 켜집니다.',
     };
   }
   throw new Error(`정적 배포에서 지원하지 않는 경로: ${rawPath}`);
@@ -304,98 +304,6 @@ const state = {
   });
 })();
 
-/* ── 쉬운 말 ───────────────────────────────────────────────────────────────
-   연구 용어를 모르는 사람도 읽을 수 있어야 한다. 기본 표기는 쉬운 말로 두고,
-   누르면 정식 용어와 설명이 뜬다. 표는 서버(또는 색인 파일)가 내려준다. */
-function plain(kind, code) {
-  const t = state.meta && state.meta.plain && state.meta.plain[kind];
-  return (t && t[code]) || { label: code, term: code, desc: '' };
-}
-
-/** 용어 배지 하나. 누르면 설명이 뜬다. */
-function termTag(kind, code, extraClass = '') {
-  const t = plain(kind, code);
-  return `<span class="term ${extraClass}" data-term="${esc(kind)}" data-code="${esc(code)}"
-    role="button" tabindex="0" aria-label="${esc(t.label)} — 설명 보기">${esc(t.label)}</span>`;
-}
-
-let _pop = null;
-let _popAnchor = null;
-
-function closeTerm() {
-  if (_pop) { _pop.remove(); _pop = null; _popAnchor = null; }
-}
-
-/* 스크롤할 때 닫아 버리면 터치 기기에서 손가락이 조금만 움직여도 사라진다.
-   닫는 대신 누른 배지를 따라다니게 하고, 화면 밖으로 나갈 때만 닫는다. */
-function placeTerm() {
-  if (!_pop || !_popAnchor || !_popAnchor.isConnected) { closeTerm(); return; }
-  const r = _popAnchor.getBoundingClientRect();
-  if (r.bottom < -20 || r.top > innerHeight + 20) { closeTerm(); return; }
-  const w = _pop.offsetWidth;
-  const h = _pop.offsetHeight;
-  const left = Math.min(Math.max(10, r.left + r.width / 2 - w / 2),
-                        document.documentElement.clientWidth - w - 10);
-  const below = r.bottom + 10 + h < innerHeight;
-  _pop.style.left = `${left + scrollX}px`;
-  _pop.style.top = `${(below ? r.bottom + 8 : r.top - h - 8) + scrollY}px`;
-}
-
-function openTerm(el) {
-  const t = plain(el.dataset.term, el.dataset.code);
-  if (!t.desc) return;
-  // 같은 배지를 다시 누르면 닫는다.
-  const same = _popAnchor === el;
-  closeTerm();
-  if (same) return;
-
-  const pop = document.createElement('div');
-  pop.className = 'termpop';
-  pop.setAttribute('role', 'tooltip');
-  pop.innerHTML = `<b>${esc(t.label)}</b>`
-    + (t.term && t.term !== t.label ? `<span class="formal">정식 용어 · ${esc(t.term)}</span>` : '')
-    + `<p>${esc(t.desc)}</p>`;
-  document.body.appendChild(pop);
-  _pop = pop;
-  _popAnchor = el;
-  placeTerm();
-  requestAnimationFrame(() => pop.classList.add('in'));
-}
-addEventListener('scroll', placeTerm, { passive: true });
-addEventListener('resize', placeTerm);
-
-/** 화면에서 쓰는 용어를 한자리에 모아 보여주는 접이식 설명. */
-function howToRead() {
-  const P = (state.meta && state.meta.plain) || {};
-  const block = (title, kind, order) => {
-    const m = P[kind] || {};
-    const rows = (order || Object.keys(m)).filter((k) => m[k]).map((k) => `
-      <div class="howrow">
-        <div class="howterm">${esc(m[k].label)}${
-          m[k].term && m[k].term !== m[k].label
-            ? `<span class="howformal">${esc(m[k].term)}</span>` : ''}</div>
-        <div class="howdesc">${esc(m[k].desc)}</div>
-      </div>`).join('');
-    return rows ? `<h4>${esc(title)}</h4>${rows}` : '';
-  };
-  return `
-    <details class="howto reveal">
-      <summary>낯선 말이 있나요? 이 화면 읽는 법</summary>
-      <div class="howbody">
-        ${block('결과가 어떻게 나왔나', 'direction', ['significant', 'null', 'unclear'])}
-        ${block('어떤 방식으로 한 연구인가', 'study_type',
-                ['meta_analysis', 'systematic_review', 'rct', 'clinical_trial',
-                 'observational', 'preclinical'])}
-        ${block('누구를 대상으로 했나', 'subject', ['human', 'animal', 'invitro'])}
-        <h4>논문 제목이 영어인 이유</h4>
-        <div class="howrow"><div class="howterm">원문 그대로</div>
-          <div class="howdesc">논문 제목과 인용한 문장은 번역하지 않고 원문 그대로 둡니다.
-            옮기는 과정에서 뜻이 달라지면 근거로서 값어치가 없어지기 때문입니다.
-            대신 위의 배지로 <b>어떤 방식의 연구이고 결과가 어땠는지</b>를 한국어로 표시합니다.</div></div>
-      </div>
-    </details>`;
-}
-
 /* ── 공통 조각 ───────────────────────────────────────────────────────────── */
 function directionBar(o, maxHuman) {
   const total = o.human_significant + o.human_null + o.human_unclear;
@@ -411,46 +319,42 @@ function directionBar(o, maxHuman) {
         ${o.human > 0 && o.human < 3 ? '<span class="few-tag">연구 적음</span>' : ''}
       </div>
       <div class="bar grow" data-w="${width}%">
-        ${total ? seg('sig', o.human_significant, '유의한 결과 보고')
-                + seg('null', o.human_null, '유의차 없음')
-                + seg('unclear', o.human_unclear, '판정 불가')
+        ${total ? seg('sig', o.human_significant, '차이 있었음')
+                + seg('null', o.human_null, '차이 없었음')
+                + seg('unclear', o.human_unclear, '알 수 없음')
                 : '<i class="seg unclear" style="flex:1"></i>'}
       </div>
       <div class="onum">사람 ${n(o.human)} · 전체 ${n(o.total)}</div>
     </div>`;
 }
 
-function legend() {
-  const item = (code, color) => {
-    const t = plain('direction', code);
-    return `<span class="term legenditem" data-term="direction" data-code="${code}"
-      role="button" tabindex="0" aria-label="${esc(t.label)} — 설명 보기">
-      <i class="sw" style="background:var(${color})"></i>${esc(t.label)}</span>`;
-  };
-  return `<div class="legend">${item('significant', '--sig')}${item('null', '--null')}`
-       + `${item('unclear', '--unclear')}</div>`;
-}
+const LEGEND = `
+  <div class="legend">
+    <span><i class="sw" style="background:var(--sig)"></i>차이 있었음</span>
+    <span><i class="sw" style="background:var(--null)"></i>차이 없었음</span>
+    <span><i class="sw" style="background:var(--unclear)"></i>알 수 없음</span>
+  </div>`;
 
 function paperItem(p, { showEvidence = true } = {}) {
   const link = p.url
     ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>`
     : esc(p.title);
   const src = [p.journal, p.pmid ? `PMID ${p.pmid}` : '',
-               p.cited_by ? `피인용 ${n(p.cited_by)}` : '']
+               p.cited_by ? `인용 ${n(p.cited_by)}회` : '']
     .filter(Boolean).map(esc).join(' · ');
   return `
     <div class="paper reveal">
       <div class="pmeta">
-        ${termTag('study_type', p.study_type)}
-        ${p.year ? `<span class="plainx">${esc(p.year)}년</span>` : ''}
-        ${termTag('subject', p.subject)}
-        ${p.direction ? termTag('direction', p.direction, `dirtag ${esc(p.direction)}`) : ''}
-        ${p.retracted ? '<span class="plainx retracted">철회된 논문</span>' : ''}
+        <span>${esc(p.study_type_ko)}</span>
+        ${p.year ? `<span>${esc(p.year)}년</span>` : ''}
+        <span>${esc(p.subject_ko)}</span>
+        ${p.direction ? `<span class="dirtag ${esc(p.direction)}">${esc(p.direction_ko)}</span>` : ''}
+        ${p.retracted ? '<span class="retracted">취소된 논문</span>' : ''}
       </div>
       <div class="ptitle">${link}</div>
       ${src ? `<div class="psrc">${src}</div>` : ''}
       ${showEvidence && p.evidence
-        ? `<div class="evidence"><span class="kicker">이렇게 분류한 이유 — 논문이 쓴 문장 그대로</span>${esc(p.evidence)}</div>`
+        ? `<div class="evidence"><span class="kicker">이렇게 나눈 이유 — 논문에 적힌 문장 (영어 원문)</span>${esc(p.evidence)}</div>`
         : ''}
     </div>`;
 }
@@ -462,18 +366,18 @@ function renderAlerts() {
   const out = [];
 
   if (!state.meta.corpus_ready || !c.papers) {
-    out.push(`<div class="banner warn"><span class="bt">⚠ 아직 논문을 수집하지 않았습니다</span>
-      화면에 표시할 데이터가 없습니다. 저장소에서
-      <code>python -m ingest.build all --target 100000</code> 을 실행해 문헌 DB 에서 논문을
-      수집하면 이 화면이 실제 데이터로 채워집니다.
-      <b>수집 전에는 어떤 수치도 지어내지 않습니다.</b></div>`);
+    out.push(`<div class="banner warn"><span class="bt">⚠ 아직 논문을 모으지 않았습니다</span>
+      보여드릴 자료가 없습니다. 저장소에서
+      <code>python -m ingest.build all --target 100000</code> 을 실행해 논문을
+      모으면 이 화면이 실제 자료로 채워집니다.
+      <b>모으기 전에는 어떤 숫자도 지어내지 않습니다.</b></div>`);
   }
   if (c.fixture_papers > 0) {
-    out.push(`<div class="banner alert"><span class="bt">⚠ 테스트 픽스처가 섞여 있습니다 —
+    out.push(`<div class="banner alert"><span class="bt">⚠ 시험용 가짜 자료가 섞여 있습니다 —
       건강 정보로 읽지 마세요</span>
-      현재 색인에 실제 논문이 아닌 합성 테스트 레코드가 <b>${n(c.fixture_papers)}건</b>
-      들어 있습니다(전체 ${n(c.papers)}건 중). 파이프라인 점검용 데이터이며 실제 근거와
-      아무 관련이 없습니다. <code>data/evidence.db</code> 를 지우고 실제 수집을 다시 하세요.</div>`);
+      지금 여기에 진짜 논문이 아닌 시험용 자료가 <b>${n(c.fixture_papers)}건</b>
+      들어 있습니다(전체 ${n(c.papers)}건 중). 프로그램 점검용이라 실제 근거와
+      아무 상관이 없습니다. <code>data/evidence.db</code> 를 지우고 다시 모으세요.</div>`);
   }
   box.innerHTML = out.join('');
 }
@@ -482,9 +386,9 @@ function renderCorpusStats() {
   const c = state.meta.corpus || {};
   // 여섯 개를 늘어놓으면 어느 것도 눈에 안 들어온다. 네 개로 줄인다.
   const tiles = [
-    [n(c.papers), '수집한 논문'],
-    [n(c.human_papers), '사람 대상 연구'],
-    [n(c.systematic_papers), '메타분석·체계적 고찰'],
+    [n(c.papers), '모은 논문'],
+    [n(c.human_papers), '사람에게 한 연구'],
+    [n(c.systematic_papers), '여러 연구 종합'],
     [`${n(c.ingredients_with_papers)} / ${n(state.meta.ingredient_count)}`, '논문이 있는 성분'],
   ];
   $('#corpus-stats').innerHTML = tiles
@@ -492,21 +396,21 @@ function renderCorpusStats() {
     .join('');
 
   const built = c.last_aggregate ? new Date(c.last_aggregate).toLocaleString('ko-KR') : '아직 없음';
-  const range = (c.year_min && c.year_max) ? ` · 논문 발표연도 ${c.year_min}–${c.year_max}` : '';
-  $('#footer-build').innerHTML = `색인 생성 ${esc(built)}${esc(range)} · `;
+  const range = (c.year_min && c.year_max) ? ` · 논문 ${c.year_min}–${c.year_max}년` : '';
+  $('#footer-build').innerHTML = `자료 정리 ${esc(built)}${esc(range)} · `;
 
   $('#about-corpus').innerHTML = `
-    <h3>현재 색인 상태</h3>
+    <h3>지금 모아 둔 자료</h3>
     <div class="scroll-x"><table class="plain">
-      <tr><th>수집한 논문</th><td class="num">${n(c.papers)}</td></tr>
-      <tr><th>초록이 있는 논문</th><td class="num">${n(c.papers)}</td></tr>
-      <tr><th>사람 대상 연구</th><td class="num">${n(c.human_papers)}</td></tr>
-      <tr><th>메타분석·체계적 문헌고찰</th><td class="num">${n(c.systematic_papers)}</td></tr>
-      <tr><th>무작위대조시험(RCT)</th><td class="num">${n(c.rct_papers)}</td></tr>
-      <tr><th>철회 논문 (집계 제외)</th><td class="num">${n(c.retracted_papers)}</td></tr>
-      <tr><th>수집 경로</th><td>${esc(c.harvest_source || '—')}</td></tr>
-      <tr><th>마지막 수집</th><td>${esc(c.last_harvest || '—')}</td></tr>
-      <tr><th>마지막 색인 생성</th><td>${esc(c.last_aggregate || '—')}</td></tr>
+      <tr><th>모은 논문</th><td class="num">${n(c.papers)}</td></tr>
+      <tr><th>요약글이 있는 논문</th><td class="num">${n(c.papers)}</td></tr>
+      <tr><th>사람에게 한 연구</th><td class="num">${n(c.human_papers)}</td></tr>
+      <tr><th>여러 연구 종합</th><td class="num">${n(c.systematic_papers)}</td></tr>
+      <tr><th>무작위 배정 시험</th><td class="num">${n(c.rct_papers)}</td></tr>
+      <tr><th>취소된 논문 (숫자에서 뺌)</th><td class="num">${n(c.retracted_papers)}</td></tr>
+      <tr><th>어디서 받았나</th><td>${esc(c.harvest_source || '—')}</td></tr>
+      <tr><th>마지막으로 받은 날</th><td>${esc(c.last_harvest || '—')}</td></tr>
+      <tr><th>마지막 정리</th><td>${esc(c.last_aggregate || '—')}</td></tr>
     </table></div>`;
 }
 
@@ -541,11 +445,11 @@ function ingredientCard(it) {
   const s = it.stats;
   const badge = s.total > 0
     ? `<span class="badge">논문 ${n(s.total)}건 · 사람 ${n(s.human)}건</span>`
-    : '<span class="badge none">색인된 논문 없음</span>';
+    : '<span class="badge none">논문 없음</span>';
   const detail = s.total > 0
-    ? `여러 연구를 합친 분석 <b>${n(s.systematic)}</b> · 무작위 비교 시험 <b>${n(s.rct)}</b>
-       · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}` : ''}`
-    : '이 색인에 수집된 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
+    ? `여러 연구 종합 <b>${n(s.systematic)}</b> · 무작위 배정 시험 <b>${n(s.rct)}</b>
+       · 동물·세포 <b>${n(s.preclinical)}</b>${s.year_min ? ` · ${s.year_min}–${s.year_max}년` : ''}`
+    : '아직 모은 논문이 없습니다. <b>효과가 없다는 뜻이 아닙니다.</b>';
   return `
     <button class="card reveal" data-ing="${esc(it.id)}">
       <div class="chead">
@@ -568,9 +472,9 @@ async function loadIngredients({ append = false } = {}) {
     state.items = append ? state.items.concat(data.items) : data.items;
     const html = state.items.map(ingredientCard).join('');
     $('#ing-list').innerHTML = html || `
-      <div class="empty"><b>“${esc(state.query)}”에 해당하는 성분을 사전에서 찾지 못했습니다.</b><br>
-        영문명(예: <i>lutein</i>)으로 검색해 보시거나, 아래에서 문헌 DB 에 직접 조회할 수 있습니다.
-        <div class="btnrow"><button class="btn primary" id="live-btn">문헌 DB 에 실시간으로 조회</button></div>
+      <div class="empty"><b>“${esc(state.query)}”에 맞는 성분이 목록에 없습니다.</b><br>
+        영어 이름(예: <i>lutein</i>)으로도 찾아보세요. 아래에서 바로 검색할 수도 있습니다.
+        <div class="btnrow"><button class="btn primary" id="live-btn">논문 데이터베이스에서 바로 찾아보기</button></div>
         <div id="live-result"></div>
       </div>`;
     $('#ing-count').innerHTML = state.query
@@ -586,28 +490,28 @@ async function loadIngredients({ append = false } = {}) {
 
 /* ── 실시간 조회 (색인에 없는 검색어) ────────────────────────────────────── */
 async function liveLookup(term, mount) {
-  mount.innerHTML = '<p class="loading">문헌 DB 에 조회 중…</p>';
+  mount.innerHTML = '<p class="loading">논문 데이터베이스에서 찾는 중…</p>';
   try {
     const d = await api('/api/live?term=' + encodeURIComponent(term));
     if (!d.available) { mount.innerHTML = `<div class="note">${esc(d.reason)}</div>`; return; }
     const dc = d.direction_counts || {};
     mount.innerHTML = `
-      <div class="note"><b>실시간 조회 결과</b> — ${esc(d.note)}</div>
+      <div class="note"><b>바로 찾아본 결과</b> — ${esc(d.note)}</div>
       <div class="stats">
-        <div class="stat"><div class="v num">${n(d.hit_count)}</div><div class="k">문헌 DB 전체 검색 결과</div></div>
-        <div class="stat"><div class="v num">${n(d.fetched)}</div><div class="k">분석한 상위 논문</div></div>
-        <div class="stat"><div class="v num">${n(d.human)}</div><div class="k">사람 대상</div></div>
+        <div class="stat"><div class="v num">${n(d.hit_count)}</div><div class="k">데이터베이스 전체</div></div>
+        <div class="stat"><div class="v num">${n(d.fetched)}</div><div class="k">살펴본 논문</div></div>
+        <div class="stat"><div class="v num">${n(d.human)}</div><div class="k">사람에게 한 연구</div></div>
         <div class="stat"><div class="v num">${n(dc.significant)} / ${n(dc.null)} / ${n(dc.unclear)}</div>
-          <div class="k">유의 / 유의차없음 / 판정불가</div></div>
+          <div class="k">차이 있음 / 없음 / 모름</div></div>
       </div>
-      ${d.outcomes.length ? `<h3>많이 측정된 항목</h3>${d.outcomes.map((o) =>
+      ${d.outcomes.length ? `<h3>많이 재 본 항목</h3>${d.outcomes.map((o) =>
         `<div class="orow"><div class="oname">${esc(o.label_ko)}</div>
          <div class="bar"><i class="seg sig" style="flex:${o.human}"></i>
          <i class="seg unclear" style="flex:${Math.max(0, o.total - o.human)}"></i></div>
          <div class="onum num">사람 ${n(o.human)} · 전체 ${n(o.total)}</div></div>`).join('')}` : ''}
       <h3>논문</h3>${d.papers.map((p) => paperItem(p)).join('') || '<p class="dim">없습니다.</p>'}`;
   } catch (e) {
-    mount.innerHTML = `<div class="empty"><b>실시간 조회 실패:</b> ${esc(e.message)}</div>`;
+    mount.innerHTML = `<div class="empty"><b>찾지 못했습니다:</b> ${esc(e.message)}</div>`;
   }
 }
 
@@ -617,7 +521,7 @@ function yearChart(byYear) {
   const max = Math.max(...byYear.map((y) => y.count));
   const bars = byYear.map((y) =>
     `<i style="height:${Math.max(3, (y.count / max) * 100)}%" title="${y.year}년 ${y.count}건"></i>`).join('');
-  return `<h2>연도별 논문 수</h2>
+  return `<h2>해마다 나온 논문 수</h2>
     <div class="bars reveal" style="padding:26px 28px">
       <div class="years">${bars}</div>
       <div class="yearlbl"><span>${byYear[0].year}</span><span>${byYear[byYear.length - 1].year}</span></div>
@@ -661,27 +565,25 @@ async function renderIngredient(id) {
     ${hasData ? `
       <div class="pull reveal">
         <span class="v num" data-count="${s.human}">0</span>
-        <span class="k">사람 대상 연구 · 전체 ${n(s.total)}건 중</span>
+        <span class="k">사람에게 한 연구 · 전체 ${n(s.total)}건 중</span>
       </div>
       <p class="lede reveal">${esc(lede)}</p>
       ${small ? `<div class="smallprint reveal">${esc(small)}</div>` : ''}
 
-      ${howToRead()}
-
-      <h2>측정한 항목</h2>
-      ${legend()}
+      <h2>어떤 걸 재 봤나</h2>
+      ${LEGEND}
       ${d.outcomes.length
         ? `<div class="bars reveal">${d.outcomes.map((o) => directionBar(o, maxHuman)).join('')}</div>`
-        : '<p class="dim" style="text-align:center">사람 대상 연구에서 분류된 결과지표가 없습니다.</p>'}
+        : '<p class="dim" style="text-align:center">사람에게 한 연구에서 잡힌 항목이 없습니다.</p>'}
 
       <h2>대표 논문</h2>
-      <p class="count">믿을 만한 방식으로 한 연구부터 보여줍니다 —
-        여러 연구를 합친 분석 → 문헌 종합 검토 → 무작위 비교 시험 순.</p>
+      <p class="count">믿을 만한 연구부터 보여줍니다 —
+        여러 연구 종합 → 논문 모아 정리 → 무작위 배정 시험 순.</p>
       ${d.top_papers.map((p) => paperItem(p, { showEvidence: false })).join('')}
 
       ${yearChart(d.by_year)}
 
-      <h2>논문 전체 보기</h2>
+      <h2>논문 전부 보기</h2>
       <div class="filters">
         <select id="f-outcome" aria-label="측정 항목으로 거르기">
           <option value="">측정 항목 전체</option>
@@ -689,20 +591,20 @@ async function renderIngredient(id) {
         </select>
         <select id="f-subject" aria-label="연구 대상으로 거르기">
           <option value="">사람·동물 모두</option>
-          <option value="human">${esc(plain('subject', 'human').label)}만</option>
-          <option value="animal">${esc(plain('subject', 'animal').label)}만</option>
-          <option value="invitro">${esc(plain('subject', 'invitro').label)}만</option>
+          <option value="human">사람에게 한 연구만</option>
+          <option value="animal">동물 실험만</option>
+          <option value="invitro">세포·시험관 실험만</option>
         </select>
         <select id="f-study" aria-label="연구 방식으로 거르기">
           <option value="">연구 방식 전체</option>
           ${d.by_study_type.map((t) =>
-            `<option value="${esc(t.study_type)}">${esc(plain('study_type', t.study_type).label)} (${n(t.count)})</option>`).join('')}
+            `<option value="${esc(t.study_type)}">${esc(t.label_ko)} (${n(t.count)})</option>`).join('')}
         </select>
         <select id="f-direction" aria-label="결과로 거르기">
           <option value="">결과 전체</option>
-          <option value="significant">${esc(plain('direction', 'significant').label)}</option>
-          <option value="null">${esc(plain('direction', 'null').label)}</option>
-          <option value="unclear">${esc(plain('direction', 'unclear').label)}</option>
+          <option value="significant">차이 있었음</option>
+          <option value="null">차이 없었음</option>
+          <option value="unclear">알 수 없음</option>
         </select>
       </div>
       <div id="paper-list"></div>
@@ -713,11 +615,11 @@ async function renderIngredient(id) {
       </div>`
     : `
       <div class="empty" style="margin-top:26px">
-        <b>이 색인에 ${esc(d.name_ko)} 관련 논문이 없습니다.</b><br>
-        아직 수집되지 않았거나, 사람 대상 연구가 보고되지 않았을 수 있습니다.
+        <b>${esc(d.name_ko)} 관련 논문을 아직 못 모았습니다.</b><br>
+        아직 아무도 연구하지 않았거나, 여기 못 모았을 수 있습니다.
         <b>“효과가 없다”는 뜻이 아닙니다.</b>
         <div class="btnrow">
-          <button class="btn primary" id="live-btn2">문헌 DB 에 실시간으로 조회</button>
+          <button class="btn primary" id="live-btn2">논문 데이터베이스에서 바로 찾아보기</button>
         </div>
         <div id="live-result2"></div>
       </div>`}`;
@@ -769,7 +671,7 @@ async function loadPapers(id) {
   try {
     const d = await api(`/api/ingredients/${encodeURIComponent(id)}/papers?` + params);
     const trunc = d.truncated
-      ? ' <span class="dim">— 정적 스냅샷이라 근거 위계가 높은 상위 일부만 담겨 있습니다.</span>'
+      ? ' <span class="dim">— 논문이 너무 많아 믿을 만한 것부터 일부만 담았습니다.</span>'
       : '';
     mount.innerHTML = d.items.length
       ? `<p class="count">조건에 맞는 논문 <b>${n(d.total)}</b>건${trunc}</p>`
@@ -819,26 +721,25 @@ async function renderOutcome(id) {
   box.innerHTML = `
     <button class="back" data-back><span class="arw">←</span> 효능</button>
     <div class="detail-head reveal">
-      <div class="kicker">측정 항목</div>
+      <div class="kicker">이런 걸 재 봤어요</div>
       <h1 class="detail-title">${esc(d.label_ko)}</h1>
       <div class="detail-sub">${esc(d.label_en)}</div>
     </div>
-    <p class="lede reveal">이 항목을 실제로 재 본 사람 대상 연구가 있는 성분입니다.</p>
+    <p class="lede reveal">이걸 실제로 재 본 사람 연구가 있는 성분입니다.</p>
     <div class="smallprint reveal" style="margin-bottom:34px">${esc(d.note)}</div>
-    ${howToRead()}
-    ${legend()}
+    ${LEGEND}
     ${d.ingredients.length ? `<div class="bars reveal">` + d.ingredients.map((i) => `
       <div class="orow">
         <div class="oname"><button class="obtn" data-ing="${esc(i.id)}">${esc(i.name_ko)}</button>
           <span class="dim" style="font-size:12px">${esc(i.category_ko)}</span></div>
         <div class="bar grow" data-w="${Math.max(3, Math.round((i.human / maxHuman) * 100))}%">
-          <i class="seg sig" style="flex:${i.human_significant}" title="유의한 결과 보고 ${n(i.human_significant)}건"></i>
-          <i class="seg null" style="flex:${i.human_null}" title="유의차 없음 ${n(i.human_null)}건"></i>
-          <i class="seg unclear" style="flex:${i.human_unclear}" title="판정 불가 ${n(i.human_unclear)}건"></i>
+          <i class="seg sig" style="flex:${i.human_significant}" title="차이 있었음 ${n(i.human_significant)}건"></i>
+          <i class="seg null" style="flex:${i.human_null}" title="차이 없었음 ${n(i.human_null)}건"></i>
+          <i class="seg unclear" style="flex:${i.human_unclear}" title="알 수 없음 ${n(i.human_unclear)}건"></i>
         </div>
         <div class="onum">사람 ${n(i.human)} · 전체 ${n(i.total)}</div>
       </div>`).join('') + `</div>`
-      : '<div class="empty">이 항목을 측정한 사람 대상 연구가 색인에 없습니다.</div>'}
+      : '<div class="empty">이걸 재 본 사람 연구를 아직 못 모았습니다.</div>'}
 
     <h2>대표 논문</h2>
     ${d.top_papers.map((p) => paperItem(p)).join('') || '<p class="dim">없습니다.</p>'}`;
@@ -875,19 +776,9 @@ function route() {
   $('#ingredient-search').hidden = false;
 }
 addEventListener('hashchange', route);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeTerm(); return; }
-  if (e.key !== 'Enter' && e.key !== ' ') return;
-  const term = e.target.closest && e.target.closest('[data-term]');
-  if (term) { e.preventDefault(); openTerm(term); }
-});
 
 /* ── 이벤트 위임 ─────────────────────────────────────────────────────────── */
 document.addEventListener('click', (e) => {
-  const term = e.target.closest('[data-term]');
-  if (term) { e.stopPropagation(); openTerm(term); return; }
-  closeTerm();
-
   if (e.target.closest('[data-home]')) { location.hash = '#/'; return; }
 
   const back = e.target.closest('[data-back]');
@@ -979,9 +870,9 @@ async function bootstrap() {
   } else {
     $('#ing-count').textContent = '';
     $('#ing-list').innerHTML = `<div class="empty">
-      <b>아직 수집된 논문이 없습니다.</b><br>
-      <code>python -m ingest.build all --target 100000</code> 을 실행해 문헌 DB 에서
-      논문을 수집하면 이 화면이 실제 데이터로 채워집니다.</div>`;
+      <b>아직 모은 논문이 없습니다.</b><br>
+      <code>python -m ingest.build all --target 100000</code> 을 실행해
+      논문을 모으면 이 화면이 실제 자료로 채워집니다.</div>`;
   }
   route();
   moveUnderline();
